@@ -4,22 +4,27 @@ Guidance for AI assistants (Claude Code and others) working in this repository.
 
 ## What this repository is
 
-**P** ("Project Mgmt") is a **project-management / strategy repository**, not a
-software codebase. It holds planning artifacts — primarily
+**P** ("Project Mgmt") is primarily a **project-management / strategy
+repository**. It holds planning artifacts — primarily
 [draw.io](https://app.diagrams.net) diagrams — that capture business and product
-strategy. There is **no application code, build system, test suite, or
-dependency manifest** here. Do not invent one, and do not scaffold tooling
-unless the user explicitly asks.
+strategy. The one exception is `whatsapp-auto-reply/`, a small self-contained
+Node.js service (see below). Outside that folder there is **no application
+code, build system, or test suite**; do not scaffold tooling elsewhere unless
+the user explicitly asks.
 
-Set expectations accordingly: tasks here are about **editing content and
-diagrams**, not compiling or running code.
+Set expectations accordingly: most tasks here are about **editing content and
+diagrams**; code changes belong in `whatsapp-auto-reply/`.
 
 ## Repository layout
 
 ```
 .
-├── README.md                 # One-line description ("Project Mgmt")
-└── 2024 w4 Strategy.drawio    # draw.io strategy diagram (Week 4, 2024)
+├── README.md                  # Short description and index
+├── 2024 w4 Strategy.drawio    # draw.io strategy diagram (Week 4, 2024)
+└── whatsapp-auto-reply/       # Node.js WhatsApp auto-responder (own README)
+    ├── src/                   # index.js (WhatsApp wiring), core.js (pure logic), config, state
+    ├── config/contacts.example.json
+    └── test/core.test.js      # `npm test` (node:test, no extra deps)
 ```
 
 - **`*.drawio` files** are diagrams.net documents: XML (`<mxfile>` /
@@ -55,8 +60,14 @@ this is the file to read.
 
 ## Development workflow
 
-There is nothing to build, lint, or test. "Done" means the content/diagram
-change is made and committed.
+For diagrams there is nothing to build, lint, or test. "Done" means the
+content/diagram change is made and committed.
+
+For `whatsapp-auto-reply/`: run `npm install` and `npm test` inside that folder
+before committing changes to it. Keep the decision logic in `src/core.js` pure
+(no WhatsApp or filesystem access) so it stays testable; `src/index.js` is the
+only file that talks to `whatsapp-web.js`. Never commit `data/`, `.env`, or
+`config/contacts.json` (session, state, and personal numbers).
 
 ### Git & branching
 

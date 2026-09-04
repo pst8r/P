@@ -1,0 +1,19 @@
+{
+  "name": "whatsapp-auto-reply",
+  "version": "1.0.0",
+  "description": "Responde automáticamente los mensajes de WhatsApp de contactos predefinidos que llevan más de un tiempo límite sin respuesta.",
+  "private": true,
+  "main": "src/index.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "dependencies": {
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.34.7"
+  }
+}
