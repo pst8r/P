@@ -7,19 +7,24 @@ Guidance for AI assistants (Claude Code and others) working in this repository.
 **P** ("Project Mgmt") is a **project-management / strategy repository**, not a
 software codebase. It holds planning artifacts — primarily
 [draw.io](https://app.diagrams.net) diagrams — that capture business and product
-strategy. There is **no application code, build system, test suite, or
-dependency manifest** here. Do not invent one, and do not scaffold tooling
-unless the user explicitly asks.
+strategy, plus one small tool: the **stock-movement monitor** in `monitor/`
+(see below). There is **no build system, test suite, or dependency manifest**
+here. Do not scaffold tooling unless the user explicitly asks.
 
 Set expectations accordingly: tasks here are about **editing content and
-diagrams**, not compiling or running code.
+diagrams**, and occasionally extending the monitor script.
 
 ## Repository layout
 
 ```
 .
-├── README.md                 # One-line description ("Project Mgmt")
-└── 2024 w4 Strategy.drawio    # draw.io strategy diagram (Week 4, 2024)
+├── README.md                 # Repository overview
+├── 2024 w4 Strategy.drawio    # draw.io strategy diagram (Week 4, 2024)
+└── monitor/                  # Stock-movement monitor (Python + generated HTML dashboard)
+    ├── README.md             # Usage, parameters and setup rules (Spanish)
+    ├── config.json           # Watchlist, indicator/signal thresholds, risk parameters
+    ├── stock_monitor.py      # Stdlib-only script; yfinance optional for live data
+    └── output/               # Sample monitor.json / monitor.html generated with --demo
 ```
 
 - **`*.drawio` files** are diagrams.net documents: XML (`<mxfile>` /
@@ -53,10 +58,29 @@ this is the file to read.
   diagrams.net writes long single-line elements on purpose; reformatting
   produces huge, unreviewable diffs.
 
+### About the stock-movement monitor
+
+`monitor/stock_monitor.py` downloads daily + intraday prices for the watchlist
+in `monitor/config.json`, computes indicators (SMA/EMA, RSI, MACD, Bollinger,
+ATR, ADX, RVOL, VWAP, opening range), classifies each instrument's trend,
+detects day-trading setups (breakout, gap-and-go, pullback, mean reversion,
+volatility squeeze, ORB) with entry/stop/target/position size, and writes
+`monitor/output/monitor.json` + a self-contained `monitor.html` dashboard.
+
+- Pure standard library; `yfinance` is optional (`--source auto|yfinance|stooq|demo`).
+- `python3 monitor/stock_monitor.py --demo` regenerates the sample output
+  offline with deterministic synthetic data — run it after changing the
+  script or the HTML template, and commit the regenerated `output/` files.
+- The HTML template lives inside the script (`HTML_TEMPLATE`) and must stay
+  self-contained: no CDN scripts, no external fonts, hand-rolled SVG charts.
+- Client-facing text in the dashboard is Spanish. It is an analysis tool, not
+  investment advice; keep the disclaimer.
+
 ## Development workflow
 
-There is nothing to build, lint, or test. "Done" means the content/diagram
-change is made and committed.
+There is nothing to build, lint, or test for the diagrams. For the monitor,
+"tested" means `--demo` runs without errors and the dashboard opens with no
+console errors. "Done" means the change is made and committed.
 
 ### Git & branching
 

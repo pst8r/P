@@ -1,0 +1,41 @@
+{
+  "watchlist": [
+    "AAPL", "MSFT", "NVDA", "AMD", "TSLA", "AMZN", "META", "GOOGL",
+    "SPY", "QQQ",
+    "WALMEX.MX", "GFNORTEO.MX", "AMXB.MX", "FEMSAUBD.MX"
+  ],
+  "data": {
+    "daily_period": "1y",
+    "intraday_interval": "5m",
+    "intraday_period": "5d",
+    "session_open": "09:30",
+    "opening_range_minutes": 30
+  },
+  "indicators": {
+    "sma_fast": 20, "sma_mid": 50, "sma_slow": 200,
+    "ema_fast": 9, "ema_slow": 21,
+    "rsi_period": 14, "rsi_oversold": 30, "rsi_overbought": 70,
+    "macd_fast": 12, "macd_slow": 26, "macd_signal": 9,
+    "bb_period": 20, "bb_std": 2.0,
+    "atr_period": 14,
+    "adx_period": 14, "adx_trend": 25,
+    "volume_lookback": 20
+  },
+  "signals": {
+    "breakout_lookback": 20,
+    "rvol_min": 1.5,
+    "gap_min_pct": 2.0,
+    "squeeze_lookback": 120,
+    "pullback_atr_distance": 1.0,
+    "atr_pct_min": 1.2,
+    "atr_pct_max": 7.0,
+    "min_dollar_volume": 20000000
+  },
+  "risk": {
+    "account_size": 100000,
+    "risk_per_trade_pct": 1.0,
+    "stop_atr_multiple": 1.5,
+    "reward_risk_ratio": 2.0,
+    "max_position_pct": 25.0
+  }
+}
