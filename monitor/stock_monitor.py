@@ -1048,10 +1048,11 @@ function renderScatter(){
     g+=`<circle class="pt" data-sym="${esc(t.symbol)}" cx="${X(t.atr_pct)}" cy="${Y(t.rvol)}" r="${5+t.signals.length*1.5}" fill="${col}" fill-opacity=".85" stroke="${C.bg||'#0A1438'}" stroke-width="2" style="cursor:pointer"/>`;
     g+=`<text x="${X(t.atr_pct)+8}" y="${Y(t.rvol)-7}" font-size="10" fill="${C.ice}">${esc(t.symbol.replace('.MX',''))}</text>`;});
   el.innerHTML=`<svg viewBox="0 0 ${W} ${H}">${g}</svg><div class="tip"></div>`;
-  const tip=el.querySelector('.tip');
+  const tip=el.querySelector('.tip'); let lastTouch=0;
   el.querySelectorAll('.pt').forEach(c=>{
     c.addEventListener('mousemove',e=>{const t=T.find(x=>x.symbol===c.dataset.sym); const r=el.getBoundingClientRect(); tip.style.display='block'; tip.style.left=Math.min(e.clientX-r.left+12,r.width-170)+'px'; tip.style.top=(e.clientY-r.top-10)+'px'; tip.innerHTML=`<b>${esc(t.symbol)}</b> · ${t.trend.label}<br>ATR ${fmt(t.atr_pct)}% · RVOL ${fmt(t.rvol)}x<br>Setups: ${t.signals.length} · Operabilidad ${t.tradability}`;});
-    c.addEventListener('mouseleave',()=>tip.style.display='none');
+    c.addEventListener('touchstart',e=>{lastTouch=Date.now(); c.dispatchEvent(new MouseEvent('mousemove',{clientX:e.touches[0].clientX,clientY:e.touches[0].clientY}));},{passive:true});
+    c.addEventListener('mouseleave',()=>{if(Date.now()-lastTouch<800) return; tip.style.display='none';});
     c.addEventListener('click',()=>openDetail(c.dataset.sym));
   });
 }
@@ -1095,6 +1096,7 @@ renderSetups();
 const sel=document.getElementById('d-select');
 sel.innerHTML=T.map(t=>`<option value="${esc(t.symbol)}">${esc(t.symbol)}</option>`).join('');
 let current=T.length?T.slice().sort((a,b)=>b.tradability-a.tradability)[0].symbol:null;
+if(current) sel.value=current;
 sel.addEventListener('change',()=>{current=sel.value;renderDetail();});
 function openDetail(sym){current=sym; sel.value=sym; showTab('detalle'); window.scrollTo({top:0,behavior:'smooth'});}
 
@@ -1122,8 +1124,12 @@ function lineChart(el, opts){
   g+=`<line class="xh" x1="0" x2="0" y1="${p.t}" y2="${H-p.b}" stroke="${C.ice}" stroke-opacity=".5" style="display:none"/>`;
   el.innerHTML=`<svg viewBox="0 0 ${W} ${H}">${g}</svg><div class="tip"></div>`;
   const svg=el.querySelector('svg'), tip=el.querySelector('.tip'), xh=el.querySelector('.xh');
-  el.onmousemove=e=>{const r=svg.getBoundingClientRect(); const sx=(e.clientX-r.left)/r.width*W; let i=Math.round((sx-p.l)/((W-p.l-p.r)/((n-1)||1))); i=Math.max(0,Math.min(n-1,i)); xh.setAttribute('x1',X(i)); xh.setAttribute('x2',X(i)); xh.style.display='block'; tip.style.display='block'; const lx=e.clientX-r.left; tip.style.left=(lx>r.width*0.65?lx-175:lx+14)+'px'; tip.style.top=Math.max(0,e.clientY-r.top-20)+'px'; tip.innerHTML=opts.hover(i);};
-  el.onmouseleave=()=>{tip.style.display='none'; xh.style.display='none';};
+  const move=e=>{const r=svg.getBoundingClientRect(); const sx=(e.clientX-r.left)/r.width*W; let i=Math.round((sx-p.l)/((W-p.l-p.r)/((n-1)||1))); i=Math.max(0,Math.min(n-1,i)); xh.setAttribute('x1',X(i)); xh.setAttribute('x2',X(i)); xh.style.display='block'; tip.style.display='block'; const lx=e.clientX-r.left; tip.style.left=(lx>r.width*0.65?lx-175:lx+14)+'px'; tip.style.top=Math.max(0,e.clientY-r.top-20)+'px'; tip.innerHTML=opts.hover(i);};
+  let lastTouch=0;
+  el.onmousemove=move;
+  el.ontouchstart=e=>{lastTouch=Date.now(); move(e.touches[0]);};   // tablets: tocar/arrastrar muestra el tooltip
+  el.ontouchmove=e=>{lastTouch=Date.now(); move(e.touches[0]);};
+  el.onmouseleave=()=>{if(Date.now()-lastTouch<800) return; tip.style.display='none'; xh.style.display='none';};
 }
 
 function renderDetail(){
