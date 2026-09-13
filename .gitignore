@@ -1,2 +1,5 @@
 __pycache__/
 *.pyc
+
+# Quiniela personal del dashboard NFL (usa nfl/picks.example.json como plantilla)
+nfl/picks.json

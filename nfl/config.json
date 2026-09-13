@@ -35,9 +35,6 @@
       "default": 0.9
     }
   },
-  "defaults": {
-    "seasontype": 2
-  },
   "sources": {
     "polymarket": {
       "enabled": true,
@@ -53,8 +50,16 @@
   "consensus": {
     "model_weight": 0.5
   },
+  "pickem": {
+    "mode": "ats",
+    "scoring": "confidence",
+    "push_points": 0
+  },
   "assets": {
     "logos": true,
     "logo_template": "https://a.espncdn.com/i/teamlogos/nfl/500/{abbr}.png"
+  },
+  "defaults": {
+    "seasontype": 2
   }
 }

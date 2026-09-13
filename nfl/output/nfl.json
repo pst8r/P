@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-13T21:19:11Z",
+  "generated_at": "2026-09-13T22:05:53Z",
   "source": "demo",
   "source_status": {
     "polymarket": "demo",
@@ -63,6 +63,11 @@
     "consensus": {
       "model_weight": 0.5
     },
+    "pickem": {
+      "mode": "ats",
+      "scoring": "confidence",
+      "push_points": 0
+    },
     "assets": {
       "logos": true,
       "logo_template": "https://a.espncdn.com/i/teamlogos/nfl/500/{abbr}.png"
@@ -81,7 +86,7 @@
         "NYJ": 0.359
       },
       "volume": 345383.89,
-      "start": "2026-09-13T18:19:11Z",
+      "start": "2026-09-13T19:05:53Z",
       "closed": false
     },
     {
@@ -93,7 +98,7 @@
         "NYJ": 0.35
       },
       "volume": 684441.17,
-      "start": "2026-09-13T18:19:11Z",
+      "start": "2026-09-13T19:05:53Z",
       "closed": false
     },
     {
@@ -105,7 +110,7 @@
         "IND": 0.714
       },
       "volume": 47501.49,
-      "start": "2026-09-13T18:19:11Z",
+      "start": "2026-09-13T19:05:53Z",
       "closed": false
     },
     {
@@ -117,7 +122,7 @@
         "IND": 0.735
       },
       "volume": 36417.69,
-      "start": "2026-09-13T18:19:11Z",
+      "start": "2026-09-13T19:05:53Z",
       "closed": false
     },
     {
@@ -129,7 +134,7 @@
         "SEA": 0.412
       },
       "volume": 344895.5,
-      "start": "2026-09-13T18:19:11Z",
+      "start": "2026-09-13T19:05:53Z",
       "closed": false
     },
     {
@@ -141,7 +146,7 @@
         "NO": 0.281
       },
       "volume": 524296.66,
-      "start": "2026-09-13T18:19:11Z",
+      "start": "2026-09-13T19:05:53Z",
       "closed": false
     },
     {
@@ -153,7 +158,7 @@
         "CHI": 0.301
       },
       "volume": 603182.44,
-      "start": "2026-09-13T18:19:11Z",
+      "start": "2026-09-13T19:05:53Z",
       "closed": false
     },
     {
@@ -165,7 +170,7 @@
         "LV": 0.611
       },
       "volume": 352974.4,
-      "start": "2026-09-16T19:19:11Z",
+      "start": "2026-09-16T20:05:53Z",
       "closed": false
     },
     {
@@ -177,7 +182,7 @@
         "LV": 0.625
       },
       "volume": 242162.96,
-      "start": "2026-09-16T19:19:11Z",
+      "start": "2026-09-16T20:05:53Z",
       "closed": false
     },
     {
@@ -189,7 +194,7 @@
         "CLE": 0.355
       },
       "volume": 494751.34,
-      "start": "2026-09-16T12:19:11Z",
+      "start": "2026-09-16T13:05:53Z",
       "closed": false
     },
     {
@@ -201,7 +206,7 @@
         "CLE": 0.351
       },
       "volume": 667722.86,
-      "start": "2026-09-16T12:19:11Z",
+      "start": "2026-09-16T13:05:53Z",
       "closed": false
     },
     {
@@ -213,7 +218,7 @@
         "TEN": 0.562
       },
       "volume": 542145.93,
-      "start": "2026-09-16T05:19:11Z",
+      "start": "2026-09-16T06:05:53Z",
       "closed": false
     },
     {
@@ -225,7 +230,7 @@
         "TEN": 0.652
       },
       "volume": 829834.71,
-      "start": "2026-09-16T05:19:11Z",
+      "start": "2026-09-16T06:05:53Z",
       "closed": false
     },
     {
@@ -237,7 +242,7 @@
         "ARI": 0.392
       },
       "volume": 730150.28,
-      "start": "2026-09-15T13:19:11Z",
+      "start": "2026-09-15T14:05:53Z",
       "closed": false
     },
     {
@@ -249,7 +254,7 @@
         "ARI": 0.385
       },
       "volume": 77040.46,
-      "start": "2026-09-15T13:19:11Z",
+      "start": "2026-09-15T14:05:53Z",
       "closed": false
     },
     {
@@ -261,7 +266,7 @@
         "CAR": 0.501
       },
       "volume": 77943.73,
-      "start": "2026-09-16T18:19:11Z",
+      "start": "2026-09-16T19:05:53Z",
       "closed": false
     },
     {
@@ -273,7 +278,7 @@
         "CAR": 0.56
       },
       "volume": 249544.2,
-      "start": "2026-09-16T18:19:11Z",
+      "start": "2026-09-16T19:05:53Z",
       "closed": false
     },
     {
@@ -285,7 +290,7 @@
         "NE": 0.296
       },
       "volume": 691709.91,
-      "start": "2026-09-16T13:19:11Z",
+      "start": "2026-09-16T14:05:53Z",
       "closed": false
     },
     {
@@ -297,7 +302,7 @@
         "NE": 0.345
       },
       "volume": 521243.29,
-      "start": "2026-09-16T13:19:11Z",
+      "start": "2026-09-16T14:05:53Z",
       "closed": false
     }
   ],
@@ -599,10 +604,316 @@
     "points": 388,
     "with_line": 16
   },
+  "picks": {
+    "mode": "ats",
+    "scoring": "confidence",
+    "season": null,
+    "week": null,
+    "tiebreaker": {
+      "matchup": "CIN@BAL",
+      "total": 45
+    },
+    "picks": {
+      "BUF@KC": {
+        "team": "KC",
+        "confidence": 1
+      },
+      "DAL@SF": {
+        "team": "DAL",
+        "confidence": 2
+      },
+      "NYG@PHI": {
+        "team": "PHI",
+        "confidence": 3
+      },
+      "GB@DET": {
+        "team": "GB",
+        "confidence": 4
+      },
+      "NE@WSH": {
+        "team": "WSH",
+        "confidence": 5
+      },
+      "SEA@LAR": {
+        "team": "SEA",
+        "confidence": 6
+      },
+      "ARI@LAC": {
+        "team": "LAC",
+        "confidence": 7
+      },
+      "NO@TB": {
+        "team": "TB",
+        "confidence": 8
+      },
+      "CAR@ATL": {
+        "team": "CAR",
+        "confidence": 9
+      },
+      "LV@DEN": {
+        "team": "LV",
+        "confidence": 10
+      },
+      "CLE@PIT": {
+        "team": "CLE",
+        "confidence": 11
+      },
+      "NYJ@MIA": {
+        "team": "NYJ",
+        "confidence": 12
+      },
+      "TEN@JAX": {
+        "team": "TEN",
+        "confidence": 13
+      },
+      "IND@HOU": {
+        "team": "HOU",
+        "confidence": 14
+      },
+      "CHI@MIN": {
+        "team": "CHI",
+        "confidence": 15
+      },
+      "CIN@BAL": {
+        "team": "BAL",
+        "confidence": 16
+      }
+    }
+  },
+  "pickem": {
+    "mode": "ats",
+    "scoring": "confidence",
+    "push_points": 0.0,
+    "games_in_week": 16,
+    "picked": 16,
+    "earned": 16.0,
+    "live_expected": 36.41,
+    "pending_expected": 27.2,
+    "projected": 79.61,
+    "max_possible": 126.0,
+    "max_week": 136.0,
+    "hits": 1,
+    "misses": 4,
+    "pushes": 0,
+    "accuracy": 20.0,
+    "issues": [],
+    "tiebreaker": {
+      "matchup": "CIN@BAL",
+      "prediction": 45,
+      "actual": 55,
+      "final": true,
+      "difference": 10.0
+    },
+    "rows": [
+      {
+        "matchup": "CIN@BAL",
+        "game_id": "demo-04",
+        "team": "BAL",
+        "side": "home",
+        "confidence": 16.0,
+        "state": "post",
+        "line_home": -1.5,
+        "probability": 1.0,
+        "status": "hit",
+        "points": 16.0
+      },
+      {
+        "matchup": "CHI@MIN",
+        "game_id": "demo-10",
+        "team": "CHI",
+        "side": "away",
+        "confidence": 15.0,
+        "state": "in",
+        "line_home": -6.5,
+        "probability": 0.9946,
+        "status": "en_juego",
+        "points": null,
+        "expected": 14.92
+      },
+      {
+        "matchup": "IND@HOU",
+        "game_id": "demo-07",
+        "team": "HOU",
+        "side": "home",
+        "confidence": 14.0,
+        "state": "in",
+        "line_home": 6.5,
+        "probability": 0.7117,
+        "status": "en_juego",
+        "points": null,
+        "expected": 9.96
+      },
+      {
+        "matchup": "TEN@JAX",
+        "game_id": "demo-13",
+        "team": "TEN",
+        "side": "away",
+        "confidence": 13.0,
+        "state": "pre",
+        "line_home": 1.5,
+        "probability": 0.5,
+        "status": "pendiente",
+        "points": null,
+        "expected": 6.5
+      },
+      {
+        "matchup": "NYJ@MIA",
+        "game_id": "demo-06",
+        "team": "NYJ",
+        "side": "away",
+        "confidence": 12.0,
+        "state": "in",
+        "line_home": -4.5,
+        "probability": 0.4136,
+        "status": "en_juego",
+        "points": null,
+        "expected": 4.96
+      },
+      {
+        "matchup": "CLE@PIT",
+        "game_id": "demo-12",
+        "team": "CLE",
+        "side": "away",
+        "confidence": 11.0,
+        "state": "pre",
+        "line_home": -6.5,
+        "probability": 0.5,
+        "status": "pendiente",
+        "points": null,
+        "expected": 5.5
+      },
+      {
+        "matchup": "LV@DEN",
+        "game_id": "demo-11",
+        "team": "LV",
+        "side": "away",
+        "confidence": 10.0,
+        "state": "pre",
+        "line_home": 2.5,
+        "probability": 0.5,
+        "status": "pendiente",
+        "points": null,
+        "expected": 5.0
+      },
+      {
+        "matchup": "CAR@ATL",
+        "game_id": "demo-15",
+        "team": "CAR",
+        "side": "away",
+        "confidence": 9.0,
+        "state": "pre",
+        "line_home": 0.0,
+        "probability": 0.4977,
+        "status": "pendiente",
+        "points": null,
+        "expected": 4.48
+      },
+      {
+        "matchup": "NO@TB",
+        "game_id": "demo-09",
+        "team": "TB",
+        "side": "home",
+        "confidence": 8.0,
+        "state": "in",
+        "line_home": -9.5,
+        "probability": 0.5076,
+        "status": "en_juego",
+        "points": null,
+        "expected": 4.06
+      },
+      {
+        "matchup": "ARI@LAC",
+        "game_id": "demo-14",
+        "team": "LAC",
+        "side": "home",
+        "confidence": 7.0,
+        "state": "pre",
+        "line_home": -4.5,
+        "probability": 0.4934,
+        "status": "pendiente",
+        "points": null,
+        "expected": 3.45
+      },
+      {
+        "matchup": "SEA@LAR",
+        "game_id": "demo-08",
+        "team": "SEA",
+        "side": "away",
+        "confidence": 6.0,
+        "state": "in",
+        "line_home": -3.5,
+        "probability": 0.4173,
+        "status": "en_juego",
+        "points": null,
+        "expected": 2.5
+      },
+      {
+        "matchup": "NE@WSH",
+        "game_id": "demo-16",
+        "team": "WSH",
+        "side": "home",
+        "confidence": 5.0,
+        "state": "pre",
+        "line_home": -7.0,
+        "probability": 0.453,
+        "status": "pendiente",
+        "points": null,
+        "expected": 2.27
+      },
+      {
+        "matchup": "GB@DET",
+        "game_id": "demo-05",
+        "team": "GB",
+        "side": "away",
+        "confidence": 4.0,
+        "state": "post",
+        "line_home": -3.0,
+        "probability": 0.0,
+        "status": "miss",
+        "points": 0.0
+      },
+      {
+        "matchup": "NYG@PHI",
+        "game_id": "demo-03",
+        "team": "PHI",
+        "side": "home",
+        "confidence": 3.0,
+        "state": "post",
+        "line_home": 3.5,
+        "probability": 0.0,
+        "status": "miss",
+        "points": 0.0
+      },
+      {
+        "matchup": "DAL@SF",
+        "game_id": "demo-02",
+        "team": "DAL",
+        "side": "away",
+        "confidence": 2.0,
+        "state": "post",
+        "line_home": 3.0,
+        "probability": 0.0,
+        "status": "miss",
+        "points": 0.0
+      },
+      {
+        "matchup": "BUF@KC",
+        "game_id": "demo-01",
+        "team": "KC",
+        "side": "home",
+        "confidence": 1.0,
+        "state": "post",
+        "line_home": 6.5,
+        "probability": 0.0,
+        "status": "miss",
+        "points": 0.0
+      }
+    ]
+  },
   "games": [
     {
       "id": "demo-06",
-      "date": "2026-09-13T18:19:11Z",
+      "date": "2026-09-13T19:05:53Z",
       "name": "NYJ @ MIA",
       "state": "in",
       "status_detail": "Q4 13:44",
@@ -710,7 +1021,7 @@
     },
     {
       "id": "demo-07",
-      "date": "2026-09-13T18:19:11Z",
+      "date": "2026-09-13T19:05:53Z",
       "name": "IND @ HOU",
       "state": "in",
       "status_detail": "Q2 5:32",
@@ -818,7 +1129,7 @@
     },
     {
       "id": "demo-08",
-      "date": "2026-09-13T18:19:11Z",
+      "date": "2026-09-13T19:05:53Z",
       "name": "SEA @ LAR",
       "state": "in",
       "status_detail": "Q2 14:06",
@@ -914,7 +1225,7 @@
     },
     {
       "id": "demo-09",
-      "date": "2026-09-13T18:19:11Z",
+      "date": "2026-09-13T19:05:53Z",
       "name": "NO @ TB",
       "state": "in",
       "status_detail": "Medio tiempo",
@@ -1010,7 +1321,7 @@
     },
     {
       "id": "demo-10",
-      "date": "2026-09-13T18:19:11Z",
+      "date": "2026-09-13T19:05:53Z",
       "name": "CHI @ MIN",
       "state": "in",
       "status_detail": "TE 1:29",
@@ -1106,10 +1417,10 @@
     },
     {
       "id": "demo-14",
-      "date": "2026-09-15T13:19:11Z",
+      "date": "2026-09-15T14:05:53Z",
       "name": "ARI @ LAC",
       "state": "pre",
-      "status_detail": "15/09 13:19 UTC",
+      "status_detail": "15/09 14:05 UTC",
       "status_short": "",
       "completed": false,
       "halftime": false,
@@ -1214,10 +1525,10 @@
     },
     {
       "id": "demo-13",
-      "date": "2026-09-16T05:19:11Z",
+      "date": "2026-09-16T06:05:53Z",
       "name": "TEN @ JAX",
       "state": "pre",
-      "status_detail": "16/09 05:19 UTC",
+      "status_detail": "16/09 06:05 UTC",
       "status_short": "",
       "completed": false,
       "halftime": false,
@@ -1322,10 +1633,10 @@
     },
     {
       "id": "demo-12",
-      "date": "2026-09-16T12:19:11Z",
+      "date": "2026-09-16T13:05:53Z",
       "name": "CLE @ PIT",
       "state": "pre",
-      "status_detail": "16/09 12:19 UTC",
+      "status_detail": "16/09 13:05 UTC",
       "status_short": "",
       "completed": false,
       "halftime": false,
@@ -1430,10 +1741,10 @@
     },
     {
       "id": "demo-16",
-      "date": "2026-09-16T13:19:11Z",
+      "date": "2026-09-16T14:05:53Z",
       "name": "NE @ WSH",
       "state": "pre",
-      "status_detail": "16/09 13:19 UTC",
+      "status_detail": "16/09 14:05 UTC",
       "status_short": "",
       "completed": false,
       "halftime": false,
@@ -1538,10 +1849,10 @@
     },
     {
       "id": "demo-15",
-      "date": "2026-09-16T18:19:11Z",
+      "date": "2026-09-16T19:05:53Z",
       "name": "CAR @ ATL",
       "state": "pre",
-      "status_detail": "16/09 18:19 UTC",
+      "status_detail": "16/09 19:05 UTC",
       "status_short": "",
       "completed": false,
       "halftime": false,
@@ -1646,10 +1957,10 @@
     },
     {
       "id": "demo-11",
-      "date": "2026-09-16T19:19:11Z",
+      "date": "2026-09-16T20:05:53Z",
       "name": "LV @ DEN",
       "state": "pre",
-      "status_detail": "16/09 19:19 UTC",
+      "status_detail": "16/09 20:05 UTC",
       "status_short": "",
       "completed": false,
       "halftime": false,
@@ -1754,7 +2065,7 @@
     },
     {
       "id": "demo-01",
-      "date": "2026-09-13T18:19:11Z",
+      "date": "2026-09-13T19:05:53Z",
       "name": "BUF @ KC",
       "state": "post",
       "status_detail": "Final",
@@ -1831,7 +2142,7 @@
     },
     {
       "id": "demo-02",
-      "date": "2026-09-13T18:19:11Z",
+      "date": "2026-09-13T19:05:53Z",
       "name": "DAL @ SF",
       "state": "post",
       "status_detail": "Final",
@@ -1908,7 +2219,7 @@
     },
     {
       "id": "demo-03",
-      "date": "2026-09-13T18:19:11Z",
+      "date": "2026-09-13T19:05:53Z",
       "name": "NYG @ PHI",
       "state": "post",
       "status_detail": "Final",
@@ -1985,7 +2296,7 @@
     },
     {
       "id": "demo-04",
-      "date": "2026-09-13T18:19:11Z",
+      "date": "2026-09-13T19:05:53Z",
       "name": "CIN @ BAL",
       "state": "post",
       "status_detail": "Final",
@@ -2062,7 +2373,7 @@
     },
     {
       "id": "demo-05",
-      "date": "2026-09-13T18:19:11Z",
+      "date": "2026-09-13T19:05:53Z",
       "name": "GB @ DET",
       "state": "post",
       "status_detail": "Final",

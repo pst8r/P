@@ -84,6 +84,9 @@ possession, spread/total/moneyline) plus two prediction markets — Polymarket
 normal distribution updated with each refresh, and writes `nfl/output/nfl.json`
 plus a self-contained `nfl.html` dashboard with cover/push/win/total
 probabilities, market-implied cover probabilities and a model/market consensus.
+It also scores the user's own pick'em entry (Yahoo Pro Football Pick'em rules:
+straight-up or against-the-spread, standard or confidence points, tiebreaker on
+a game's combined total) against live results.
 
 - Pure standard library; no dependencies. `--demo` builds the sample output
   offline with deterministic synthetic games.
@@ -95,6 +98,10 @@ probabilities, market-implied cover probabilities and a model/market consensus.
 - Sources are independent: each is fetched in parallel and a failure degrades to
   the previous reading rather than breaking the page. Market quotes are matched
   to games by team pair using the alias table in `TEAM_ALIASES`.
+- Picks live in `nfl/picks.json` (git-ignored by habit, see `picks.example.json`)
+  or in the browser's localStorage per season/phase/week; keys are `AWAY@HOME`.
+  Keep the two honesty rules: auto-fill only touches games that have not started,
+  and started games are locked by default.
 - Official team colors live in `TEAM_META`; crests come from ESPN's logo CDN with
   a colored-badge fallback. This is a private dashboard — keep the note that the
   marks belong to the clubs, and do not add redistribution features.

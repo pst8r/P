@@ -9,6 +9,10 @@ Cruza tres fuentes en cada refresco: **ESPN** (marcador, situación de campo, l�
 **Polymarket** y **Kalshi** (mercados de predicción sobre el ganador). Usa escudos y colores
 oficiales de los 32 equipos. Es una herramienta privada de análisis.
 
+Incluye una sección de **quiniela propia** con la metodología de Yahoo Fantasy Pick'em: capturas
+tus pronósticos, el tablero los contrasta contra los resultados en vivo y calcula cuántos puntos
+llevas y cuántos proyectas terminar la semana.
+
 Genera dos artefactos en `output/`:
 
 | Archivo | Contenido |
@@ -33,6 +37,9 @@ python3 nfl/nfl_dashboard.py --demo
 
 # Sólo marcador y líneas, sin consultar mercados de predicción
 python3 nfl/nfl_dashboard.py --no-markets
+
+# Con tu quiniela para puntuarla contra los resultados
+python3 nfl/nfl_dashboard.py --picks nfl/picks.json
 ```
 
 Después basta con abrir `nfl/output/nfl.html`. El HTML no queda congelado: al abrirlo consulta
@@ -90,10 +97,68 @@ redistribuye ni comercializa esos activos.
 | Auto | Intervalo de auto-refresco; se pausa cuando la pestaña no está visible. |
 | Actualizar ahora | Fuerza una consulta inmediata. |
 | Filtros | Todos · En vivo · Por jugar · Finalizados · **Cobertura apretada** (partidos en vivo cuyo spread sigue indefinido, < 65 %). |
-| Pestañas | Marcadores (tarjetas), Spread ATS, Totales, **Mercados** (Polymarket · Kalshi · modelo), Resumen y Metodología. |
+| Pestañas | Marcadores (tarjetas), Spread ATS, Totales, **Mercados** (Polymarket · Kalshi · modelo), **Mi quiniela**, Resumen y Metodología. |
 | Chips de fuente | Estado de ESPN, Polymarket y Kalshi en la última lectura. |
 
 Las preferencias de temporada, fase, semana e intervalo se guardan en el navegador.
+
+## Mi quiniela (metodología Yahoo Pick'em)
+
+La pestaña **Mi quiniela** replica las dos variantes de Yahoo Pro Football Pick'em:
+
+| Ajuste | Opciones |
+|---|---|
+| Pronóstico | **Contra el spread** (gana después de aplicar la línea) o **directo** (gana el partido). |
+| Puntuación | **Confianza**: repartes los valores 1 a N entre los N partidos de la semana, cada valor una sola vez; el acierto paga los puntos asignados y el fallo paga cero. **Estándar**: un punto por acierto. |
+| Desempate | Total combinado de puntos del partido que elijas. |
+| Push | Un empate contra la línea paga lo que indique `pickem.push_points`, cero por omisión. |
+
+Con confianza, el máximo semanal es N × (N + 1) / 2: 136 puntos en una semana de 16 partidos.
+
+### Qué calcula
+
+| Indicador | Significado |
+|---|---|
+| Puntos asegurados | Suma de los partidos ya terminados. |
+| En juego ahora | Valor esperado de los partidos en curso: confianza × probabilidad de que tu pronóstico acierte. |
+| Proyección de la semana | Asegurados + en juego + pendientes. Es la respuesta a «cuántos puntos voy a sacar». |
+| Máximo alcanzable | Lo que sumarías si aciertas todo lo que falta. |
+| Efectividad | Aciertos sobre partidos ya resueltos. |
+
+La probabilidad de acierto sale del **consenso** entre el modelo y los mercados de predicción
+cuando hay cotización, y del modelo solo cuando no la hay. Cada refresco del marcador recalcula
+puntos y proyección.
+
+### Cómo se usa
+
+1. Elige tipo de pronóstico y puntuación.
+2. Marca un equipo por partido y asigna la confianza, o pulsa **Autollenar pendientes** para que
+   el modelo ordene los partidos por probabilidad y reparta los valores disponibles.
+3. Fija el desempate: partido y total combinado.
+4. La quiniela se guarda sola en el navegador, por temporada, fase y semana.
+
+El botón **Exportar JSON** descarga un `picks.json` con el mismo formato que lee el script; si lo
+guardas en `nfl/picks.json`, la instantánea que genera Python ya viene con tu quiniela puntuada
+(útil para versionarla o para abrir el tablero en otro equipo). **Importar JSON** hace el camino
+inverso. Ver [`picks.example.json`](picks.example.json):
+
+```bash
+python3 nfl/nfl_dashboard.py --picks nfl/picks.json
+```
+
+Las claves de `picks` son `VISITANTE@LOCAL` con las abreviaturas del marcador, así que la quiniela
+sobrevive a regenerar la instantánea.
+
+Dos reglas para que el ejercicio sea honesto:
+
+- **Autollenar pendientes** sólo toca partidos que no han empezado: usar la probabilidad de un
+  partido en curso o terminado sería pronosticar con el resultado a la vista. Respeta los valores
+  de confianza ya comprometidos y reparte los que quedan libres.
+- **Bloquear iniciados** (activo por omisión) impide editar el pronóstico de un partido que ya
+  arrancó. Se puede desactivar si estás capturando una quiniela a media jornada.
+
+El tablero avisa si repites un valor de confianza, si dejas huecos en el rango 1..N o si faltan
+partidos por pronosticar.
 
 ## Modelo
 
@@ -156,6 +221,7 @@ terminados no se calcula.
 | `live` | `endpoint` del marcador, `refresh_seconds` inicial y `fetch_on_load`. |
 | `sources` | `polymarket` (`enabled`, `endpoint`, `query`) y `kalshi` (`enabled`, `endpoint`, `series_ticker`). Poner `enabled: false` apaga esa fuente en el script y en el navegador. |
 | `consensus` | `model_weight`: peso del modelo frente a los mercados (0 = sólo mercados, 1 = sólo modelo). |
+| `pickem` | `mode` (`ats` o `su`), `scoring` (`confidence` o `standard`) y `push_points` por omisión de la quiniela. |
 | `assets` | `logos` (usar escudos o sólo colores) y `logo_template`. |
 | `model` | `sigma_full_game`, `sigma_total`, `sigma_overtime`, `sigma_floor`, `possession_points`, `default_total` y los pesos `key_numbers` por margen. |
 | `defaults` | Fase por omisión al pedir una semana concreta. |
