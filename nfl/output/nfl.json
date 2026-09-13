@@ -1,9 +1,11 @@
 {
-  "generated_at": "2026-09-13T22:05:53Z",
+  "generated_at": "2026-09-13T22:36:31Z",
   "source": "demo",
   "source_status": {
     "polymarket": "demo",
-    "kalshi": "demo"
+    "kalshi": "demo",
+    "injuries": "demo",
+    "news": "demo"
   },
   "meta": {
     "season": 2026,
@@ -58,10 +60,131 @@
         "enabled": true,
         "endpoint": "https://api.elections.kalshi.com/trade-api/v2/markets",
         "series_ticker": "KXNFLGAME"
+      },
+      "injuries": {
+        "enabled": true,
+        "endpoint": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries"
+      },
+      "news": {
+        "enabled": true,
+        "endpoint": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/news",
+        "query": "limit=50"
       }
     },
     "consensus": {
       "model_weight": 0.5
+    },
+    "forecast": {
+      "home_field": 2.0,
+      "form_weight": 0.12,
+      "form_cap": 2.5,
+      "injury_cap": 4.0,
+      "news_cap": 1.5,
+      "market_cap": 3.0,
+      "total_cap": 6.0,
+      "position_weights": {
+        "QB": 2.2,
+        "RB": 0.5,
+        "WR": 0.6,
+        "TE": 0.4,
+        "OT": 0.5,
+        "OG": 0.4,
+        "C": 0.4,
+        "OL": 0.45,
+        "G": 0.4,
+        "T": 0.5,
+        "DE": 0.6,
+        "DT": 0.5,
+        "EDGE": 0.6,
+        "LB": 0.4,
+        "CB": 0.5,
+        "S": 0.4,
+        "FS": 0.4,
+        "SS": 0.4,
+        "K": 0.3,
+        "P": 0.15,
+        "LS": 0.1,
+        "FB": 0.2,
+        "default": 0.25
+      },
+      "status_weights": {
+        "out": 1.0,
+        "injured reserve": 1.0,
+        "suspension": 1.0,
+        "suspended": 1.0,
+        "doubtful": 0.75,
+        "questionable": 0.35,
+        "probable": 0.1,
+        "day-to-day": 0.2,
+        "day to day": 0.2
+      },
+      "news_rules": [
+        {
+          "label": "fuera de cancha",
+          "weight": -0.8,
+          "terms": [
+            "suspended",
+            "suspension",
+            "arrest",
+            "charged",
+            "lawsuit",
+            "police",
+            "personal conduct",
+            "indicted",
+            "investigation",
+            "banned",
+            "fired",
+            "steps down",
+            "resigns",
+            "death",
+            "hospitalized"
+          ]
+        },
+        {
+          "label": "plantel inestable",
+          "weight": -0.4,
+          "terms": [
+            "trade request",
+            "contract dispute",
+            "holdout",
+            "benched",
+            "released",
+            "waived",
+            "locker room",
+            "illness outbreak",
+            "coordinator change"
+          ]
+        },
+        {
+          "label": "refuerzo",
+          "weight": 0.3,
+          "terms": [
+            "activated",
+            "returns",
+            "cleared to play",
+            "expected to play",
+            "signs",
+            "extension",
+            "reinstated"
+          ]
+        },
+        {
+          "label": "logística",
+          "weight": -0.3,
+          "terms": [
+            "london",
+            "munich",
+            "international series",
+            "short week",
+            "thursday night",
+            "travel",
+            "blizzard",
+            "high winds",
+            "hurricane",
+            "field conditions"
+          ]
+        }
+      ]
     },
     "pickem": {
       "mode": "ats",
@@ -86,7 +209,7 @@
         "NYJ": 0.359
       },
       "volume": 345383.89,
-      "start": "2026-09-13T19:05:53Z",
+      "start": "2026-09-13T19:36:31Z",
       "closed": false
     },
     {
@@ -98,7 +221,7 @@
         "NYJ": 0.35
       },
       "volume": 684441.17,
-      "start": "2026-09-13T19:05:53Z",
+      "start": "2026-09-13T19:36:31Z",
       "closed": false
     },
     {
@@ -110,7 +233,7 @@
         "IND": 0.714
       },
       "volume": 47501.49,
-      "start": "2026-09-13T19:05:53Z",
+      "start": "2026-09-13T19:36:31Z",
       "closed": false
     },
     {
@@ -122,7 +245,7 @@
         "IND": 0.735
       },
       "volume": 36417.69,
-      "start": "2026-09-13T19:05:53Z",
+      "start": "2026-09-13T19:36:31Z",
       "closed": false
     },
     {
@@ -134,7 +257,7 @@
         "SEA": 0.412
       },
       "volume": 344895.5,
-      "start": "2026-09-13T19:05:53Z",
+      "start": "2026-09-13T19:36:31Z",
       "closed": false
     },
     {
@@ -146,7 +269,7 @@
         "NO": 0.281
       },
       "volume": 524296.66,
-      "start": "2026-09-13T19:05:53Z",
+      "start": "2026-09-13T19:36:31Z",
       "closed": false
     },
     {
@@ -158,7 +281,7 @@
         "CHI": 0.301
       },
       "volume": 603182.44,
-      "start": "2026-09-13T19:05:53Z",
+      "start": "2026-09-13T19:36:31Z",
       "closed": false
     },
     {
@@ -170,7 +293,7 @@
         "LV": 0.611
       },
       "volume": 352974.4,
-      "start": "2026-09-16T20:05:53Z",
+      "start": "2026-09-16T20:36:31Z",
       "closed": false
     },
     {
@@ -182,7 +305,7 @@
         "LV": 0.625
       },
       "volume": 242162.96,
-      "start": "2026-09-16T20:05:53Z",
+      "start": "2026-09-16T20:36:31Z",
       "closed": false
     },
     {
@@ -194,7 +317,7 @@
         "CLE": 0.355
       },
       "volume": 494751.34,
-      "start": "2026-09-16T13:05:53Z",
+      "start": "2026-09-16T13:36:31Z",
       "closed": false
     },
     {
@@ -206,7 +329,7 @@
         "CLE": 0.351
       },
       "volume": 667722.86,
-      "start": "2026-09-16T13:05:53Z",
+      "start": "2026-09-16T13:36:31Z",
       "closed": false
     },
     {
@@ -218,7 +341,7 @@
         "TEN": 0.562
       },
       "volume": 542145.93,
-      "start": "2026-09-16T06:05:53Z",
+      "start": "2026-09-16T06:36:31Z",
       "closed": false
     },
     {
@@ -230,7 +353,7 @@
         "TEN": 0.652
       },
       "volume": 829834.71,
-      "start": "2026-09-16T06:05:53Z",
+      "start": "2026-09-16T06:36:31Z",
       "closed": false
     },
     {
@@ -242,7 +365,7 @@
         "ARI": 0.392
       },
       "volume": 730150.28,
-      "start": "2026-09-15T14:05:53Z",
+      "start": "2026-09-15T14:36:31Z",
       "closed": false
     },
     {
@@ -254,7 +377,7 @@
         "ARI": 0.385
       },
       "volume": 77040.46,
-      "start": "2026-09-15T14:05:53Z",
+      "start": "2026-09-15T14:36:31Z",
       "closed": false
     },
     {
@@ -266,7 +389,7 @@
         "CAR": 0.501
       },
       "volume": 77943.73,
-      "start": "2026-09-16T19:05:53Z",
+      "start": "2026-09-16T19:36:31Z",
       "closed": false
     },
     {
@@ -278,7 +401,7 @@
         "CAR": 0.56
       },
       "volume": 249544.2,
-      "start": "2026-09-16T19:05:53Z",
+      "start": "2026-09-16T19:36:31Z",
       "closed": false
     },
     {
@@ -290,7 +413,7 @@
         "NE": 0.296
       },
       "volume": 691709.91,
-      "start": "2026-09-16T14:05:53Z",
+      "start": "2026-09-16T14:36:31Z",
       "closed": false
     },
     {
@@ -302,7 +425,7 @@
         "NE": 0.345
       },
       "volume": 521243.29,
-      "start": "2026-09-16T14:05:53Z",
+      "start": "2026-09-16T14:36:31Z",
       "closed": false
     }
   ],
@@ -607,8 +730,6 @@
   "picks": {
     "mode": "ats",
     "scoring": "confidence",
-    "season": null,
-    "week": null,
     "tiebreaker": {
       "matchup": "CIN@BAL",
       "total": 45
@@ -678,7 +799,10 @@
         "team": "BAL",
         "confidence": 16
       }
-    }
+    },
+    "season": 2026,
+    "seasontype": 2,
+    "week": 3
   },
   "pickem": {
     "mode": "ats",
@@ -910,10 +1034,780 @@
       }
     ]
   },
+  "forecast": {
+    "generated_at": "2026-09-13T22:36:31Z",
+    "meta": {
+      "season": 2026,
+      "seasontype": 2,
+      "week": 4
+    },
+    "games": 16,
+    "with_line": 16,
+    "injury_teams": 32,
+    "news_articles": 10,
+    "news_flagged": 8,
+    "with_market": 11,
+    "rows": [
+      {
+        "matchup": "CHI@MIN",
+        "game_id": "demo-10",
+        "date": "2026-09-16T17:36:31Z",
+        "home": "MIN",
+        "away": "CHI",
+        "line_home": 1.5,
+        "market": "spread",
+        "base_margin": -1.5,
+        "base_source": "línea publicada",
+        "adj_injuries": 0.6,
+        "adj_form": 0.0,
+        "adj_news": 0.8,
+        "adj_market": 3.0,
+        "market_home_win": 0.7049,
+        "adjustment": 4.4,
+        "expected_margin": 2.9,
+        "p_home": 0.6306,
+        "p_away": 0.3694,
+        "p_push": 0.0,
+        "pick": "MIN",
+        "pick_side": "home",
+        "pick_probability": 0.6306,
+        "injuries": {
+          "home": 0.17,
+          "away": 0.77,
+          "home_notes": [],
+          "away_notes": [
+            "WR Jugador 35 (Out)"
+          ]
+        },
+        "form": {
+          "home": 0.0,
+          "away": 0.0
+        },
+        "news": {
+          "home": [],
+          "away": [
+            {
+              "headline": "CHI player arrested, team says it is gathering information",
+              "labels": [
+                "fuera de cancha"
+              ],
+              "points": -0.8,
+              "link": ""
+            }
+          ]
+        },
+        "suggested_confidence": 16
+      },
+      {
+        "matchup": "LV@DEN",
+        "game_id": "demo-11",
+        "date": "2026-09-16T19:36:31Z",
+        "home": "DEN",
+        "away": "LV",
+        "line_home": -4.5,
+        "market": "spread",
+        "base_margin": 4.5,
+        "base_source": "línea publicada",
+        "adj_injuries": 0.6,
+        "adj_form": 0.0,
+        "adj_news": -0.8,
+        "adj_market": -3.0,
+        "market_home_win": 0.3971,
+        "adjustment": -3.2,
+        "expected_margin": 1.3,
+        "p_home": 0.4042,
+        "p_away": 0.5958,
+        "p_push": 0.0,
+        "pick": "LV",
+        "pick_side": "away",
+        "pick_probability": 0.5958,
+        "injuries": {
+          "home": 0.68,
+          "away": 1.27,
+          "home_notes": [
+            "OT Jugador 33 (Injured Reserve)"
+          ],
+          "away_notes": [
+            "CB Jugador 60 (Out)",
+            "DE Jugador 78 (Injured Reserve)"
+          ]
+        },
+        "form": {
+          "home": 0.0,
+          "away": 0.0
+        },
+        "news": {
+          "home": [
+            {
+              "headline": "DEN player arrested, team says it is gathering information",
+              "labels": [
+                "fuera de cancha"
+              ],
+              "points": -0.8,
+              "link": ""
+            }
+          ],
+          "away": []
+        },
+        "suggested_confidence": 15
+      },
+      {
+        "matchup": "CLE@PIT",
+        "game_id": "demo-12",
+        "date": "2026-09-16T00:36:31Z",
+        "home": "PIT",
+        "away": "CLE",
+        "line_home": 0.0,
+        "market": "spread",
+        "base_margin": -0.0,
+        "base_source": "línea publicada",
+        "adj_injuries": 0.53,
+        "adj_form": 0.0,
+        "adj_news": 0.0,
+        "adj_market": 2.64,
+        "market_home_win": 0.6556,
+        "adjustment": 3.17,
+        "expected_margin": 3.17,
+        "p_home": 0.5952,
+        "p_away": 0.4004,
+        "p_push": 0.0044,
+        "pick": "PIT",
+        "pick_side": "home",
+        "pick_probability": 0.5952,
+        "injuries": {
+          "home": 1.02,
+          "away": 1.55,
+          "home_notes": [
+            "OT Jugador 35 (Out)"
+          ],
+          "away_notes": [
+            "DE Jugador 62 (Out)"
+          ]
+        },
+        "form": {
+          "home": 0.0,
+          "away": 0.0
+        },
+        "news": {
+          "home": [],
+          "away": []
+        },
+        "suggested_confidence": 14
+      },
+      {
+        "matchup": "NE@WSH",
+        "game_id": "demo-16",
+        "date": "2026-09-16T08:36:31Z",
+        "home": "WSH",
+        "away": "NE",
+        "line_home": 2.5,
+        "market": "spread",
+        "base_margin": -2.5,
+        "base_source": "línea publicada",
+        "adj_injuries": -0.52,
+        "adj_form": 0.0,
+        "adj_news": 0.0,
+        "adj_market": 3.0,
+        "market_home_win": 0.6874,
+        "adjustment": 2.48,
+        "expected_margin": -0.02,
+        "p_home": 0.5745,
+        "p_away": 0.4255,
+        "p_push": 0.0,
+        "pick": "WSH",
+        "pick_side": "home",
+        "pick_probability": 0.5745,
+        "injuries": {
+          "home": 3.6,
+          "away": 3.08,
+          "home_notes": [
+            "WR Jugador 18 (Out)",
+            "QB Jugador 35 (Injured Reserve)"
+          ],
+          "away_notes": [
+            "QB Jugador 37 (Doubtful)",
+            "QB Jugador 59 (Questionable)"
+          ]
+        },
+        "form": {
+          "home": 0.0,
+          "away": 0.0
+        },
+        "news": {
+          "home": [],
+          "away": []
+        },
+        "suggested_confidence": 13
+      },
+      {
+        "matchup": "SEA@LAR",
+        "game_id": "demo-08",
+        "date": "2026-09-16T12:36:31Z",
+        "home": "LAR",
+        "away": "SEA",
+        "line_home": -9.5,
+        "market": "spread",
+        "base_margin": 9.5,
+        "base_source": "línea publicada",
+        "adj_injuries": 0.53,
+        "adj_form": 0.0,
+        "adj_news": 0.0,
+        "adj_market": -3.0,
+        "market_home_win": 0.5961,
+        "adjustment": -2.46,
+        "expected_margin": 7.04,
+        "p_home": 0.4259,
+        "p_away": 0.5741,
+        "p_push": 0.0,
+        "pick": "SEA",
+        "pick_side": "away",
+        "pick_probability": 0.5741,
+        "injuries": {
+          "home": 0.84,
+          "away": 1.38,
+          "home_notes": [],
+          "away_notes": []
+        },
+        "form": {
+          "home": 0.0,
+          "away": 0.0
+        },
+        "news": {
+          "home": [],
+          "away": []
+        },
+        "suggested_confidence": 12
+      },
+      {
+        "matchup": "IND@HOU",
+        "game_id": "demo-07",
+        "date": "2026-09-14T18:36:31Z",
+        "home": "HOU",
+        "away": "IND",
+        "line_home": -9.5,
+        "market": "spread",
+        "base_margin": 9.5,
+        "base_source": "línea publicada",
+        "adj_injuries": 1.63,
+        "adj_form": 0.0,
+        "adj_news": -0.8,
+        "adj_market": -3.0,
+        "market_home_win": 0.2932,
+        "adjustment": -2.17,
+        "expected_margin": 7.33,
+        "p_home": 0.4347,
+        "p_away": 0.5653,
+        "p_push": 0.0,
+        "pick": "IND",
+        "pick_side": "away",
+        "pick_probability": 0.5653,
+        "injuries": {
+          "home": 0.4,
+          "away": 2.03,
+          "home_notes": [],
+          "away_notes": [
+            "QB Jugador 35 (Questionable)",
+            "RB Jugador 47 (Out)"
+          ]
+        },
+        "form": {
+          "home": 0.0,
+          "away": 0.0
+        },
+        "news": {
+          "home": [
+            {
+              "headline": "HOU head coach fired after slow start",
+              "labels": [
+                "fuera de cancha"
+              ],
+              "points": -0.8,
+              "link": ""
+            }
+          ],
+          "away": []
+        },
+        "suggested_confidence": 11
+      },
+      {
+        "matchup": "GB@DET",
+        "game_id": "demo-05",
+        "date": "2026-09-15T19:36:31Z",
+        "home": "DET",
+        "away": "GB",
+        "line_home": 1.5,
+        "market": "spread",
+        "base_margin": -1.5,
+        "base_source": "línea publicada",
+        "adj_injuries": 0.54,
+        "adj_form": 1.44,
+        "adj_news": 0.0,
+        "adj_market": 0.0,
+        "market_home_win": null,
+        "adjustment": 1.98,
+        "expected_margin": 0.48,
+        "p_home": 0.5596,
+        "p_away": 0.4404,
+        "p_push": 0.0,
+        "pick": "DET",
+        "pick_side": "home",
+        "pick_probability": 0.5596,
+        "injuries": {
+          "home": 0.61,
+          "away": 1.15,
+          "home_notes": [],
+          "away_notes": []
+        },
+        "form": {
+          "home": 0.72,
+          "away": -0.72
+        },
+        "news": {
+          "home": [],
+          "away": []
+        },
+        "suggested_confidence": 10
+      },
+      {
+        "matchup": "NYJ@MIA",
+        "game_id": "demo-06",
+        "date": "2026-09-14T08:36:31Z",
+        "home": "MIA",
+        "away": "NYJ",
+        "line_home": 0.0,
+        "market": "spread",
+        "base_margin": -0.0,
+        "base_source": "línea publicada",
+        "adj_injuries": -0.81,
+        "adj_form": 0.0,
+        "adj_news": -0.3,
+        "adj_market": 2.62,
+        "market_home_win": 0.6541,
+        "adjustment": 1.51,
+        "expected_margin": 1.51,
+        "p_home": 0.5445,
+        "p_away": 0.451,
+        "p_push": 0.0045,
+        "pick": "MIA",
+        "pick_side": "home",
+        "pick_probability": 0.5445,
+        "injuries": {
+          "home": 1.71,
+          "away": 0.9,
+          "home_notes": [
+            "RB Jugador 27 (Injured Reserve)"
+          ],
+          "away_notes": [
+            "CB Jugador 88 (Out)"
+          ]
+        },
+        "form": {
+          "home": 0.0,
+          "away": 0.0
+        },
+        "news": {
+          "home": [],
+          "away": [
+            {
+              "headline": "NYJ activates veteran lineman, expected to play Sunday",
+              "labels": [
+                "refuerzo"
+              ],
+              "points": 0.3,
+              "link": ""
+            }
+          ]
+        },
+        "suggested_confidence": 9
+      },
+      {
+        "matchup": "CAR@ATL",
+        "game_id": "demo-15",
+        "date": "2026-09-15T01:36:31Z",
+        "home": "ATL",
+        "away": "CAR",
+        "line_home": -2.5,
+        "market": "spread",
+        "base_margin": 2.5,
+        "base_source": "línea publicada",
+        "adj_injuries": 0.21,
+        "adj_form": 0.0,
+        "adj_news": 0.0,
+        "adj_market": -1.54,
+        "market_home_win": 0.4826,
+        "adjustment": -1.33,
+        "expected_margin": 1.17,
+        "p_home": 0.4598,
+        "p_away": 0.5402,
+        "p_push": 0.0,
+        "pick": "CAR",
+        "pick_side": "away",
+        "pick_probability": 0.5402,
+        "injuries": {
+          "home": 1.68,
+          "away": 1.89,
+          "home_notes": [
+            "QB Jugador 33 (Questionable)"
+          ],
+          "away_notes": [
+            "CB Jugador 55 (Out)",
+            "OT Jugador 91 (Out)",
+            "CB Jugador 92 (Injured Reserve)"
+          ]
+        },
+        "form": {
+          "home": 0.0,
+          "away": 0.0
+        },
+        "news": {
+          "home": [],
+          "away": []
+        },
+        "suggested_confidence": 8
+      },
+      {
+        "matchup": "TEN@JAX",
+        "game_id": "demo-13",
+        "date": "2026-09-16T14:36:31Z",
+        "home": "JAX",
+        "away": "TEN",
+        "line_home": 2.5,
+        "market": "spread",
+        "base_margin": -2.5,
+        "base_source": "línea publicada",
+        "adj_injuries": -0.58,
+        "adj_form": 0.0,
+        "adj_news": 0.0,
+        "adj_market": -0.29,
+        "market_home_win": 0.408,
+        "adjustment": -0.86,
+        "expected_margin": -3.36,
+        "p_home": 0.474,
+        "p_away": 0.526,
+        "p_push": 0.0,
+        "pick": "TEN",
+        "pick_side": "away",
+        "pick_probability": 0.526,
+        "injuries": {
+          "home": 0.8,
+          "away": 0.22,
+          "home_notes": [
+            "RB Jugador 15 (Out)"
+          ],
+          "away_notes": []
+        },
+        "form": {
+          "home": 0.0,
+          "away": 0.0
+        },
+        "news": {
+          "home": [],
+          "away": []
+        },
+        "suggested_confidence": 7
+      },
+      {
+        "matchup": "NYG@PHI",
+        "game_id": "demo-03",
+        "date": "2026-09-15T06:36:31Z",
+        "home": "PHI",
+        "away": "NYG",
+        "line_home": -1.5,
+        "market": "spread",
+        "base_margin": 1.5,
+        "base_source": "línea publicada",
+        "adj_injuries": 0.15,
+        "adj_form": -0.6,
+        "adj_news": -0.3,
+        "adj_market": 0.0,
+        "market_home_win": null,
+        "adjustment": -0.75,
+        "expected_margin": 0.75,
+        "p_home": 0.4772,
+        "p_away": 0.5228,
+        "p_push": 0.0,
+        "pick": "NYG",
+        "pick_side": "away",
+        "pick_probability": 0.5228,
+        "injuries": {
+          "home": 1.05,
+          "away": 1.2,
+          "home_notes": [
+            "WR Jugador 24 (Injured Reserve)"
+          ],
+          "away_notes": [
+            "DE Jugador 53 (Injured Reserve)",
+            "WR Jugador 38 (Injured Reserve)"
+          ]
+        },
+        "form": {
+          "home": -0.3,
+          "away": 0.3
+        },
+        "news": {
+          "home": [],
+          "away": [
+            {
+              "headline": "NYG activates veteran lineman, expected to play Sunday",
+              "labels": [
+                "refuerzo"
+              ],
+              "points": 0.3,
+              "link": ""
+            }
+          ]
+        },
+        "suggested_confidence": 6
+      },
+      {
+        "matchup": "CIN@BAL",
+        "game_id": "demo-04",
+        "date": "2026-09-15T22:36:31Z",
+        "home": "BAL",
+        "away": "CIN",
+        "line_home": 2.5,
+        "market": "spread",
+        "base_margin": -2.5,
+        "base_source": "línea publicada",
+        "adj_injuries": -0.29,
+        "adj_form": 1.32,
+        "adj_news": -0.4,
+        "adj_market": 0.0,
+        "market_home_win": null,
+        "adjustment": 0.63,
+        "expected_margin": -1.87,
+        "p_home": 0.519,
+        "p_away": 0.481,
+        "p_push": 0.0,
+        "pick": "BAL",
+        "pick_side": "home",
+        "pick_probability": 0.519,
+        "injuries": {
+          "home": 0.5,
+          "away": 0.21,
+          "home_notes": [
+            "OT Jugador 86 (Injured Reserve)"
+          ],
+          "away_notes": []
+        },
+        "form": {
+          "home": 0.66,
+          "away": -0.66
+        },
+        "news": {
+          "home": [
+            {
+              "headline": "BAL star receiver requests trade amid contract dispute",
+              "labels": [
+                "plantel inestable"
+              ],
+              "points": -0.4,
+              "link": ""
+            }
+          ],
+          "away": []
+        },
+        "suggested_confidence": 5
+      },
+      {
+        "matchup": "ARI@LAC",
+        "game_id": "demo-14",
+        "date": "2026-09-15T10:36:31Z",
+        "home": "LAC",
+        "away": "ARI",
+        "line_home": 2.5,
+        "market": "spread",
+        "base_margin": -2.5,
+        "base_source": "línea publicada",
+        "adj_injuries": -2.52,
+        "adj_form": 0.0,
+        "adj_news": 0.0,
+        "adj_market": 3.0,
+        "market_home_win": 0.621,
+        "adjustment": 0.48,
+        "expected_margin": -2.02,
+        "p_home": 0.5147,
+        "p_away": 0.4853,
+        "p_push": 0.0,
+        "pick": "LAC",
+        "pick_side": "home",
+        "pick_probability": 0.5147,
+        "injuries": {
+          "home": 3.18,
+          "away": 0.66,
+          "home_notes": [
+            "QB Jugador 11 (Injured Reserve)",
+            "WR Jugador 59 (Injured Reserve)"
+          ],
+          "away_notes": []
+        },
+        "form": {
+          "home": 0.0,
+          "away": 0.0
+        },
+        "news": {
+          "home": [],
+          "away": []
+        },
+        "suggested_confidence": 4
+      },
+      {
+        "matchup": "NO@TB",
+        "game_id": "demo-09",
+        "date": "2026-09-15T18:36:31Z",
+        "home": "TB",
+        "away": "NO",
+        "line_home": -3.5,
+        "market": "spread",
+        "base_margin": 3.5,
+        "base_source": "línea publicada",
+        "adj_injuries": -2.48,
+        "adj_form": 0.0,
+        "adj_news": 0.0,
+        "adj_market": 2.24,
+        "market_home_win": 0.7272,
+        "adjustment": -0.24,
+        "expected_margin": 3.26,
+        "p_home": 0.4927,
+        "p_away": 0.5073,
+        "p_push": 0.0,
+        "pick": "NO",
+        "pick_side": "away",
+        "pick_probability": 0.5073,
+        "injuries": {
+          "home": 4.0,
+          "away": 1.52,
+          "home_notes": [
+            "QB Jugador 21 (Out)",
+            "QB Jugador 93 (Questionable)",
+            "RB Jugador 93 (Injured Reserve)"
+          ],
+          "away_notes": [
+            "QB Jugador 55 (Questionable)"
+          ]
+        },
+        "form": {
+          "home": 0.0,
+          "away": 0.0
+        },
+        "news": {
+          "home": [],
+          "away": []
+        },
+        "suggested_confidence": 3
+      },
+      {
+        "matchup": "DAL@SF",
+        "game_id": "demo-02",
+        "date": "2026-09-15T12:36:31Z",
+        "home": "SF",
+        "away": "DAL",
+        "line_home": 1.5,
+        "market": "spread",
+        "base_margin": -1.5,
+        "base_source": "línea publicada",
+        "adj_injuries": -0.6,
+        "adj_form": 1.44,
+        "adj_news": -0.8,
+        "adj_market": 0.0,
+        "market_home_win": null,
+        "adjustment": 0.04,
+        "expected_margin": -1.46,
+        "p_home": 0.5012,
+        "p_away": 0.4988,
+        "p_push": 0.0,
+        "pick": "SF",
+        "pick_side": "home",
+        "pick_probability": 0.5012,
+        "injuries": {
+          "home": 1.0,
+          "away": 0.4,
+          "home_notes": [
+            "DE Jugador 11 (Injured Reserve)"
+          ],
+          "away_notes": []
+        },
+        "form": {
+          "home": 0.72,
+          "away": -0.72
+        },
+        "news": {
+          "home": [
+            {
+              "headline": "SF head coach fired after slow start",
+              "labels": [
+                "fuera de cancha"
+              ],
+              "points": -0.8,
+              "link": ""
+            }
+          ],
+          "away": []
+        },
+        "suggested_confidence": 2
+      },
+      {
+        "matchup": "BUF@KC",
+        "game_id": "demo-01",
+        "date": "2026-09-16T21:36:31Z",
+        "home": "KC",
+        "away": "BUF",
+        "line_home": 3.0,
+        "market": "spread",
+        "base_margin": -3.0,
+        "base_source": "línea publicada",
+        "adj_injuries": -0.75,
+        "adj_form": -0.6,
+        "adj_news": -0.3,
+        "adj_market": 0.0,
+        "market_home_win": null,
+        "adjustment": -1.65,
+        "expected_margin": -4.65,
+        "p_home": 0.403,
+        "p_away": 0.495,
+        "p_push": 0.102,
+        "pick": "BUF",
+        "pick_side": "away",
+        "pick_probability": 0.495,
+        "injuries": {
+          "home": 1.65,
+          "away": 0.9,
+          "home_notes": [
+            "CB Jugador 34 (Out)"
+          ],
+          "away_notes": [
+            "RB Jugador 28 (Injured Reserve)"
+          ]
+        },
+        "form": {
+          "home": -0.3,
+          "away": 0.3
+        },
+        "news": {
+          "home": [
+            {
+              "headline": "KC travels to London for the international series",
+              "labels": [
+                "logística"
+              ],
+              "points": -0.3,
+              "link": ""
+            }
+          ],
+          "away": []
+        },
+        "suggested_confidence": 1
+      }
+    ],
+    "source_status": {
+      "injuries": "demo",
+      "news": "demo"
+    }
+  },
   "games": [
     {
       "id": "demo-06",
-      "date": "2026-09-13T19:05:53Z",
+      "date": "2026-09-13T19:36:31Z",
       "name": "NYJ @ MIA",
       "state": "in",
       "status_detail": "Q4 13:44",
@@ -1021,7 +1915,7 @@
     },
     {
       "id": "demo-07",
-      "date": "2026-09-13T19:05:53Z",
+      "date": "2026-09-13T19:36:31Z",
       "name": "IND @ HOU",
       "state": "in",
       "status_detail": "Q2 5:32",
@@ -1129,7 +2023,7 @@
     },
     {
       "id": "demo-08",
-      "date": "2026-09-13T19:05:53Z",
+      "date": "2026-09-13T19:36:31Z",
       "name": "SEA @ LAR",
       "state": "in",
       "status_detail": "Q2 14:06",
@@ -1225,7 +2119,7 @@
     },
     {
       "id": "demo-09",
-      "date": "2026-09-13T19:05:53Z",
+      "date": "2026-09-13T19:36:31Z",
       "name": "NO @ TB",
       "state": "in",
       "status_detail": "Medio tiempo",
@@ -1321,7 +2215,7 @@
     },
     {
       "id": "demo-10",
-      "date": "2026-09-13T19:05:53Z",
+      "date": "2026-09-13T19:36:31Z",
       "name": "CHI @ MIN",
       "state": "in",
       "status_detail": "TE 1:29",
@@ -1417,10 +2311,10 @@
     },
     {
       "id": "demo-14",
-      "date": "2026-09-15T14:05:53Z",
+      "date": "2026-09-15T14:36:31Z",
       "name": "ARI @ LAC",
       "state": "pre",
-      "status_detail": "15/09 14:05 UTC",
+      "status_detail": "15/09 14:36 UTC",
       "status_short": "",
       "completed": false,
       "halftime": false,
@@ -1525,10 +2419,10 @@
     },
     {
       "id": "demo-13",
-      "date": "2026-09-16T06:05:53Z",
+      "date": "2026-09-16T06:36:31Z",
       "name": "TEN @ JAX",
       "state": "pre",
-      "status_detail": "16/09 06:05 UTC",
+      "status_detail": "16/09 06:36 UTC",
       "status_short": "",
       "completed": false,
       "halftime": false,
@@ -1633,10 +2527,10 @@
     },
     {
       "id": "demo-12",
-      "date": "2026-09-16T13:05:53Z",
+      "date": "2026-09-16T13:36:31Z",
       "name": "CLE @ PIT",
       "state": "pre",
-      "status_detail": "16/09 13:05 UTC",
+      "status_detail": "16/09 13:36 UTC",
       "status_short": "",
       "completed": false,
       "halftime": false,
@@ -1741,10 +2635,10 @@
     },
     {
       "id": "demo-16",
-      "date": "2026-09-16T14:05:53Z",
+      "date": "2026-09-16T14:36:31Z",
       "name": "NE @ WSH",
       "state": "pre",
-      "status_detail": "16/09 14:05 UTC",
+      "status_detail": "16/09 14:36 UTC",
       "status_short": "",
       "completed": false,
       "halftime": false,
@@ -1849,10 +2743,10 @@
     },
     {
       "id": "demo-15",
-      "date": "2026-09-16T19:05:53Z",
+      "date": "2026-09-16T19:36:31Z",
       "name": "CAR @ ATL",
       "state": "pre",
-      "status_detail": "16/09 19:05 UTC",
+      "status_detail": "16/09 19:36 UTC",
       "status_short": "",
       "completed": false,
       "halftime": false,
@@ -1957,10 +2851,10 @@
     },
     {
       "id": "demo-11",
-      "date": "2026-09-16T20:05:53Z",
+      "date": "2026-09-16T20:36:31Z",
       "name": "LV @ DEN",
       "state": "pre",
-      "status_detail": "16/09 20:05 UTC",
+      "status_detail": "16/09 20:36 UTC",
       "status_short": "",
       "completed": false,
       "halftime": false,
@@ -2065,7 +2959,7 @@
     },
     {
       "id": "demo-01",
-      "date": "2026-09-13T19:05:53Z",
+      "date": "2026-09-13T19:36:31Z",
       "name": "BUF @ KC",
       "state": "post",
       "status_detail": "Final",
@@ -2142,7 +3036,7 @@
     },
     {
       "id": "demo-02",
-      "date": "2026-09-13T19:05:53Z",
+      "date": "2026-09-13T19:36:31Z",
       "name": "DAL @ SF",
       "state": "post",
       "status_detail": "Final",
@@ -2219,7 +3113,7 @@
     },
     {
       "id": "demo-03",
-      "date": "2026-09-13T19:05:53Z",
+      "date": "2026-09-13T19:36:31Z",
       "name": "NYG @ PHI",
       "state": "post",
       "status_detail": "Final",
@@ -2296,7 +3190,7 @@
     },
     {
       "id": "demo-04",
-      "date": "2026-09-13T19:05:53Z",
+      "date": "2026-09-13T19:36:31Z",
       "name": "CIN @ BAL",
       "state": "post",
       "status_detail": "Final",
@@ -2373,7 +3267,7 @@
     },
     {
       "id": "demo-05",
-      "date": "2026-09-13T19:05:53Z",
+      "date": "2026-09-13T19:36:31Z",
       "name": "GB @ DET",
       "state": "post",
       "status_detail": "Final",

@@ -106,7 +106,15 @@ select.cf:disabled{opacity:.55;cursor:not-allowed}
 button.pk.sel{border-color:var(--cyan);color:var(--white);background:rgba(0,217,255,.10)}
 label.act.file{cursor:pointer;display:inline-flex;align-items:center}
 select.cf{padding:5px 8px;font-size:12px}
-#pk-kpis{margin:4px 0 14px}
+#pk-kpis,#fc-kpis{margin:4px 0 14px}
+#fc-sources{margin:0 0 12px}
+.fcnotes{font-size:11px;color:var(--mute);white-space:normal;max-width:430px;margin-top:4px;line-height:1.35}
+.fcnotes i{color:var(--amber);font-style:normal}
+.fcnews{margin-top:16px}
+.fcnews h3{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);margin:0 0 8px}
+.fcnews ul{margin:0;padding-left:18px;font-size:12.5px;color:var(--ice)}
+.fcnews li{margin-bottom:5px}
+#pk-week{margin-bottom:8px}
 .trow .nm{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .trow .nm small{display:block;color:var(--mute);font-size:11px;font-weight:400}
 .trow .ball{color:var(--amber);font-size:12px;width:14px;text-align:center}
@@ -218,6 +226,7 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
   <button data-tab="totals">Totales</button>
   <button data-tab="markets">Mercados</button>
   <button data-tab="picks">Mi quiniela</button>
+  <button data-tab="forecast">Pronóstico</button>
   <button data-tab="summary">Resumen</button>
   <button data-tab="method">Metodología</button>
 </div>
@@ -263,6 +272,8 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
     <h3>Mi quiniela · metodología Yahoo Pick'em</h3>
     <div class="hint sub">Elige un equipo por partido y reparte la confianza. El acierto paga los
       puntos asignados; el fallo, cero. Los puntos se recalculan con cada refresco del marcador.</div>
+    <div class="sub" id="pk-week"></div>
+    <div id="pk-mismatch"></div>
     <div class="pkctl">
       <div class="ctlgroup">
         <label for="pk-mode">Pronóstico</label>
@@ -307,6 +318,34 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
   </div>
 </section>
 
+<section data-panel="forecast">
+  <div class="card">
+    <h3>Pronóstico de la jornada siguiente</h3>
+    <div class="hint sub">Parte de la línea publicada y la corrige con cuatro fuentes: el reporte
+      de lesiones, el desempeño de la semana anterior, las noticias del plantel —incluidas las que
+      no son deportivas— y los mercados de predicción. Cada ajuste tiene tope y se muestra
+      desglosado para que puedas discutirlo, no para que lo aceptes a ciegas.</div>
+    <div class="pkctl">
+      <div class="ctlgroup">
+        <label for="fc-week">Semana a pronosticar</label>
+        <input type="number" id="fc-week" min="1" max="22" step="1">
+      </div>
+      <button class="act" id="fc-generate">Generar pronóstico</button>
+      <button class="act" id="fc-apply">Aplicar a mi quiniela</button>
+      <span class="sub" id="fc-status"></span>
+    </div>
+    <div class="sources" id="fc-sources"></div>
+    <div class="kpis" id="fc-kpis"></div>
+    <div class="tscroll"><table id="forecast-table"></table></div>
+    <div class="fcnews" id="fc-news"></div>
+    <div class="note" style="margin-top:16px"><b>Cómo leerlo.</b> «Base» es el margen que implica
+      la línea publicada; si no hay línea, la ventaja de local más la forma. Las columnas de
+      lesiones, forma, noticias y mercado son puntos sumados o restados al margen del local, con
+      tope individual y un tope conjunto. El pick sugerido es el lado con mayor probabilidad de
+      cubrir y la confianza se ordena de menor a mayor certeza, como pide Yahoo.</div>
+  </div>
+</section>
+
 <section data-panel="summary">
   <div class="grid2">
     <div class="card"><h3>Cobertura de la jornada</h3><div id="ats-record"></div></div>
@@ -344,6 +383,32 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
     <p>Cuando el feed trae momios, se convierten a probabilidad implícita y se les retira la
     comisión repartiéndola entre ambos lados. La columna <i>edge</i> es la diferencia entre la
     probabilidad del modelo y esa probabilidad sin comisión: positiva favorece al local.</p>
+    <h3>Pronóstico de la jornada siguiente</h3>
+    <p>El botón <i>Generar pronóstico</i> consulta el calendario de la semana objetivo, el reporte
+    de lesiones de la liga y las noticias del día, y los combina con lo que ya está en el tablero:
+    el desempeño de la semana en revisión y las cotizaciones de los mercados de predicción.</p>
+    <ul>
+      <li><b>Base</b>: el margen que implica la línea publicada. Cuando todavía no hay línea, la
+      ventaja de local más la diferencia de forma entre los dos equipos.</li>
+      <li><b>Lesiones</b>: cada jugador del reporte pesa según su posición y su estatus (fuera,
+      duda, probable). El quarterback domina la escala; el total por equipo tiene tope.</li>
+      <li><b>Forma</b>: margen contra la línea de la semana anterior, escalado y acotado. Una
+      semana es una muestra pequeña, por eso pesa poco.</li>
+      <li><b>Noticias</b>: los titulares se clasifican con reglas de palabras clave configurables
+      en <code>forecast.news_rules</code>, con cuatro categorías: asuntos fuera de cancha
+      (suspensiones, temas legales, despidos), plantel inestable (traspasos, disputas de
+      contrato), refuerzos (regresos y altas) y logística (viajes internacionales, semana corta,
+      clima extremo).</li>
+      <li><b>Mercado</b>: si Polymarket o Kalshi ya cotizan el partido, la diferencia entre el
+      margen que implica ese precio y la base entra con el peso del consenso.</li>
+    </ul>
+    <p>La suma de ajustes está acotada y cada columna se muestra por separado, con las lesiones y
+    los titulares que la originaron. <i>Aplicar a mi quiniela</i> guarda los picks sugeridos en la
+    semana pronosticada, con la confianza ordenada de menor a mayor certeza.</p>
+    <p><b>Límites.</b> La clasificación de noticias es por palabras clave, no por lectura: puede
+    marcar de más o pasar por alto un matiz. El peso de una lesión sale de la posición, no del
+    jugador concreto ni de su reemplazo. Trátalo como un ordenador de información, no como un
+    veredicto.</p>
     <h3>Quiniela (metodología Yahoo Pick'em)</h3>
     <p>Yahoo Pro Football Pick'em combina dos ajustes, ambos disponibles en la pestaña
     <i>Mi quiniela</i>:</p>
@@ -404,7 +469,7 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
 </div>
 <script>
 "use strict";
-var BOOT = {"generated_at":"2026-09-13T22:05:53Z","source":"demo","source_status":{"polymarket":"demo","kalshi":"demo"},"meta":{"season":2026,"seasontype":2,"week":3,"url":"demo"},"config":{"live":{"endpoint":"https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard","refresh_seconds":30,"fetch_on_load":true},"model":{"sigma_full_game":13.2,"sigma_total":10.6,"sigma_overtime":5.5,"sigma_floor":1.4,"possession_points":1.1,"default_total":44.0,"key_numbers":{"0":0.15,"1":1.1,"2":1.2,"3":3.4,"4":1.3,"5":1.0,"6":1.9,"7":2.6,"8":1.2,"9":1.1,"10":2.0,"11":1.1,"13":1.1,"14":1.8,"16":1.1,"17":1.7,"20":1.3,"21":1.4,"24":1.3,"28":1.2,"default":0.9}},"sources":{"polymarket":{"enabled":true,"endpoint":"https://gamma-api.polymarket.com/events","query":"tag_slug=nfl&closed=false&limit=200"},"kalshi":{"enabled":true,"endpoint":"https://api.elections.kalshi.com/trade-api/v2/markets","series_ticker":"KXNFLGAME"}},"consensus":{"model_weight":0.5},"pickem":{"mode":"ats","scoring":"confidence","push_points":0},"assets":{"logos":true,"logo_template":"https://a.espncdn.com/i/teamlogos/nfl/500/{abbr}.png"},"defaults":{"seasontype":2}},"quotes":[{"source":"polymarket","id":"po-nyj-mia","title":"NYJ vs MIA","teams":{"MIA":0.661,"NYJ":0.359},"volume":345383.89,"start":"2026-09-13T19:05:53Z","closed":false},{"source":"kalshi","id":"ka-nyj-mia","title":"NYJ vs MIA","teams":{"MIA":0.68,"NYJ":0.35},"volume":684441.17,"start":"2026-09-13T19:05:53Z","closed":false},{"source":"polymarket","id":"po-ind-hou","title":"IND vs HOU","teams":{"HOU":0.306,"IND":0.714},"volume":47501.49,"start":"2026-09-13T19:05:53Z","closed":false},{"source":"kalshi","id":"ka-ind-hou","title":"IND vs HOU","teams":{"HOU":0.295,"IND":0.735},"volume":36417.69,"start":"2026-09-13T19:05:53Z","closed":false},{"source":"polymarket","id":"po-sea-lar","title":"SEA vs LAR","teams":{"LAR":0.608,"SEA":0.412},"volume":344895.5,"start":"2026-09-13T19:05:53Z","closed":false},{"source":"kalshi","id":"ka-no-tb","title":"NO vs TB","teams":{"TB":0.749,"NO":0.281},"volume":524296.66,"start":"2026-09-13T19:05:53Z","closed":false},{"source":"polymarket","id":"po-chi-min","title":"CHI vs MIN","teams":{"MIN":0.719,"CHI":0.301},"volume":603182.44,"start":"2026-09-13T19:05:53Z","closed":false},{"source":"polymarket","id":"po-lv-den","title":"LV vs DEN","teams":{"DEN":0.409,"LV":0.611},"volume":352974.4,"start":"2026-09-16T20:05:53Z","closed":false},{"source":"kalshi","id":"ka-lv-den","title":"LV vs DEN","teams":{"DEN":0.405,"LV":0.625},"volume":242162.96,"start":"2026-09-16T20:05:53Z","closed":false},{"source":"polymarket","id":"po-cle-pit","title":"CLE vs PIT","teams":{"PIT":0.665,"CLE":0.355},"volume":494751.34,"start":"2026-09-16T13:05:53Z","closed":false},{"source":"kalshi","id":"ka-cle-pit","title":"CLE vs PIT","teams":{"PIT":0.679,"CLE":0.351},"volume":667722.86,"start":"2026-09-16T13:05:53Z","closed":false},{"source":"polymarket","id":"po-ten-jax","title":"TEN vs JAX","teams":{"JAX":0.458,"TEN":0.562},"volume":542145.93,"start":"2026-09-16T06:05:53Z","closed":false},{"source":"kalshi","id":"ka-ten-jax","title":"TEN vs JAX","teams":{"JAX":0.378,"TEN":0.652},"volume":829834.71,"start":"2026-09-16T06:05:53Z","closed":false},{"source":"polymarket","id":"po-ari-lac","title":"ARI vs LAC","teams":{"LAC":0.628,"ARI":0.392},"volume":730150.28,"start":"2026-09-15T14:05:53Z","closed":false},{"source":"kalshi","id":"ka-ari-lac","title":"ARI vs LAC","teams":{"LAC":0.645,"ARI":0.385},"volume":77040.46,"start":"2026-09-15T14:05:53Z","closed":false},{"source":"polymarket","id":"po-car-atl","title":"CAR vs ATL","teams":{"ATL":0.519,"CAR":0.501},"volume":77943.73,"start":"2026-09-16T19:05:53Z","closed":false},{"source":"kalshi","id":"ka-car-atl","title":"CAR vs ATL","teams":{"ATL":0.47,"CAR":0.56},"volume":249544.2,"start":"2026-09-16T19:05:53Z","closed":false},{"source":"polymarket","id":"po-ne-wsh","title":"NE vs WSH","teams":{"WSH":0.724,"NE":0.296},"volume":691709.91,"start":"2026-09-16T14:05:53Z","closed":false},{"source":"kalshi","id":"ka-ne-wsh","title":"NE vs WSH","teams":{"WSH":0.685,"NE":0.345},"volume":521243.29,"start":"2026-09-16T14:05:53Z","closed":false}],"teams":{"ARI":["Arizona","Cardinals"],"ATL":["Atlanta","Falcons"],"BAL":["Baltimore","Ravens"],"BUF":["Buffalo","Bills"],"CAR":["Carolina","Panthers"],"CHI":["Chicago","Bears"],"CIN":["Cincinnati","Bengals"],"CLE":["Cleveland","Browns"],"DAL":["Dallas","Cowboys"],"DEN":["Denver","Broncos"],"DET":["Detroit","Lions"],"GB":["Green Bay","Packers"],"HOU":["Houston","Texans"],"IND":["Indianapolis","Colts"],"JAX":["Jacksonville","Jaguars"],"KC":["Kansas City","Chiefs"],"LAC":["Los Angeles","Chargers"],"LAR":["Los Angeles","Rams"],"LV":["Las Vegas","Raiders"],"MIA":["Miami","Dolphins"],"MIN":["Minnesota","Vikings"],"NE":["New England","Patriots"],"NO":["New Orleans","Saints"],"NYG":["New York","Giants"],"NYJ":["New York","Jets"],"PHI":["Philadelphia","Eagles"],"PIT":["Pittsburgh","Steelers"],"SEA":["Seattle","Seahawks"],"SF":["San Francisco","49ers"],"TB":["Tampa Bay","Buccaneers"],"TEN":["Tennessee","Titans"],"WSH":["Washington","Commanders"]},"team_meta":{"ARI":{"primary":"#97233F","secondary":"#FFB612"},"ATL":{"primary":"#A71930","secondary":"#A5ACAF"},"BAL":{"primary":"#241773","secondary":"#9E7C0C"},"BUF":{"primary":"#00338D","secondary":"#C60C30"},"CAR":{"primary":"#0085CA","secondary":"#BFC0BF"},"CHI":{"primary":"#0B162A","secondary":"#C83803"},"CIN":{"primary":"#FB4F14","secondary":"#000000"},"CLE":{"primary":"#311D00","secondary":"#FF3C00"},"DAL":{"primary":"#003594","secondary":"#869397"},"DEN":{"primary":"#FB4F14","secondary":"#002244"},"DET":{"primary":"#0076B6","secondary":"#B0B7BC"},"GB":{"primary":"#203731","secondary":"#FFB612"},"HOU":{"primary":"#03202F","secondary":"#A71930"},"IND":{"primary":"#002C5F","secondary":"#A2AAAD"},"JAX":{"primary":"#006778","secondary":"#D7A22A"},"KC":{"primary":"#E31837","secondary":"#FFB81C"},"LAC":{"primary":"#0080C6","secondary":"#FFC20E"},"LAR":{"primary":"#003594","secondary":"#FFA300"},"LV":{"primary":"#000000","secondary":"#A5ACAF"},"MIA":{"primary":"#008E97","secondary":"#FC4C02"},"MIN":{"primary":"#4F2683","secondary":"#FFC62F"},"NE":{"primary":"#002244","secondary":"#C60C30"},"NO":{"primary":"#D3BC8D","secondary":"#101820"},"NYG":{"primary":"#0B2265","secondary":"#A71930"},"NYJ":{"primary":"#125740","secondary":"#FFFFFF"},"PHI":{"primary":"#004C54","secondary":"#A5ACAF"},"PIT":{"primary":"#FFB612","secondary":"#101820"},"SEA":{"primary":"#002244","secondary":"#69BE28"},"SF":{"primary":"#AA0000","secondary":"#B3995D"},"TB":{"primary":"#D50A0A","secondary":"#FF7900"},"TEN":{"primary":"#0C2340","secondary":"#4B92DB"},"WSH":{"primary":"#5A1414","secondary":"#FFB612"}},"team_aliases":{"WAS":"WSH","WFT":"WSH","JAC":"JAX","LA":"LAR","STL":"LAR","SD":"LAC","OAK":"LV","LVR":"LV","ARZ":"ARI","BLT":"BAL","CLV":"CLE","HST":"HOU","KAN":"KC","NOR":"NO","NWE":"NE","SFO":"SF","TAM":"TB","GNB":"GB","NYA":"NYJ"},"summary":{"games":16,"live":5,"final":5,"scheduled":6,"ats_home":3,"ats_away":2,"ats_push":0,"ats_home_pct":60.0,"favorites_covered":4,"underdogs_covered":1,"favorites_pct":80.0,"totals_over":3,"totals_under":2,"points":388,"with_line":16},"picks":{"mode":"ats","scoring":"confidence","season":null,"week":null,"tiebreaker":{"matchup":"CIN@BAL","total":45},"picks":{"BUF@KC":{"team":"KC","confidence":1},"DAL@SF":{"team":"DAL","confidence":2},"NYG@PHI":{"team":"PHI","confidence":3},"GB@DET":{"team":"GB","confidence":4},"NE@WSH":{"team":"WSH","confidence":5},"SEA@LAR":{"team":"SEA","confidence":6},"ARI@LAC":{"team":"LAC","confidence":7},"NO@TB":{"team":"TB","confidence":8},"CAR@ATL":{"team":"CAR","confidence":9},"LV@DEN":{"team":"LV","confidence":10},"CLE@PIT":{"team":"CLE","confidence":11},"NYJ@MIA":{"team":"NYJ","confidence":12},"TEN@JAX":{"team":"TEN","confidence":13},"IND@HOU":{"team":"HOU","confidence":14},"CHI@MIN":{"team":"CHI","confidence":15},"CIN@BAL":{"team":"BAL","confidence":16}}},"pickem":{"mode":"ats","scoring":"confidence","push_points":0.0,"games_in_week":16,"picked":16,"earned":16.0,"live_expected":36.41,"pending_expected":27.2,"projected":79.61,"max_possible":126.0,"max_week":136.0,"hits":1,"misses":4,"pushes":0,"accuracy":20.0,"issues":[],"tiebreaker":{"matchup":"CIN@BAL","prediction":45,"actual":55,"final":true,"difference":10.0},"rows":[{"matchup":"CIN@BAL","game_id":"demo-04","team":"BAL","side":"home","confidence":16.0,"state":"post","line_home":-1.5,"probability":1.0,"status":"hit","points":16.0},{"matchup":"CHI@MIN","game_id":"demo-10","team":"CHI","side":"away","confidence":15.0,"state":"in","line_home":-6.5,"probability":0.9946,"status":"en_juego","points":null,"expected":14.92},{"matchup":"IND@HOU","game_id":"demo-07","team":"HOU","side":"home","confidence":14.0,"state":"in","line_home":6.5,"probability":0.7117,"status":"en_juego","points":null,"expected":9.96},{"matchup":"TEN@JAX","game_id":"demo-13","team":"TEN","side":"away","confidence":13.0,"state":"pre","line_home":1.5,"probability":0.5,"status":"pendiente","points":null,"expected":6.5},{"matchup":"NYJ@MIA","game_id":"demo-06","team":"NYJ","side":"away","confidence":12.0,"state":"in","line_home":-4.5,"probability":0.4136,"status":"en_juego","points":null,"expected":4.96},{"matchup":"CLE@PIT","game_id":"demo-12","team":"CLE","side":"away","confidence":11.0,"state":"pre","line_home":-6.5,"probability":0.5,"status":"pendiente","points":null,"expected":5.5},{"matchup":"LV@DEN","game_id":"demo-11","team":"LV","side":"away","confidence":10.0,"state":"pre","line_home":2.5,"probability":0.5,"status":"pendiente","points":null,"expected":5.0},{"matchup":"CAR@ATL","game_id":"demo-15","team":"CAR","side":"away","confidence":9.0,"state":"pre","line_home":0.0,"probability":0.4977,"status":"pendiente","points":null,"expected":4.48},{"matchup":"NO@TB","game_id":"demo-09","team":"TB","side":"home","confidence":8.0,"state":"in","line_home":-9.5,"probability":0.5076,"status":"en_juego","points":null,"expected":4.06},{"matchup":"ARI@LAC","game_id":"demo-14","team":"LAC","side":"home","confidence":7.0,"state":"pre","line_home":-4.5,"probability":0.4934,"status":"pendiente","points":null,"expected":3.45},{"matchup":"SEA@LAR","game_id":"demo-08","team":"SEA","side":"away","confidence":6.0,"state":"in","line_home":-3.5,"probability":0.4173,"status":"en_juego","points":null,"expected":2.5},{"matchup":"NE@WSH","game_id":"demo-16","team":"WSH","side":"home","confidence":5.0,"state":"pre","line_home":-7.0,"probability":0.453,"status":"pendiente","points":null,"expected":2.27},{"matchup":"GB@DET","game_id":"demo-05","team":"GB","side":"away","confidence":4.0,"state":"post","line_home":-3.0,"probability":0.0,"status":"miss","points":0.0},{"matchup":"NYG@PHI","game_id":"demo-03","team":"PHI","side":"home","confidence":3.0,"state":"post","line_home":3.5,"probability":0.0,"status":"miss","points":0.0},{"matchup":"DAL@SF","game_id":"demo-02","team":"DAL","side":"away","confidence":2.0,"state":"post","line_home":3.0,"probability":0.0,"status":"miss","points":0.0},{"matchup":"BUF@KC","game_id":"demo-01","team":"KC","side":"home","confidence":1.0,"state":"post","line_home":6.5,"probability":0.0,"status":"miss","points":0.0}]},"games":[{"id":"demo-06","date":"2026-09-13T19:05:53Z","name":"NYJ @ MIA","state":"in","status_detail":"Q4 13:44","status_short":"13:44","completed":false,"halftime":false,"period":4,"clock":"13:44","clock_seconds":824,"home":{"id":"MIA","abbr":"MIA","name":"Miami Dolphins","short":"Dolphins","location":"Miami","color":"#008E97","alt_color":"#FC4C02","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/mia.png","record":"6-5"},"away":{"id":"NYJ","abbr":"NYJ","name":"New York Jets","short":"Jets","location":"New York","color":"#125740","alt_color":"#FFFFFF","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/nyj.png","record":"3-7"},"home_score":25,"away_score":21,"line_home":-4.5,"line_display":"MIA -4.5","line_total":49.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":true,"down_distance":"1ro y 10 en la 32","possession_text":"","red_zone":false,"last_play":"Pase incompleto por la banda derecha.","venue":"Estadio demo","broadcast":"FOX","neutral_site":false,"markets":{"polymarket":{"id":"po-nyj-mia","title":"NYJ vs MIA","p_home_win":0.648,"p_away_win":0.352,"raw_home":0.661,"volume":345383.89,"implied_margin":2.4,"p_home_cover":0.3697,"p_away_cover":0.6303,"p_push":0.0},"kalshi":{"id":"ka-nyj-mia","title":"NYJ vs MIA","p_home_win":0.6602,"p_away_win":0.3398,"raw_home":0.68,"volume":684441.17,"implied_margin":2.6,"p_home_cover":0.3823,"p_away_cover":0.6177,"p_push":0.0}},"probs":{"margin_now":4.0,"total_now":46.0,"projected_margin":5.9,"sigma":6.32,"remaining_seconds":824,"fraction_remaining":0.2289,"p_home_cover":0.5864,"p_away_cover":0.4136,"p_push":0.0,"cover_margin_now":-0.5,"p_home_win":0.8319,"p_away_win":0.1619,"p_tie":0.0061,"projected_total":57.3,"p_over":0.9387,"p_under":0.0613,"p_total_push":0.0,"market_win_consensus":0.6541,"market_divergence":-0.1778,"consensus_home_win":0.743,"market_cover_consensus":0.376,"consensus_home_cover":0.4812,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.0864,"market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-07","date":"2026-09-13T19:05:53Z","name":"IND @ HOU","state":"in","status_detail":"Q2 5:32","status_short":"5:32","completed":false,"halftime":false,"period":2,"clock":"5:32","clock_seconds":332,"home":{"id":"HOU","abbr":"HOU","name":"Houston Texans","short":"Texans","location":"Houston","color":"#03202F","alt_color":"#A71930","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/hou.png","record":"3-2"},"away":{"id":"IND","abbr":"IND","name":"Indianapolis Colts","short":"Colts","location":"Indianapolis","color":"#002C5F","alt_color":"#A2AAAD","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/ind.png","record":"1-2"},"home_score":16,"away_score":6,"line_home":6.5,"line_display":"HOU +6.5","line_total":49.5,"odds_provider":"Demo","home_moneyline":145,"away_moneyline":-170,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":false,"down_distance":"3ro y 4 en la 38 rival","possession_text":"","red_zone":false,"last_play":"Gol de campo bueno de 41 yardas.","venue":"Estadio demo","broadcast":"ESPN","neutral_site":false,"markets":{"polymarket":{"id":"po-ind-hou","title":"IND vs HOU","p_home_win":0.3,"p_away_win":0.7,"raw_home":0.306,"volume":47501.49,"implied_margin":-5.3,"p_home_cover":0.546,"p_away_cover":0.454,"p_push":0.0},"kalshi":{"id":"ka-ind-hou","title":"IND vs HOU","p_home_win":0.2864,"p_away_win":0.7136,"raw_home":0.295,"volume":36417.69,"implied_margin":-5.7,"p_home_cover":0.5303,"p_away_cover":0.4697,"p_push":0.0}},"probs":{"margin_now":10.0,"total_now":22.0,"projected_margin":5.7,"sigma":10.16,"remaining_seconds":2132,"fraction_remaining":0.5922,"p_home_cover":0.8852,"p_away_cover":0.1148,"p_push":0.0,"cover_margin_now":16.5,"p_home_win":0.7162,"p_away_win":0.2787,"p_tie":0.005,"projected_total":51.3,"p_over":0.588,"p_under":0.412,"p_total_push":0.0,"market_win_consensus":0.2932,"market_divergence":-0.423,"consensus_home_win":0.5047,"market_cover_consensus":0.5382,"consensus_home_cover":0.7117,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.3852,"market_home_win":0.3933,"market_away_win":0.6067}},{"id":"demo-08","date":"2026-09-13T19:05:53Z","name":"SEA @ LAR","state":"in","status_detail":"Q2 14:06","status_short":"14:06","completed":false,"halftime":false,"period":2,"clock":"14:06","clock_seconds":846,"home":{"id":"LAR","abbr":"LAR","name":"Los Angeles Rams","short":"Rams","location":"Los Angeles","color":"#003594","alt_color":"#FFA300","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/lar.png","record":"3-3"},"away":{"id":"SEA","abbr":"SEA","name":"Seattle Seahawks","short":"Seahawks","location":"Seattle","color":"#002244","alt_color":"#69BE28","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/sea.png","record":"1-8"},"home_score":6,"away_score":3,"line_home":-3.5,"line_display":"LAR -3.5","line_total":47.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":true,"down_distance":"4to y 1 en la 12 rival","possession_text":"","red_zone":false,"last_play":"Pase completo de 12 yardas para primer down.","venue":"Estadio demo","broadcast":"NBC","neutral_site":false,"markets":{"polymarket":{"id":"po-sea-lar","title":"SEA vs LAR","p_home_win":0.5961,"p_away_win":0.4039,"raw_home":0.608,"volume":344895.5,"implied_margin":2.8,"p_home_cover":0.4737,"p_away_cover":0.5263,"p_push":0.0}},"probs":{"margin_now":3.0,"total_now":9.0,"projected_margin":5.9,"sigma":11.32,"remaining_seconds":2646,"fraction_remaining":0.735,"p_home_cover":0.5827,"p_away_cover":0.4173,"p_push":0.0,"cover_margin_now":-0.5,"p_home_win":0.7007,"p_away_win":0.2947,"p_tie":0.0046,"projected_total":43.9,"p_over":0.3465,"p_under":0.6535,"p_total_push":0.0,"market_win_consensus":0.5961,"market_divergence":-0.1046,"consensus_home_win":0.6484,"market_cover_consensus":0.4737,"consensus_home_cover":0.5282,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.0827,"market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-09","date":"2026-09-13T19:05:53Z","name":"NO @ TB","state":"in","status_detail":"Medio tiempo","status_short":"0:00","completed":false,"halftime":true,"period":2,"clock":"0:00","clock_seconds":0,"home":{"id":"TB","abbr":"TB","name":"Tampa Bay Buccaneers","short":"Buccaneers","location":"Tampa Bay","color":"#D50A0A","alt_color":"#FF7900","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/tb.png","record":"5-4"},"away":{"id":"NO","abbr":"NO","name":"New Orleans Saints","short":"Saints","location":"New Orleans","color":"#D3BC8D","alt_color":"#101820","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/no.png","record":"3-1"},"home_score":18,"away_score":9,"line_home":-9.5,"line_display":"TB -9.5","line_total":49.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"ESPN","neutral_site":false,"markets":{"kalshi":{"id":"ka-no-tb","title":"NO vs TB","p_home_win":0.7272,"p_away_win":0.2728,"raw_home":0.749,"volume":524296.66,"implied_margin":5.6,"p_home_cover":0.3396,"p_away_cover":0.6604,"p_push":0.0}},"probs":{"margin_now":9.0,"total_now":27.0,"projected_margin":13.8,"sigma":9.33,"remaining_seconds":1800,"fraction_remaining":0.5,"p_home_cover":0.6756,"p_away_cover":0.3244,"p_push":0.0,"cover_margin_now":-0.5,"p_home_win":0.9336,"p_away_win":0.0642,"p_tie":0.0022,"projected_total":51.8,"p_over":0.618,"p_under":0.382,"p_total_push":0.0,"market_win_consensus":0.7272,"market_divergence":-0.2064,"consensus_home_win":0.8304,"market_cover_consensus":0.3396,"consensus_home_cover":0.5076,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.1756,"market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-10","date":"2026-09-13T19:05:53Z","name":"CHI @ MIN","state":"in","status_detail":"TE 1:29","status_short":"1:29","completed":false,"halftime":false,"period":5,"clock":"1:29","clock_seconds":89,"home":{"id":"MIN","abbr":"MIN","name":"Minnesota Vikings","short":"Vikings","location":"Minnesota","color":"#4F2683","alt_color":"#FFC62F","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/min.png","record":"3-8"},"away":{"id":"CHI","abbr":"CHI","name":"Chicago Bears","short":"Bears","location":"Chicago","color":"#0B162A","alt_color":"#C83803","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/chi.png","record":"8-8"},"home_score":18,"away_score":18,"line_home":-6.5,"line_display":"MIN -6.5","line_total":45.0,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":true,"down_distance":"1ro y 10 en la 44 rival","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"NBC","neutral_site":false,"markets":{"polymarket":{"id":"po-chi-min","title":"CHI vs MIN","p_home_win":0.7049,"p_away_win":0.2951,"raw_home":0.719,"volume":603182.44,"implied_margin":1.1,"p_home_cover":0.0057,"p_away_cover":0.9943,"p_push":0.0}},"probs":{"margin_now":0.0,"total_now":36.0,"projected_margin":1.1,"sigma":2.12,"remaining_seconds":89,"fraction_remaining":0.0,"p_home_cover":0.0054,"p_away_cover":0.9946,"p_push":0.0,"cover_margin_now":-6.5,"p_home_win":0.7164,"p_away_win":0.2636,"p_tie":0.02,"projected_total":36.0,"p_over":0.0,"p_under":1.0,"p_total_push":0.0,"market_win_consensus":0.7049,"market_divergence":-0.0115,"consensus_home_win":0.7107,"market_cover_consensus":0.0057,"consensus_home_cover":0.0056,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":-0.4946,"market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-14","date":"2026-09-15T14:05:53Z","name":"ARI @ LAC","state":"pre","status_detail":"15/09 14:05 UTC","status_short":"","completed":false,"halftime":false,"period":0,"clock":"","clock_seconds":0,"home":{"id":"LAC","abbr":"LAC","name":"Los Angeles Chargers","short":"Chargers","location":"Los Angeles","color":"#0080C6","alt_color":"#FFC20E","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/lac.png","record":"2-6"},"away":{"id":"ARI","abbr":"ARI","name":"Arizona Cardinals","short":"Cardinals","location":"Arizona","color":"#97233F","alt_color":"#FFB612","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/ari.png","record":"8-7"},"home_score":0,"away_score":0,"line_home":-4.5,"line_display":"LAC -4.5","line_total":47.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"Prime","neutral_site":false,"markets":{"polymarket":{"id":"po-ari-lac","title":"ARI vs LAC","p_home_win":0.6157,"p_away_win":0.3843,"raw_home":0.628,"volume":730150.28,"implied_margin":3.9,"p_home_cover":0.4814,"p_away_cover":0.5186,"p_push":0.0},"kalshi":{"id":"ka-ari-lac","title":"ARI vs LAC","p_home_win":0.6262,"p_away_win":0.3738,"raw_home":0.645,"volume":77040.46,"implied_margin":4.2,"p_home_cover":0.4924,"p_away_cover":0.5076,"p_push":0.0}},"probs":{"margin_now":0.0,"total_now":0.0,"projected_margin":4.5,"sigma":13.2,"remaining_seconds":3600,"fraction_remaining":1.0,"p_home_cover":0.5,"p_away_cover":0.5,"p_push":0.0,"cover_margin_now":-4.5,"p_home_win":0.6345,"p_away_win":0.3612,"p_tie":0.0043,"projected_total":47.5,"p_over":0.5,"p_under":0.5,"p_total_push":0.0,"market_win_consensus":0.621,"market_divergence":-0.0135,"consensus_home_win":0.6277,"market_cover_consensus":0.4869,"consensus_home_cover":0.4934,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.0,"market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-13","date":"2026-09-16T06:05:53Z","name":"TEN @ JAX","state":"pre","status_detail":"16/09 06:05 UTC","status_short":"","completed":false,"halftime":false,"period":0,"clock":"","clock_seconds":0,"home":{"id":"JAX","abbr":"JAX","name":"Jacksonville Jaguars","short":"Jaguars","location":"Jacksonville","color":"#006778","alt_color":"#D7A22A","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/jax.png","record":"5-2"},"away":{"id":"TEN","abbr":"TEN","name":"Tennessee Titans","short":"Titans","location":"Tennessee","color":"#0C2340","alt_color":"#4B92DB","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/ten.png","record":"4-8"},"home_score":0,"away_score":0,"line_home":1.5,"line_display":"JAX +1.5","line_total":45.0,"odds_provider":"Demo","home_moneyline":145,"away_moneyline":-170,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"Prime","neutral_site":false,"markets":{"polymarket":{"id":"po-ten-jax","title":"TEN vs JAX","p_home_win":0.449,"p_away_win":0.551,"raw_home":0.458,"volume":542145.93,"implied_margin":-1.7,"p_home_cover":0.4942,"p_away_cover":0.5058,"p_push":0.0},"kalshi":{"id":"ka-ten-jax","title":"TEN vs JAX","p_home_win":0.367,"p_away_win":0.633,"raw_home":0.378,"volume":829834.71,"implied_margin":-4.5,"p_home_cover":0.4105,"p_away_cover":0.5895,"p_push":0.0}},"probs":{"margin_now":0.0,"total_now":0.0,"projected_margin":-1.5,"sigma":13.2,"remaining_seconds":3600,"fraction_remaining":1.0,"p_home_cover":0.5,"p_away_cover":0.5,"p_push":0.0,"cover_margin_now":1.5,"p_home_win":0.4514,"p_away_win":0.5441,"p_tie":0.0045,"projected_total":45.0,"p_over":0.4831,"p_under":0.4831,"p_total_push":0.0339,"market_win_consensus":0.408,"market_divergence":-0.0434,"consensus_home_win":0.4297,"market_cover_consensus":0.4523,"consensus_home_cover":0.4762,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.0,"market_home_win":0.3933,"market_away_win":0.6067}},{"id":"demo-12","date":"2026-09-16T13:05:53Z","name":"CLE @ PIT","state":"pre","status_detail":"16/09 13:05 UTC","status_short":"","completed":false,"halftime":false,"period":0,"clock":"","clock_seconds":0,"home":{"id":"PIT","abbr":"PIT","name":"Pittsburgh Steelers","short":"Steelers","location":"Pittsburgh","color":"#FFB612","alt_color":"#101820","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/pit.png","record":"4-2"},"away":{"id":"CLE","abbr":"CLE","name":"Cleveland Browns","short":"Browns","location":"Cleveland","color":"#311D00","alt_color":"#FF3C00","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/cle.png","record":"10-8"},"home_score":0,"away_score":0,"line_home":-6.5,"line_display":"PIT -6.5","line_total":42.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"Prime","neutral_site":false,"markets":{"polymarket":{"id":"po-cle-pit","title":"CLE vs PIT","p_home_win":0.652,"p_away_win":0.348,"raw_home":0.665,"volume":494751.34,"implied_margin":5.2,"p_home_cover":0.4595,"p_away_cover":0.5405,"p_push":0.0},"kalshi":{"id":"ka-cle-pit","title":"CLE vs PIT","p_home_win":0.6592,"p_away_win":0.3408,"raw_home":0.679,"volume":667722.86,"implied_margin":5.4,"p_home_cover":0.4673,"p_away_cover":0.5327,"p_push":0.0}},"probs":{"margin_now":0.0,"total_now":0.0,"projected_margin":6.5,"sigma":13.2,"remaining_seconds":3600,"fraction_remaining":1.0,"p_home_cover":0.5,"p_away_cover":0.5,"p_push":0.0,"cover_margin_now":-6.5,"p_home_win":0.6911,"p_away_win":0.3049,"p_tie":0.004,"projected_total":42.5,"p_over":0.5,"p_under":0.5,"p_total_push":0.0,"market_win_consensus":0.6556,"market_divergence":-0.0355,"consensus_home_win":0.6734,"market_cover_consensus":0.4634,"consensus_home_cover":0.4817,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.0,"market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-16","date":"2026-09-16T14:05:53Z","name":"NE @ WSH","state":"pre","status_detail":"16/09 14:05 UTC","status_short":"","completed":false,"halftime":false,"period":0,"clock":"","clock_seconds":0,"home":{"id":"WSH","abbr":"WSH","name":"Washington Commanders","short":"Commanders","location":"Washington","color":"#5A1414","alt_color":"#FFB612","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/wsh.png","record":"2-3"},"away":{"id":"NE","abbr":"NE","name":"New England Patriots","short":"Patriots","location":"New England","color":"#002244","alt_color":"#C60C30","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/ne.png","record":"3-5"},"home_score":0,"away_score":0,"line_home":-7.0,"line_display":"WSH -7.0","line_total":44.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"NBC","neutral_site":false,"markets":{"polymarket":{"id":"po-ne-wsh","title":"NE vs WSH","p_home_win":0.7098,"p_away_win":0.2902,"raw_home":0.724,"volume":691709.91,"implied_margin":7.3,"p_home_cover":0.4692,"p_away_cover":0.4522,"p_push":0.0786},"kalshi":{"id":"ka-ne-wsh","title":"NE vs WSH","p_home_win":0.665,"p_away_win":0.335,"raw_home":0.685,"volume":521243.29,"implied_margin":5.6,"p_home_cover":0.4215,"p_away_cover":0.5003,"p_push":0.0782}},"probs":{"margin_now":0.0,"total_now":0.0,"projected_margin":7.0,"sigma":13.2,"remaining_seconds":3600,"fraction_remaining":1.0,"p_home_cover":0.4607,"p_away_cover":0.4607,"p_push":0.0786,"cover_margin_now":-7.0,"p_home_win":0.7046,"p_away_win":0.2915,"p_tie":0.0039,"projected_total":44.5,"p_over":0.5,"p_under":0.5,"p_total_push":0.0,"market_win_consensus":0.6874,"market_divergence":-0.0172,"consensus_home_win":0.696,"market_cover_consensus":0.4454,"consensus_home_cover":0.453,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.0,"market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-15","date":"2026-09-16T19:05:53Z","name":"CAR @ ATL","state":"pre","status_detail":"16/09 19:05 UTC","status_short":"","completed":false,"halftime":false,"period":0,"clock":"","clock_seconds":0,"home":{"id":"ATL","abbr":"ATL","name":"Atlanta Falcons","short":"Falcons","location":"Atlanta","color":"#A71930","alt_color":"#A5ACAF","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/atl.png","record":"10-2"},"away":{"id":"CAR","abbr":"CAR","name":"Carolina Panthers","short":"Panthers","location":"Carolina","color":"#0085CA","alt_color":"#BFC0BF","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/car.png","record":"11-5"},"home_score":0,"away_score":0,"line_home":0.0,"line_display":"PK","line_total":41.0,"odds_provider":"Demo","home_moneyline":145,"away_moneyline":-170,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"FOX","neutral_site":false,"markets":{"polymarket":{"id":"po-car-atl","title":"CAR vs ATL","p_home_win":0.5088,"p_away_win":0.4912,"raw_home":0.519,"volume":77943.73,"implied_margin":0.3,"p_home_cover":0.5068,"p_away_cover":0.4887,"p_push":0.0045},"kalshi":{"id":"ka-car-atl","title":"CAR vs ATL","p_home_win":0.4563,"p_away_win":0.5437,"raw_home":0.47,"volume":249544.2,"implied_margin":-1.4,"p_home_cover":0.4529,"p_away_cover":0.5426,"p_push":0.0045}},"probs":{"margin_now":0.0,"total_now":0.0,"projected_margin":0.0,"sigma":13.2,"remaining_seconds":3600,"fraction_remaining":1.0,"p_home_cover":0.4977,"p_away_cover":0.4977,"p_push":0.0045,"cover_margin_now":0.0,"p_home_win":0.4977,"p_away_win":0.4977,"p_tie":0.0045,"projected_total":41.0,"p_over":0.4831,"p_under":0.4831,"p_total_push":0.0339,"market_win_consensus":0.4826,"market_divergence":-0.0151,"consensus_home_win":0.4901,"market_cover_consensus":0.4798,"consensus_home_cover":0.4888,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":-0.0001,"market_home_win":0.3933,"market_away_win":0.6067}},{"id":"demo-11","date":"2026-09-16T20:05:53Z","name":"LV @ DEN","state":"pre","status_detail":"16/09 20:05 UTC","status_short":"","completed":false,"halftime":false,"period":0,"clock":"","clock_seconds":0,"home":{"id":"DEN","abbr":"DEN","name":"Denver Broncos","short":"Broncos","location":"Denver","color":"#FB4F14","alt_color":"#002244","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/den.png","record":"5-6"},"away":{"id":"LV","abbr":"LV","name":"Las Vegas Raiders","short":"Raiders","location":"Las Vegas","color":"#000000","alt_color":"#A5ACAF","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/lv.png","record":"6-3"},"home_score":0,"away_score":0,"line_home":2.5,"line_display":"DEN +2.5","line_total":38.5,"odds_provider":"Demo","home_moneyline":145,"away_moneyline":-170,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"CBS","neutral_site":false,"markets":{"polymarket":{"id":"po-lv-den","title":"LV vs DEN","p_home_win":0.401,"p_away_win":0.599,"raw_home":0.409,"volume":352974.4,"implied_margin":-3.3,"p_home_cover":0.4755,"p_away_cover":0.5245,"p_push":0.0},"kalshi":{"id":"ka-lv-den","title":"LV vs DEN","p_home_win":0.3932,"p_away_win":0.6068,"raw_home":0.405,"volume":242162.96,"implied_margin":-3.6,"p_home_cover":0.4675,"p_away_cover":0.5325,"p_push":0.0}},"probs":{"margin_now":0.0,"total_now":0.0,"projected_margin":-2.5,"sigma":13.2,"remaining_seconds":3600,"fraction_remaining":1.0,"p_home_cover":0.5,"p_away_cover":0.5,"p_push":0.0,"cover_margin_now":2.5,"p_home_win":0.4208,"p_away_win":0.5748,"p_tie":0.0045,"projected_total":38.5,"p_over":0.5,"p_under":0.5,"p_total_push":0.0,"market_win_consensus":0.3971,"market_divergence":-0.0237,"consensus_home_win":0.409,"market_cover_consensus":0.4715,"consensus_home_cover":0.4858,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.0,"market_home_win":0.3933,"market_away_win":0.6067}},{"id":"demo-01","date":"2026-09-13T19:05:53Z","name":"BUF @ KC","state":"post","status_detail":"Final","status_short":"Final","completed":true,"halftime":false,"period":4,"clock":"0:00","clock_seconds":0,"home":{"id":"KC","abbr":"KC","name":"Kansas City Chiefs","short":"Chiefs","location":"Kansas City","color":"#E31837","alt_color":"#FFB81C","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/kc.png","record":"9-6"},"away":{"id":"BUF","abbr":"BUF","name":"Buffalo Bills","short":"Bills","location":"Buffalo","color":"#00338D","alt_color":"#C60C30","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/buf.png","record":"6-4"},"home_score":13,"away_score":22,"line_home":6.5,"line_display":"KC +6.5","line_total":41.0,"odds_provider":"Demo","home_moneyline":145,"away_moneyline":-170,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"CBS","neutral_site":false,"markets":{},"probs":{"margin_now":-9.0,"total_now":35.0,"projected_margin":-9.0,"sigma":0.0,"remaining_seconds":0,"fraction_remaining":0.0,"p_home_cover":0.0,"p_away_cover":1.0,"p_push":0.0,"cover_margin_now":-2.5,"ats_result":"away","p_home_win":0.0,"p_away_win":1.0,"p_tie":0.0,"projected_total":35.0,"p_over":0.0,"p_under":1.0,"p_total_push":0.0,"total_result":"under","market_home_win":0.3933,"market_away_win":0.6067}},{"id":"demo-02","date":"2026-09-13T19:05:53Z","name":"DAL @ SF","state":"post","status_detail":"Final","status_short":"Final","completed":true,"halftime":false,"period":4,"clock":"0:00","clock_seconds":0,"home":{"id":"SF","abbr":"SF","name":"San Francisco 49ers","short":"49ers","location":"San Francisco","color":"#AA0000","alt_color":"#B3995D","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/sf.png","record":"8-8"},"away":{"id":"DAL","abbr":"DAL","name":"Dallas Cowboys","short":"Cowboys","location":"Dallas","color":"#003594","alt_color":"#869397","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/dal.png","record":"11-7"},"home_score":30,"away_score":27,"line_home":3.0,"line_display":"SF +3.0","line_total":45.0,"odds_provider":"Demo","home_moneyline":145,"away_moneyline":-170,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"NBC","neutral_site":false,"markets":{},"probs":{"margin_now":3.0,"total_now":57.0,"projected_margin":3.0,"sigma":0.0,"remaining_seconds":0,"fraction_remaining":0.0,"p_home_cover":1.0,"p_away_cover":0.0,"p_push":0.0,"cover_margin_now":6.0,"ats_result":"home","p_home_win":1.0,"p_away_win":0.0,"p_tie":0.0,"projected_total":57.0,"p_over":1.0,"p_under":0.0,"p_total_push":0.0,"total_result":"over","market_home_win":0.3933,"market_away_win":0.6067}},{"id":"demo-03","date":"2026-09-13T19:05:53Z","name":"NYG @ PHI","state":"post","status_detail":"Final","status_short":"Final","completed":true,"halftime":false,"period":4,"clock":"0:00","clock_seconds":0,"home":{"id":"PHI","abbr":"PHI","name":"Philadelphia Eagles","short":"Eagles","location":"Philadelphia","color":"#004C54","alt_color":"#A5ACAF","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/phi.png","record":"1-6"},"away":{"id":"NYG","abbr":"NYG","name":"New York Giants","short":"Giants","location":"New York","color":"#0B2265","alt_color":"#A71930","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png","record":"6-1"},"home_score":24,"away_score":30,"line_home":3.5,"line_display":"PHI +3.5","line_total":51.5,"odds_provider":"Demo","home_moneyline":145,"away_moneyline":-170,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"CBS","neutral_site":false,"markets":{},"probs":{"margin_now":-6.0,"total_now":54.0,"projected_margin":-6.0,"sigma":0.0,"remaining_seconds":0,"fraction_remaining":0.0,"p_home_cover":0.0,"p_away_cover":1.0,"p_push":0.0,"cover_margin_now":-2.5,"ats_result":"away","p_home_win":0.0,"p_away_win":1.0,"p_tie":0.0,"projected_total":54.0,"p_over":1.0,"p_under":0.0,"p_total_push":0.0,"total_result":"over","market_home_win":0.3933,"market_away_win":0.6067}},{"id":"demo-04","date":"2026-09-13T19:05:53Z","name":"CIN @ BAL","state":"post","status_detail":"Final","status_short":"Final","completed":true,"halftime":false,"period":4,"clock":"0:00","clock_seconds":0,"home":{"id":"BAL","abbr":"BAL","name":"Baltimore Ravens","short":"Ravens","location":"Baltimore","color":"#241773","alt_color":"#9E7C0C","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/bal.png","record":"8-5"},"away":{"id":"CIN","abbr":"CIN","name":"Cincinnati Bengals","short":"Bengals","location":"Cincinnati","color":"#FB4F14","alt_color":"#000000","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/cin.png","record":"9-5"},"home_score":31,"away_score":24,"line_home":-1.5,"line_display":"BAL -1.5","line_total":49.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"Prime","neutral_site":false,"markets":{},"probs":{"margin_now":7.0,"total_now":55.0,"projected_margin":7.0,"sigma":0.0,"remaining_seconds":0,"fraction_remaining":0.0,"p_home_cover":1.0,"p_away_cover":0.0,"p_push":0.0,"cover_margin_now":5.5,"ats_result":"home","p_home_win":1.0,"p_away_win":0.0,"p_tie":0.0,"projected_total":55.0,"p_over":1.0,"p_under":0.0,"p_total_push":0.0,"total_result":"over","market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-05","date":"2026-09-13T19:05:53Z","name":"GB @ DET","state":"post","status_detail":"Final","status_short":"Final","completed":true,"halftime":false,"period":4,"clock":"0:00","clock_seconds":0,"home":{"id":"DET","abbr":"DET","name":"Detroit Lions","short":"Lions","location":"Detroit","color":"#0076B6","alt_color":"#B0B7BC","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/det.png","record":"5-3"},"away":{"id":"GB","abbr":"GB","name":"Green Bay Packers","short":"Packers","location":"Green Bay","color":"#203731","alt_color":"#FFB612","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/gb.png","record":"4-8"},"home_score":28,"away_score":19,"line_home":-3.0,"line_display":"DET -3.0","line_total":47.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"ESPN","neutral_site":false,"markets":{},"probs":{"margin_now":9.0,"total_now":47.0,"projected_margin":9.0,"sigma":0.0,"remaining_seconds":0,"fraction_remaining":0.0,"p_home_cover":1.0,"p_away_cover":0.0,"p_push":0.0,"cover_margin_now":6.0,"ats_result":"home","p_home_win":1.0,"p_away_win":0.0,"p_tie":0.0,"projected_total":47.0,"p_over":0.0,"p_under":1.0,"p_total_push":0.0,"total_result":"under","market_home_win":0.6067,"market_away_win":0.3933}}]};
+var BOOT = {"generated_at":"2026-09-13T22:36:31Z","source":"demo","source_status":{"polymarket":"demo","kalshi":"demo","injuries":"demo","news":"demo"},"meta":{"season":2026,"seasontype":2,"week":3,"url":"demo"},"config":{"live":{"endpoint":"https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard","refresh_seconds":30,"fetch_on_load":true},"model":{"sigma_full_game":13.2,"sigma_total":10.6,"sigma_overtime":5.5,"sigma_floor":1.4,"possession_points":1.1,"default_total":44.0,"key_numbers":{"0":0.15,"1":1.1,"2":1.2,"3":3.4,"4":1.3,"5":1.0,"6":1.9,"7":2.6,"8":1.2,"9":1.1,"10":2.0,"11":1.1,"13":1.1,"14":1.8,"16":1.1,"17":1.7,"20":1.3,"21":1.4,"24":1.3,"28":1.2,"default":0.9}},"sources":{"polymarket":{"enabled":true,"endpoint":"https://gamma-api.polymarket.com/events","query":"tag_slug=nfl&closed=false&limit=200"},"kalshi":{"enabled":true,"endpoint":"https://api.elections.kalshi.com/trade-api/v2/markets","series_ticker":"KXNFLGAME"},"injuries":{"enabled":true,"endpoint":"https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries"},"news":{"enabled":true,"endpoint":"https://site.api.espn.com/apis/site/v2/sports/football/nfl/news","query":"limit=50"}},"consensus":{"model_weight":0.5},"forecast":{"home_field":2.0,"form_weight":0.12,"form_cap":2.5,"injury_cap":4.0,"news_cap":1.5,"market_cap":3.0,"total_cap":6.0,"position_weights":{"QB":2.2,"RB":0.5,"WR":0.6,"TE":0.4,"OT":0.5,"OG":0.4,"C":0.4,"OL":0.45,"G":0.4,"T":0.5,"DE":0.6,"DT":0.5,"EDGE":0.6,"LB":0.4,"CB":0.5,"S":0.4,"FS":0.4,"SS":0.4,"K":0.3,"P":0.15,"LS":0.1,"FB":0.2,"default":0.25},"status_weights":{"out":1.0,"injured reserve":1.0,"suspension":1.0,"suspended":1.0,"doubtful":0.75,"questionable":0.35,"probable":0.1,"day-to-day":0.2,"day to day":0.2},"news_rules":[{"label":"fuera de cancha","weight":-0.8,"terms":["suspended","suspension","arrest","charged","lawsuit","police","personal conduct","indicted","investigation","banned","fired","steps down","resigns","death","hospitalized"]},{"label":"plantel inestable","weight":-0.4,"terms":["trade request","contract dispute","holdout","benched","released","waived","locker room","illness outbreak","coordinator change"]},{"label":"refuerzo","weight":0.3,"terms":["activated","returns","cleared to play","expected to play","signs","extension","reinstated"]},{"label":"logística","weight":-0.3,"terms":["london","munich","international series","short week","thursday night","travel","blizzard","high winds","hurricane","field conditions"]}]},"pickem":{"mode":"ats","scoring":"confidence","push_points":0},"assets":{"logos":true,"logo_template":"https://a.espncdn.com/i/teamlogos/nfl/500/{abbr}.png"},"defaults":{"seasontype":2}},"quotes":[{"source":"polymarket","id":"po-nyj-mia","title":"NYJ vs MIA","teams":{"MIA":0.661,"NYJ":0.359},"volume":345383.89,"start":"2026-09-13T19:36:31Z","closed":false},{"source":"kalshi","id":"ka-nyj-mia","title":"NYJ vs MIA","teams":{"MIA":0.68,"NYJ":0.35},"volume":684441.17,"start":"2026-09-13T19:36:31Z","closed":false},{"source":"polymarket","id":"po-ind-hou","title":"IND vs HOU","teams":{"HOU":0.306,"IND":0.714},"volume":47501.49,"start":"2026-09-13T19:36:31Z","closed":false},{"source":"kalshi","id":"ka-ind-hou","title":"IND vs HOU","teams":{"HOU":0.295,"IND":0.735},"volume":36417.69,"start":"2026-09-13T19:36:31Z","closed":false},{"source":"polymarket","id":"po-sea-lar","title":"SEA vs LAR","teams":{"LAR":0.608,"SEA":0.412},"volume":344895.5,"start":"2026-09-13T19:36:31Z","closed":false},{"source":"kalshi","id":"ka-no-tb","title":"NO vs TB","teams":{"TB":0.749,"NO":0.281},"volume":524296.66,"start":"2026-09-13T19:36:31Z","closed":false},{"source":"polymarket","id":"po-chi-min","title":"CHI vs MIN","teams":{"MIN":0.719,"CHI":0.301},"volume":603182.44,"start":"2026-09-13T19:36:31Z","closed":false},{"source":"polymarket","id":"po-lv-den","title":"LV vs DEN","teams":{"DEN":0.409,"LV":0.611},"volume":352974.4,"start":"2026-09-16T20:36:31Z","closed":false},{"source":"kalshi","id":"ka-lv-den","title":"LV vs DEN","teams":{"DEN":0.405,"LV":0.625},"volume":242162.96,"start":"2026-09-16T20:36:31Z","closed":false},{"source":"polymarket","id":"po-cle-pit","title":"CLE vs PIT","teams":{"PIT":0.665,"CLE":0.355},"volume":494751.34,"start":"2026-09-16T13:36:31Z","closed":false},{"source":"kalshi","id":"ka-cle-pit","title":"CLE vs PIT","teams":{"PIT":0.679,"CLE":0.351},"volume":667722.86,"start":"2026-09-16T13:36:31Z","closed":false},{"source":"polymarket","id":"po-ten-jax","title":"TEN vs JAX","teams":{"JAX":0.458,"TEN":0.562},"volume":542145.93,"start":"2026-09-16T06:36:31Z","closed":false},{"source":"kalshi","id":"ka-ten-jax","title":"TEN vs JAX","teams":{"JAX":0.378,"TEN":0.652},"volume":829834.71,"start":"2026-09-16T06:36:31Z","closed":false},{"source":"polymarket","id":"po-ari-lac","title":"ARI vs LAC","teams":{"LAC":0.628,"ARI":0.392},"volume":730150.28,"start":"2026-09-15T14:36:31Z","closed":false},{"source":"kalshi","id":"ka-ari-lac","title":"ARI vs LAC","teams":{"LAC":0.645,"ARI":0.385},"volume":77040.46,"start":"2026-09-15T14:36:31Z","closed":false},{"source":"polymarket","id":"po-car-atl","title":"CAR vs ATL","teams":{"ATL":0.519,"CAR":0.501},"volume":77943.73,"start":"2026-09-16T19:36:31Z","closed":false},{"source":"kalshi","id":"ka-car-atl","title":"CAR vs ATL","teams":{"ATL":0.47,"CAR":0.56},"volume":249544.2,"start":"2026-09-16T19:36:31Z","closed":false},{"source":"polymarket","id":"po-ne-wsh","title":"NE vs WSH","teams":{"WSH":0.724,"NE":0.296},"volume":691709.91,"start":"2026-09-16T14:36:31Z","closed":false},{"source":"kalshi","id":"ka-ne-wsh","title":"NE vs WSH","teams":{"WSH":0.685,"NE":0.345},"volume":521243.29,"start":"2026-09-16T14:36:31Z","closed":false}],"teams":{"ARI":["Arizona","Cardinals"],"ATL":["Atlanta","Falcons"],"BAL":["Baltimore","Ravens"],"BUF":["Buffalo","Bills"],"CAR":["Carolina","Panthers"],"CHI":["Chicago","Bears"],"CIN":["Cincinnati","Bengals"],"CLE":["Cleveland","Browns"],"DAL":["Dallas","Cowboys"],"DEN":["Denver","Broncos"],"DET":["Detroit","Lions"],"GB":["Green Bay","Packers"],"HOU":["Houston","Texans"],"IND":["Indianapolis","Colts"],"JAX":["Jacksonville","Jaguars"],"KC":["Kansas City","Chiefs"],"LAC":["Los Angeles","Chargers"],"LAR":["Los Angeles","Rams"],"LV":["Las Vegas","Raiders"],"MIA":["Miami","Dolphins"],"MIN":["Minnesota","Vikings"],"NE":["New England","Patriots"],"NO":["New Orleans","Saints"],"NYG":["New York","Giants"],"NYJ":["New York","Jets"],"PHI":["Philadelphia","Eagles"],"PIT":["Pittsburgh","Steelers"],"SEA":["Seattle","Seahawks"],"SF":["San Francisco","49ers"],"TB":["Tampa Bay","Buccaneers"],"TEN":["Tennessee","Titans"],"WSH":["Washington","Commanders"]},"team_meta":{"ARI":{"primary":"#97233F","secondary":"#FFB612"},"ATL":{"primary":"#A71930","secondary":"#A5ACAF"},"BAL":{"primary":"#241773","secondary":"#9E7C0C"},"BUF":{"primary":"#00338D","secondary":"#C60C30"},"CAR":{"primary":"#0085CA","secondary":"#BFC0BF"},"CHI":{"primary":"#0B162A","secondary":"#C83803"},"CIN":{"primary":"#FB4F14","secondary":"#000000"},"CLE":{"primary":"#311D00","secondary":"#FF3C00"},"DAL":{"primary":"#003594","secondary":"#869397"},"DEN":{"primary":"#FB4F14","secondary":"#002244"},"DET":{"primary":"#0076B6","secondary":"#B0B7BC"},"GB":{"primary":"#203731","secondary":"#FFB612"},"HOU":{"primary":"#03202F","secondary":"#A71930"},"IND":{"primary":"#002C5F","secondary":"#A2AAAD"},"JAX":{"primary":"#006778","secondary":"#D7A22A"},"KC":{"primary":"#E31837","secondary":"#FFB81C"},"LAC":{"primary":"#0080C6","secondary":"#FFC20E"},"LAR":{"primary":"#003594","secondary":"#FFA300"},"LV":{"primary":"#000000","secondary":"#A5ACAF"},"MIA":{"primary":"#008E97","secondary":"#FC4C02"},"MIN":{"primary":"#4F2683","secondary":"#FFC62F"},"NE":{"primary":"#002244","secondary":"#C60C30"},"NO":{"primary":"#D3BC8D","secondary":"#101820"},"NYG":{"primary":"#0B2265","secondary":"#A71930"},"NYJ":{"primary":"#125740","secondary":"#FFFFFF"},"PHI":{"primary":"#004C54","secondary":"#A5ACAF"},"PIT":{"primary":"#FFB612","secondary":"#101820"},"SEA":{"primary":"#002244","secondary":"#69BE28"},"SF":{"primary":"#AA0000","secondary":"#B3995D"},"TB":{"primary":"#D50A0A","secondary":"#FF7900"},"TEN":{"primary":"#0C2340","secondary":"#4B92DB"},"WSH":{"primary":"#5A1414","secondary":"#FFB612"}},"team_aliases":{"WAS":"WSH","WFT":"WSH","JAC":"JAX","LA":"LAR","STL":"LAR","SD":"LAC","OAK":"LV","LVR":"LV","ARZ":"ARI","BLT":"BAL","CLV":"CLE","HST":"HOU","KAN":"KC","NOR":"NO","NWE":"NE","SFO":"SF","TAM":"TB","GNB":"GB","NYA":"NYJ"},"summary":{"games":16,"live":5,"final":5,"scheduled":6,"ats_home":3,"ats_away":2,"ats_push":0,"ats_home_pct":60.0,"favorites_covered":4,"underdogs_covered":1,"favorites_pct":80.0,"totals_over":3,"totals_under":2,"points":388,"with_line":16},"picks":{"mode":"ats","scoring":"confidence","tiebreaker":{"matchup":"CIN@BAL","total":45},"picks":{"BUF@KC":{"team":"KC","confidence":1},"DAL@SF":{"team":"DAL","confidence":2},"NYG@PHI":{"team":"PHI","confidence":3},"GB@DET":{"team":"GB","confidence":4},"NE@WSH":{"team":"WSH","confidence":5},"SEA@LAR":{"team":"SEA","confidence":6},"ARI@LAC":{"team":"LAC","confidence":7},"NO@TB":{"team":"TB","confidence":8},"CAR@ATL":{"team":"CAR","confidence":9},"LV@DEN":{"team":"LV","confidence":10},"CLE@PIT":{"team":"CLE","confidence":11},"NYJ@MIA":{"team":"NYJ","confidence":12},"TEN@JAX":{"team":"TEN","confidence":13},"IND@HOU":{"team":"HOU","confidence":14},"CHI@MIN":{"team":"CHI","confidence":15},"CIN@BAL":{"team":"BAL","confidence":16}},"season":2026,"seasontype":2,"week":3},"pickem":{"mode":"ats","scoring":"confidence","push_points":0.0,"games_in_week":16,"picked":16,"earned":16.0,"live_expected":36.41,"pending_expected":27.2,"projected":79.61,"max_possible":126.0,"max_week":136.0,"hits":1,"misses":4,"pushes":0,"accuracy":20.0,"issues":[],"tiebreaker":{"matchup":"CIN@BAL","prediction":45,"actual":55,"final":true,"difference":10.0},"rows":[{"matchup":"CIN@BAL","game_id":"demo-04","team":"BAL","side":"home","confidence":16.0,"state":"post","line_home":-1.5,"probability":1.0,"status":"hit","points":16.0},{"matchup":"CHI@MIN","game_id":"demo-10","team":"CHI","side":"away","confidence":15.0,"state":"in","line_home":-6.5,"probability":0.9946,"status":"en_juego","points":null,"expected":14.92},{"matchup":"IND@HOU","game_id":"demo-07","team":"HOU","side":"home","confidence":14.0,"state":"in","line_home":6.5,"probability":0.7117,"status":"en_juego","points":null,"expected":9.96},{"matchup":"TEN@JAX","game_id":"demo-13","team":"TEN","side":"away","confidence":13.0,"state":"pre","line_home":1.5,"probability":0.5,"status":"pendiente","points":null,"expected":6.5},{"matchup":"NYJ@MIA","game_id":"demo-06","team":"NYJ","side":"away","confidence":12.0,"state":"in","line_home":-4.5,"probability":0.4136,"status":"en_juego","points":null,"expected":4.96},{"matchup":"CLE@PIT","game_id":"demo-12","team":"CLE","side":"away","confidence":11.0,"state":"pre","line_home":-6.5,"probability":0.5,"status":"pendiente","points":null,"expected":5.5},{"matchup":"LV@DEN","game_id":"demo-11","team":"LV","side":"away","confidence":10.0,"state":"pre","line_home":2.5,"probability":0.5,"status":"pendiente","points":null,"expected":5.0},{"matchup":"CAR@ATL","game_id":"demo-15","team":"CAR","side":"away","confidence":9.0,"state":"pre","line_home":0.0,"probability":0.4977,"status":"pendiente","points":null,"expected":4.48},{"matchup":"NO@TB","game_id":"demo-09","team":"TB","side":"home","confidence":8.0,"state":"in","line_home":-9.5,"probability":0.5076,"status":"en_juego","points":null,"expected":4.06},{"matchup":"ARI@LAC","game_id":"demo-14","team":"LAC","side":"home","confidence":7.0,"state":"pre","line_home":-4.5,"probability":0.4934,"status":"pendiente","points":null,"expected":3.45},{"matchup":"SEA@LAR","game_id":"demo-08","team":"SEA","side":"away","confidence":6.0,"state":"in","line_home":-3.5,"probability":0.4173,"status":"en_juego","points":null,"expected":2.5},{"matchup":"NE@WSH","game_id":"demo-16","team":"WSH","side":"home","confidence":5.0,"state":"pre","line_home":-7.0,"probability":0.453,"status":"pendiente","points":null,"expected":2.27},{"matchup":"GB@DET","game_id":"demo-05","team":"GB","side":"away","confidence":4.0,"state":"post","line_home":-3.0,"probability":0.0,"status":"miss","points":0.0},{"matchup":"NYG@PHI","game_id":"demo-03","team":"PHI","side":"home","confidence":3.0,"state":"post","line_home":3.5,"probability":0.0,"status":"miss","points":0.0},{"matchup":"DAL@SF","game_id":"demo-02","team":"DAL","side":"away","confidence":2.0,"state":"post","line_home":3.0,"probability":0.0,"status":"miss","points":0.0},{"matchup":"BUF@KC","game_id":"demo-01","team":"KC","side":"home","confidence":1.0,"state":"post","line_home":6.5,"probability":0.0,"status":"miss","points":0.0}]},"forecast":{"generated_at":"2026-09-13T22:36:31Z","meta":{"season":2026,"seasontype":2,"week":4},"games":16,"with_line":16,"injury_teams":32,"news_articles":10,"news_flagged":8,"with_market":11,"rows":[{"matchup":"CHI@MIN","game_id":"demo-10","date":"2026-09-16T17:36:31Z","home":"MIN","away":"CHI","line_home":1.5,"market":"spread","base_margin":-1.5,"base_source":"línea publicada","adj_injuries":0.6,"adj_form":0.0,"adj_news":0.8,"adj_market":3.0,"market_home_win":0.7049,"adjustment":4.4,"expected_margin":2.9,"p_home":0.6306,"p_away":0.3694,"p_push":0.0,"pick":"MIN","pick_side":"home","pick_probability":0.6306,"injuries":{"home":0.17,"away":0.77,"home_notes":[],"away_notes":["WR Jugador 35 (Out)"]},"form":{"home":0.0,"away":0.0},"news":{"home":[],"away":[{"headline":"CHI player arrested, team says it is gathering information","labels":["fuera de cancha"],"points":-0.8,"link":""}]},"suggested_confidence":16},{"matchup":"LV@DEN","game_id":"demo-11","date":"2026-09-16T19:36:31Z","home":"DEN","away":"LV","line_home":-4.5,"market":"spread","base_margin":4.5,"base_source":"línea publicada","adj_injuries":0.6,"adj_form":0.0,"adj_news":-0.8,"adj_market":-3.0,"market_home_win":0.3971,"adjustment":-3.2,"expected_margin":1.3,"p_home":0.4042,"p_away":0.5958,"p_push":0.0,"pick":"LV","pick_side":"away","pick_probability":0.5958,"injuries":{"home":0.68,"away":1.27,"home_notes":["OT Jugador 33 (Injured Reserve)"],"away_notes":["CB Jugador 60 (Out)","DE Jugador 78 (Injured Reserve)"]},"form":{"home":0.0,"away":0.0},"news":{"home":[{"headline":"DEN player arrested, team says it is gathering information","labels":["fuera de cancha"],"points":-0.8,"link":""}],"away":[]},"suggested_confidence":15},{"matchup":"CLE@PIT","game_id":"demo-12","date":"2026-09-16T00:36:31Z","home":"PIT","away":"CLE","line_home":0.0,"market":"spread","base_margin":-0.0,"base_source":"línea publicada","adj_injuries":0.53,"adj_form":0.0,"adj_news":0.0,"adj_market":2.64,"market_home_win":0.6556,"adjustment":3.17,"expected_margin":3.17,"p_home":0.5952,"p_away":0.4004,"p_push":0.0044,"pick":"PIT","pick_side":"home","pick_probability":0.5952,"injuries":{"home":1.02,"away":1.55,"home_notes":["OT Jugador 35 (Out)"],"away_notes":["DE Jugador 62 (Out)"]},"form":{"home":0.0,"away":0.0},"news":{"home":[],"away":[]},"suggested_confidence":14},{"matchup":"NE@WSH","game_id":"demo-16","date":"2026-09-16T08:36:31Z","home":"WSH","away":"NE","line_home":2.5,"market":"spread","base_margin":-2.5,"base_source":"línea publicada","adj_injuries":-0.52,"adj_form":0.0,"adj_news":0.0,"adj_market":3.0,"market_home_win":0.6874,"adjustment":2.48,"expected_margin":-0.02,"p_home":0.5745,"p_away":0.4255,"p_push":0.0,"pick":"WSH","pick_side":"home","pick_probability":0.5745,"injuries":{"home":3.6,"away":3.08,"home_notes":["WR Jugador 18 (Out)","QB Jugador 35 (Injured Reserve)"],"away_notes":["QB Jugador 37 (Doubtful)","QB Jugador 59 (Questionable)"]},"form":{"home":0.0,"away":0.0},"news":{"home":[],"away":[]},"suggested_confidence":13},{"matchup":"SEA@LAR","game_id":"demo-08","date":"2026-09-16T12:36:31Z","home":"LAR","away":"SEA","line_home":-9.5,"market":"spread","base_margin":9.5,"base_source":"línea publicada","adj_injuries":0.53,"adj_form":0.0,"adj_news":0.0,"adj_market":-3.0,"market_home_win":0.5961,"adjustment":-2.46,"expected_margin":7.04,"p_home":0.4259,"p_away":0.5741,"p_push":0.0,"pick":"SEA","pick_side":"away","pick_probability":0.5741,"injuries":{"home":0.84,"away":1.38,"home_notes":[],"away_notes":[]},"form":{"home":0.0,"away":0.0},"news":{"home":[],"away":[]},"suggested_confidence":12},{"matchup":"IND@HOU","game_id":"demo-07","date":"2026-09-14T18:36:31Z","home":"HOU","away":"IND","line_home":-9.5,"market":"spread","base_margin":9.5,"base_source":"línea publicada","adj_injuries":1.63,"adj_form":0.0,"adj_news":-0.8,"adj_market":-3.0,"market_home_win":0.2932,"adjustment":-2.17,"expected_margin":7.33,"p_home":0.4347,"p_away":0.5653,"p_push":0.0,"pick":"IND","pick_side":"away","pick_probability":0.5653,"injuries":{"home":0.4,"away":2.03,"home_notes":[],"away_notes":["QB Jugador 35 (Questionable)","RB Jugador 47 (Out)"]},"form":{"home":0.0,"away":0.0},"news":{"home":[{"headline":"HOU head coach fired after slow start","labels":["fuera de cancha"],"points":-0.8,"link":""}],"away":[]},"suggested_confidence":11},{"matchup":"GB@DET","game_id":"demo-05","date":"2026-09-15T19:36:31Z","home":"DET","away":"GB","line_home":1.5,"market":"spread","base_margin":-1.5,"base_source":"línea publicada","adj_injuries":0.54,"adj_form":1.44,"adj_news":0.0,"adj_market":0.0,"market_home_win":null,"adjustment":1.98,"expected_margin":0.48,"p_home":0.5596,"p_away":0.4404,"p_push":0.0,"pick":"DET","pick_side":"home","pick_probability":0.5596,"injuries":{"home":0.61,"away":1.15,"home_notes":[],"away_notes":[]},"form":{"home":0.72,"away":-0.72},"news":{"home":[],"away":[]},"suggested_confidence":10},{"matchup":"NYJ@MIA","game_id":"demo-06","date":"2026-09-14T08:36:31Z","home":"MIA","away":"NYJ","line_home":0.0,"market":"spread","base_margin":-0.0,"base_source":"línea publicada","adj_injuries":-0.81,"adj_form":0.0,"adj_news":-0.3,"adj_market":2.62,"market_home_win":0.6541,"adjustment":1.51,"expected_margin":1.51,"p_home":0.5445,"p_away":0.451,"p_push":0.0045,"pick":"MIA","pick_side":"home","pick_probability":0.5445,"injuries":{"home":1.71,"away":0.9,"home_notes":["RB Jugador 27 (Injured Reserve)"],"away_notes":["CB Jugador 88 (Out)"]},"form":{"home":0.0,"away":0.0},"news":{"home":[],"away":[{"headline":"NYJ activates veteran lineman, expected to play Sunday","labels":["refuerzo"],"points":0.3,"link":""}]},"suggested_confidence":9},{"matchup":"CAR@ATL","game_id":"demo-15","date":"2026-09-15T01:36:31Z","home":"ATL","away":"CAR","line_home":-2.5,"market":"spread","base_margin":2.5,"base_source":"línea publicada","adj_injuries":0.21,"adj_form":0.0,"adj_news":0.0,"adj_market":-1.54,"market_home_win":0.4826,"adjustment":-1.33,"expected_margin":1.17,"p_home":0.4598,"p_away":0.5402,"p_push":0.0,"pick":"CAR","pick_side":"away","pick_probability":0.5402,"injuries":{"home":1.68,"away":1.89,"home_notes":["QB Jugador 33 (Questionable)"],"away_notes":["CB Jugador 55 (Out)","OT Jugador 91 (Out)","CB Jugador 92 (Injured Reserve)"]},"form":{"home":0.0,"away":0.0},"news":{"home":[],"away":[]},"suggested_confidence":8},{"matchup":"TEN@JAX","game_id":"demo-13","date":"2026-09-16T14:36:31Z","home":"JAX","away":"TEN","line_home":2.5,"market":"spread","base_margin":-2.5,"base_source":"línea publicada","adj_injuries":-0.58,"adj_form":0.0,"adj_news":0.0,"adj_market":-0.29,"market_home_win":0.408,"adjustment":-0.86,"expected_margin":-3.36,"p_home":0.474,"p_away":0.526,"p_push":0.0,"pick":"TEN","pick_side":"away","pick_probability":0.526,"injuries":{"home":0.8,"away":0.22,"home_notes":["RB Jugador 15 (Out)"],"away_notes":[]},"form":{"home":0.0,"away":0.0},"news":{"home":[],"away":[]},"suggested_confidence":7},{"matchup":"NYG@PHI","game_id":"demo-03","date":"2026-09-15T06:36:31Z","home":"PHI","away":"NYG","line_home":-1.5,"market":"spread","base_margin":1.5,"base_source":"línea publicada","adj_injuries":0.15,"adj_form":-0.6,"adj_news":-0.3,"adj_market":0.0,"market_home_win":null,"adjustment":-0.75,"expected_margin":0.75,"p_home":0.4772,"p_away":0.5228,"p_push":0.0,"pick":"NYG","pick_side":"away","pick_probability":0.5228,"injuries":{"home":1.05,"away":1.2,"home_notes":["WR Jugador 24 (Injured Reserve)"],"away_notes":["DE Jugador 53 (Injured Reserve)","WR Jugador 38 (Injured Reserve)"]},"form":{"home":-0.3,"away":0.3},"news":{"home":[],"away":[{"headline":"NYG activates veteran lineman, expected to play Sunday","labels":["refuerzo"],"points":0.3,"link":""}]},"suggested_confidence":6},{"matchup":"CIN@BAL","game_id":"demo-04","date":"2026-09-15T22:36:31Z","home":"BAL","away":"CIN","line_home":2.5,"market":"spread","base_margin":-2.5,"base_source":"línea publicada","adj_injuries":-0.29,"adj_form":1.32,"adj_news":-0.4,"adj_market":0.0,"market_home_win":null,"adjustment":0.63,"expected_margin":-1.87,"p_home":0.519,"p_away":0.481,"p_push":0.0,"pick":"BAL","pick_side":"home","pick_probability":0.519,"injuries":{"home":0.5,"away":0.21,"home_notes":["OT Jugador 86 (Injured Reserve)"],"away_notes":[]},"form":{"home":0.66,"away":-0.66},"news":{"home":[{"headline":"BAL star receiver requests trade amid contract dispute","labels":["plantel inestable"],"points":-0.4,"link":""}],"away":[]},"suggested_confidence":5},{"matchup":"ARI@LAC","game_id":"demo-14","date":"2026-09-15T10:36:31Z","home":"LAC","away":"ARI","line_home":2.5,"market":"spread","base_margin":-2.5,"base_source":"línea publicada","adj_injuries":-2.52,"adj_form":0.0,"adj_news":0.0,"adj_market":3.0,"market_home_win":0.621,"adjustment":0.48,"expected_margin":-2.02,"p_home":0.5147,"p_away":0.4853,"p_push":0.0,"pick":"LAC","pick_side":"home","pick_probability":0.5147,"injuries":{"home":3.18,"away":0.66,"home_notes":["QB Jugador 11 (Injured Reserve)","WR Jugador 59 (Injured Reserve)"],"away_notes":[]},"form":{"home":0.0,"away":0.0},"news":{"home":[],"away":[]},"suggested_confidence":4},{"matchup":"NO@TB","game_id":"demo-09","date":"2026-09-15T18:36:31Z","home":"TB","away":"NO","line_home":-3.5,"market":"spread","base_margin":3.5,"base_source":"línea publicada","adj_injuries":-2.48,"adj_form":0.0,"adj_news":0.0,"adj_market":2.24,"market_home_win":0.7272,"adjustment":-0.24,"expected_margin":3.26,"p_home":0.4927,"p_away":0.5073,"p_push":0.0,"pick":"NO","pick_side":"away","pick_probability":0.5073,"injuries":{"home":4.0,"away":1.52,"home_notes":["QB Jugador 21 (Out)","QB Jugador 93 (Questionable)","RB Jugador 93 (Injured Reserve)"],"away_notes":["QB Jugador 55 (Questionable)"]},"form":{"home":0.0,"away":0.0},"news":{"home":[],"away":[]},"suggested_confidence":3},{"matchup":"DAL@SF","game_id":"demo-02","date":"2026-09-15T12:36:31Z","home":"SF","away":"DAL","line_home":1.5,"market":"spread","base_margin":-1.5,"base_source":"línea publicada","adj_injuries":-0.6,"adj_form":1.44,"adj_news":-0.8,"adj_market":0.0,"market_home_win":null,"adjustment":0.04,"expected_margin":-1.46,"p_home":0.5012,"p_away":0.4988,"p_push":0.0,"pick":"SF","pick_side":"home","pick_probability":0.5012,"injuries":{"home":1.0,"away":0.4,"home_notes":["DE Jugador 11 (Injured Reserve)"],"away_notes":[]},"form":{"home":0.72,"away":-0.72},"news":{"home":[{"headline":"SF head coach fired after slow start","labels":["fuera de cancha"],"points":-0.8,"link":""}],"away":[]},"suggested_confidence":2},{"matchup":"BUF@KC","game_id":"demo-01","date":"2026-09-16T21:36:31Z","home":"KC","away":"BUF","line_home":3.0,"market":"spread","base_margin":-3.0,"base_source":"línea publicada","adj_injuries":-0.75,"adj_form":-0.6,"adj_news":-0.3,"adj_market":0.0,"market_home_win":null,"adjustment":-1.65,"expected_margin":-4.65,"p_home":0.403,"p_away":0.495,"p_push":0.102,"pick":"BUF","pick_side":"away","pick_probability":0.495,"injuries":{"home":1.65,"away":0.9,"home_notes":["CB Jugador 34 (Out)"],"away_notes":["RB Jugador 28 (Injured Reserve)"]},"form":{"home":-0.3,"away":0.3},"news":{"home":[{"headline":"KC travels to London for the international series","labels":["logística"],"points":-0.3,"link":""}],"away":[]},"suggested_confidence":1}],"source_status":{"injuries":"demo","news":"demo"}},"games":[{"id":"demo-06","date":"2026-09-13T19:36:31Z","name":"NYJ @ MIA","state":"in","status_detail":"Q4 13:44","status_short":"13:44","completed":false,"halftime":false,"period":4,"clock":"13:44","clock_seconds":824,"home":{"id":"MIA","abbr":"MIA","name":"Miami Dolphins","short":"Dolphins","location":"Miami","color":"#008E97","alt_color":"#FC4C02","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/mia.png","record":"6-5"},"away":{"id":"NYJ","abbr":"NYJ","name":"New York Jets","short":"Jets","location":"New York","color":"#125740","alt_color":"#FFFFFF","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/nyj.png","record":"3-7"},"home_score":25,"away_score":21,"line_home":-4.5,"line_display":"MIA -4.5","line_total":49.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":true,"down_distance":"1ro y 10 en la 32","possession_text":"","red_zone":false,"last_play":"Pase incompleto por la banda derecha.","venue":"Estadio demo","broadcast":"FOX","neutral_site":false,"markets":{"polymarket":{"id":"po-nyj-mia","title":"NYJ vs MIA","p_home_win":0.648,"p_away_win":0.352,"raw_home":0.661,"volume":345383.89,"implied_margin":2.4,"p_home_cover":0.3697,"p_away_cover":0.6303,"p_push":0.0},"kalshi":{"id":"ka-nyj-mia","title":"NYJ vs MIA","p_home_win":0.6602,"p_away_win":0.3398,"raw_home":0.68,"volume":684441.17,"implied_margin":2.6,"p_home_cover":0.3823,"p_away_cover":0.6177,"p_push":0.0}},"probs":{"margin_now":4.0,"total_now":46.0,"projected_margin":5.9,"sigma":6.32,"remaining_seconds":824,"fraction_remaining":0.2289,"p_home_cover":0.5864,"p_away_cover":0.4136,"p_push":0.0,"cover_margin_now":-0.5,"p_home_win":0.8319,"p_away_win":0.1619,"p_tie":0.0061,"projected_total":57.3,"p_over":0.9387,"p_under":0.0613,"p_total_push":0.0,"market_win_consensus":0.6541,"market_divergence":-0.1778,"consensus_home_win":0.743,"market_cover_consensus":0.376,"consensus_home_cover":0.4812,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.0864,"market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-07","date":"2026-09-13T19:36:31Z","name":"IND @ HOU","state":"in","status_detail":"Q2 5:32","status_short":"5:32","completed":false,"halftime":false,"period":2,"clock":"5:32","clock_seconds":332,"home":{"id":"HOU","abbr":"HOU","name":"Houston Texans","short":"Texans","location":"Houston","color":"#03202F","alt_color":"#A71930","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/hou.png","record":"3-2"},"away":{"id":"IND","abbr":"IND","name":"Indianapolis Colts","short":"Colts","location":"Indianapolis","color":"#002C5F","alt_color":"#A2AAAD","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/ind.png","record":"1-2"},"home_score":16,"away_score":6,"line_home":6.5,"line_display":"HOU +6.5","line_total":49.5,"odds_provider":"Demo","home_moneyline":145,"away_moneyline":-170,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":false,"down_distance":"3ro y 4 en la 38 rival","possession_text":"","red_zone":false,"last_play":"Gol de campo bueno de 41 yardas.","venue":"Estadio demo","broadcast":"ESPN","neutral_site":false,"markets":{"polymarket":{"id":"po-ind-hou","title":"IND vs HOU","p_home_win":0.3,"p_away_win":0.7,"raw_home":0.306,"volume":47501.49,"implied_margin":-5.3,"p_home_cover":0.546,"p_away_cover":0.454,"p_push":0.0},"kalshi":{"id":"ka-ind-hou","title":"IND vs HOU","p_home_win":0.2864,"p_away_win":0.7136,"raw_home":0.295,"volume":36417.69,"implied_margin":-5.7,"p_home_cover":0.5303,"p_away_cover":0.4697,"p_push":0.0}},"probs":{"margin_now":10.0,"total_now":22.0,"projected_margin":5.7,"sigma":10.16,"remaining_seconds":2132,"fraction_remaining":0.5922,"p_home_cover":0.8852,"p_away_cover":0.1148,"p_push":0.0,"cover_margin_now":16.5,"p_home_win":0.7162,"p_away_win":0.2787,"p_tie":0.005,"projected_total":51.3,"p_over":0.588,"p_under":0.412,"p_total_push":0.0,"market_win_consensus":0.2932,"market_divergence":-0.423,"consensus_home_win":0.5047,"market_cover_consensus":0.5382,"consensus_home_cover":0.7117,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.3852,"market_home_win":0.3933,"market_away_win":0.6067}},{"id":"demo-08","date":"2026-09-13T19:36:31Z","name":"SEA @ LAR","state":"in","status_detail":"Q2 14:06","status_short":"14:06","completed":false,"halftime":false,"period":2,"clock":"14:06","clock_seconds":846,"home":{"id":"LAR","abbr":"LAR","name":"Los Angeles Rams","short":"Rams","location":"Los Angeles","color":"#003594","alt_color":"#FFA300","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/lar.png","record":"3-3"},"away":{"id":"SEA","abbr":"SEA","name":"Seattle Seahawks","short":"Seahawks","location":"Seattle","color":"#002244","alt_color":"#69BE28","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/sea.png","record":"1-8"},"home_score":6,"away_score":3,"line_home":-3.5,"line_display":"LAR -3.5","line_total":47.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":true,"down_distance":"4to y 1 en la 12 rival","possession_text":"","red_zone":false,"last_play":"Pase completo de 12 yardas para primer down.","venue":"Estadio demo","broadcast":"NBC","neutral_site":false,"markets":{"polymarket":{"id":"po-sea-lar","title":"SEA vs LAR","p_home_win":0.5961,"p_away_win":0.4039,"raw_home":0.608,"volume":344895.5,"implied_margin":2.8,"p_home_cover":0.4737,"p_away_cover":0.5263,"p_push":0.0}},"probs":{"margin_now":3.0,"total_now":9.0,"projected_margin":5.9,"sigma":11.32,"remaining_seconds":2646,"fraction_remaining":0.735,"p_home_cover":0.5827,"p_away_cover":0.4173,"p_push":0.0,"cover_margin_now":-0.5,"p_home_win":0.7007,"p_away_win":0.2947,"p_tie":0.0046,"projected_total":43.9,"p_over":0.3465,"p_under":0.6535,"p_total_push":0.0,"market_win_consensus":0.5961,"market_divergence":-0.1046,"consensus_home_win":0.6484,"market_cover_consensus":0.4737,"consensus_home_cover":0.5282,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.0827,"market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-09","date":"2026-09-13T19:36:31Z","name":"NO @ TB","state":"in","status_detail":"Medio tiempo","status_short":"0:00","completed":false,"halftime":true,"period":2,"clock":"0:00","clock_seconds":0,"home":{"id":"TB","abbr":"TB","name":"Tampa Bay Buccaneers","short":"Buccaneers","location":"Tampa Bay","color":"#D50A0A","alt_color":"#FF7900","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/tb.png","record":"5-4"},"away":{"id":"NO","abbr":"NO","name":"New Orleans Saints","short":"Saints","location":"New Orleans","color":"#D3BC8D","alt_color":"#101820","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/no.png","record":"3-1"},"home_score":18,"away_score":9,"line_home":-9.5,"line_display":"TB -9.5","line_total":49.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"ESPN","neutral_site":false,"markets":{"kalshi":{"id":"ka-no-tb","title":"NO vs TB","p_home_win":0.7272,"p_away_win":0.2728,"raw_home":0.749,"volume":524296.66,"implied_margin":5.6,"p_home_cover":0.3396,"p_away_cover":0.6604,"p_push":0.0}},"probs":{"margin_now":9.0,"total_now":27.0,"projected_margin":13.8,"sigma":9.33,"remaining_seconds":1800,"fraction_remaining":0.5,"p_home_cover":0.6756,"p_away_cover":0.3244,"p_push":0.0,"cover_margin_now":-0.5,"p_home_win":0.9336,"p_away_win":0.0642,"p_tie":0.0022,"projected_total":51.8,"p_over":0.618,"p_under":0.382,"p_total_push":0.0,"market_win_consensus":0.7272,"market_divergence":-0.2064,"consensus_home_win":0.8304,"market_cover_consensus":0.3396,"consensus_home_cover":0.5076,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.1756,"market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-10","date":"2026-09-13T19:36:31Z","name":"CHI @ MIN","state":"in","status_detail":"TE 1:29","status_short":"1:29","completed":false,"halftime":false,"period":5,"clock":"1:29","clock_seconds":89,"home":{"id":"MIN","abbr":"MIN","name":"Minnesota Vikings","short":"Vikings","location":"Minnesota","color":"#4F2683","alt_color":"#FFC62F","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/min.png","record":"3-8"},"away":{"id":"CHI","abbr":"CHI","name":"Chicago Bears","short":"Bears","location":"Chicago","color":"#0B162A","alt_color":"#C83803","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/chi.png","record":"8-8"},"home_score":18,"away_score":18,"line_home":-6.5,"line_display":"MIN -6.5","line_total":45.0,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":true,"down_distance":"1ro y 10 en la 44 rival","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"NBC","neutral_site":false,"markets":{"polymarket":{"id":"po-chi-min","title":"CHI vs MIN","p_home_win":0.7049,"p_away_win":0.2951,"raw_home":0.719,"volume":603182.44,"implied_margin":1.1,"p_home_cover":0.0057,"p_away_cover":0.9943,"p_push":0.0}},"probs":{"margin_now":0.0,"total_now":36.0,"projected_margin":1.1,"sigma":2.12,"remaining_seconds":89,"fraction_remaining":0.0,"p_home_cover":0.0054,"p_away_cover":0.9946,"p_push":0.0,"cover_margin_now":-6.5,"p_home_win":0.7164,"p_away_win":0.2636,"p_tie":0.02,"projected_total":36.0,"p_over":0.0,"p_under":1.0,"p_total_push":0.0,"market_win_consensus":0.7049,"market_divergence":-0.0115,"consensus_home_win":0.7107,"market_cover_consensus":0.0057,"consensus_home_cover":0.0056,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":-0.4946,"market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-14","date":"2026-09-15T14:36:31Z","name":"ARI @ LAC","state":"pre","status_detail":"15/09 14:36 UTC","status_short":"","completed":false,"halftime":false,"period":0,"clock":"","clock_seconds":0,"home":{"id":"LAC","abbr":"LAC","name":"Los Angeles Chargers","short":"Chargers","location":"Los Angeles","color":"#0080C6","alt_color":"#FFC20E","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/lac.png","record":"2-6"},"away":{"id":"ARI","abbr":"ARI","name":"Arizona Cardinals","short":"Cardinals","location":"Arizona","color":"#97233F","alt_color":"#FFB612","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/ari.png","record":"8-7"},"home_score":0,"away_score":0,"line_home":-4.5,"line_display":"LAC -4.5","line_total":47.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"Prime","neutral_site":false,"markets":{"polymarket":{"id":"po-ari-lac","title":"ARI vs LAC","p_home_win":0.6157,"p_away_win":0.3843,"raw_home":0.628,"volume":730150.28,"implied_margin":3.9,"p_home_cover":0.4814,"p_away_cover":0.5186,"p_push":0.0},"kalshi":{"id":"ka-ari-lac","title":"ARI vs LAC","p_home_win":0.6262,"p_away_win":0.3738,"raw_home":0.645,"volume":77040.46,"implied_margin":4.2,"p_home_cover":0.4924,"p_away_cover":0.5076,"p_push":0.0}},"probs":{"margin_now":0.0,"total_now":0.0,"projected_margin":4.5,"sigma":13.2,"remaining_seconds":3600,"fraction_remaining":1.0,"p_home_cover":0.5,"p_away_cover":0.5,"p_push":0.0,"cover_margin_now":-4.5,"p_home_win":0.6345,"p_away_win":0.3612,"p_tie":0.0043,"projected_total":47.5,"p_over":0.5,"p_under":0.5,"p_total_push":0.0,"market_win_consensus":0.621,"market_divergence":-0.0135,"consensus_home_win":0.6277,"market_cover_consensus":0.4869,"consensus_home_cover":0.4934,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.0,"market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-13","date":"2026-09-16T06:36:31Z","name":"TEN @ JAX","state":"pre","status_detail":"16/09 06:36 UTC","status_short":"","completed":false,"halftime":false,"period":0,"clock":"","clock_seconds":0,"home":{"id":"JAX","abbr":"JAX","name":"Jacksonville Jaguars","short":"Jaguars","location":"Jacksonville","color":"#006778","alt_color":"#D7A22A","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/jax.png","record":"5-2"},"away":{"id":"TEN","abbr":"TEN","name":"Tennessee Titans","short":"Titans","location":"Tennessee","color":"#0C2340","alt_color":"#4B92DB","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/ten.png","record":"4-8"},"home_score":0,"away_score":0,"line_home":1.5,"line_display":"JAX +1.5","line_total":45.0,"odds_provider":"Demo","home_moneyline":145,"away_moneyline":-170,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"Prime","neutral_site":false,"markets":{"polymarket":{"id":"po-ten-jax","title":"TEN vs JAX","p_home_win":0.449,"p_away_win":0.551,"raw_home":0.458,"volume":542145.93,"implied_margin":-1.7,"p_home_cover":0.4942,"p_away_cover":0.5058,"p_push":0.0},"kalshi":{"id":"ka-ten-jax","title":"TEN vs JAX","p_home_win":0.367,"p_away_win":0.633,"raw_home":0.378,"volume":829834.71,"implied_margin":-4.5,"p_home_cover":0.4105,"p_away_cover":0.5895,"p_push":0.0}},"probs":{"margin_now":0.0,"total_now":0.0,"projected_margin":-1.5,"sigma":13.2,"remaining_seconds":3600,"fraction_remaining":1.0,"p_home_cover":0.5,"p_away_cover":0.5,"p_push":0.0,"cover_margin_now":1.5,"p_home_win":0.4514,"p_away_win":0.5441,"p_tie":0.0045,"projected_total":45.0,"p_over":0.4831,"p_under":0.4831,"p_total_push":0.0339,"market_win_consensus":0.408,"market_divergence":-0.0434,"consensus_home_win":0.4297,"market_cover_consensus":0.4523,"consensus_home_cover":0.4762,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.0,"market_home_win":0.3933,"market_away_win":0.6067}},{"id":"demo-12","date":"2026-09-16T13:36:31Z","name":"CLE @ PIT","state":"pre","status_detail":"16/09 13:36 UTC","status_short":"","completed":false,"halftime":false,"period":0,"clock":"","clock_seconds":0,"home":{"id":"PIT","abbr":"PIT","name":"Pittsburgh Steelers","short":"Steelers","location":"Pittsburgh","color":"#FFB612","alt_color":"#101820","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/pit.png","record":"4-2"},"away":{"id":"CLE","abbr":"CLE","name":"Cleveland Browns","short":"Browns","location":"Cleveland","color":"#311D00","alt_color":"#FF3C00","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/cle.png","record":"10-8"},"home_score":0,"away_score":0,"line_home":-6.5,"line_display":"PIT -6.5","line_total":42.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"Prime","neutral_site":false,"markets":{"polymarket":{"id":"po-cle-pit","title":"CLE vs PIT","p_home_win":0.652,"p_away_win":0.348,"raw_home":0.665,"volume":494751.34,"implied_margin":5.2,"p_home_cover":0.4595,"p_away_cover":0.5405,"p_push":0.0},"kalshi":{"id":"ka-cle-pit","title":"CLE vs PIT","p_home_win":0.6592,"p_away_win":0.3408,"raw_home":0.679,"volume":667722.86,"implied_margin":5.4,"p_home_cover":0.4673,"p_away_cover":0.5327,"p_push":0.0}},"probs":{"margin_now":0.0,"total_now":0.0,"projected_margin":6.5,"sigma":13.2,"remaining_seconds":3600,"fraction_remaining":1.0,"p_home_cover":0.5,"p_away_cover":0.5,"p_push":0.0,"cover_margin_now":-6.5,"p_home_win":0.6911,"p_away_win":0.3049,"p_tie":0.004,"projected_total":42.5,"p_over":0.5,"p_under":0.5,"p_total_push":0.0,"market_win_consensus":0.6556,"market_divergence":-0.0355,"consensus_home_win":0.6734,"market_cover_consensus":0.4634,"consensus_home_cover":0.4817,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.0,"market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-16","date":"2026-09-16T14:36:31Z","name":"NE @ WSH","state":"pre","status_detail":"16/09 14:36 UTC","status_short":"","completed":false,"halftime":false,"period":0,"clock":"","clock_seconds":0,"home":{"id":"WSH","abbr":"WSH","name":"Washington Commanders","short":"Commanders","location":"Washington","color":"#5A1414","alt_color":"#FFB612","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/wsh.png","record":"2-3"},"away":{"id":"NE","abbr":"NE","name":"New England Patriots","short":"Patriots","location":"New England","color":"#002244","alt_color":"#C60C30","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/ne.png","record":"3-5"},"home_score":0,"away_score":0,"line_home":-7.0,"line_display":"WSH -7.0","line_total":44.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"NBC","neutral_site":false,"markets":{"polymarket":{"id":"po-ne-wsh","title":"NE vs WSH","p_home_win":0.7098,"p_away_win":0.2902,"raw_home":0.724,"volume":691709.91,"implied_margin":7.3,"p_home_cover":0.4692,"p_away_cover":0.4522,"p_push":0.0786},"kalshi":{"id":"ka-ne-wsh","title":"NE vs WSH","p_home_win":0.665,"p_away_win":0.335,"raw_home":0.685,"volume":521243.29,"implied_margin":5.6,"p_home_cover":0.4215,"p_away_cover":0.5003,"p_push":0.0782}},"probs":{"margin_now":0.0,"total_now":0.0,"projected_margin":7.0,"sigma":13.2,"remaining_seconds":3600,"fraction_remaining":1.0,"p_home_cover":0.4607,"p_away_cover":0.4607,"p_push":0.0786,"cover_margin_now":-7.0,"p_home_win":0.7046,"p_away_win":0.2915,"p_tie":0.0039,"projected_total":44.5,"p_over":0.5,"p_under":0.5,"p_total_push":0.0,"market_win_consensus":0.6874,"market_divergence":-0.0172,"consensus_home_win":0.696,"market_cover_consensus":0.4454,"consensus_home_cover":0.453,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.0,"market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-15","date":"2026-09-16T19:36:31Z","name":"CAR @ ATL","state":"pre","status_detail":"16/09 19:36 UTC","status_short":"","completed":false,"halftime":false,"period":0,"clock":"","clock_seconds":0,"home":{"id":"ATL","abbr":"ATL","name":"Atlanta Falcons","short":"Falcons","location":"Atlanta","color":"#A71930","alt_color":"#A5ACAF","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/atl.png","record":"10-2"},"away":{"id":"CAR","abbr":"CAR","name":"Carolina Panthers","short":"Panthers","location":"Carolina","color":"#0085CA","alt_color":"#BFC0BF","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/car.png","record":"11-5"},"home_score":0,"away_score":0,"line_home":0.0,"line_display":"PK","line_total":41.0,"odds_provider":"Demo","home_moneyline":145,"away_moneyline":-170,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"FOX","neutral_site":false,"markets":{"polymarket":{"id":"po-car-atl","title":"CAR vs ATL","p_home_win":0.5088,"p_away_win":0.4912,"raw_home":0.519,"volume":77943.73,"implied_margin":0.3,"p_home_cover":0.5068,"p_away_cover":0.4887,"p_push":0.0045},"kalshi":{"id":"ka-car-atl","title":"CAR vs ATL","p_home_win":0.4563,"p_away_win":0.5437,"raw_home":0.47,"volume":249544.2,"implied_margin":-1.4,"p_home_cover":0.4529,"p_away_cover":0.5426,"p_push":0.0045}},"probs":{"margin_now":0.0,"total_now":0.0,"projected_margin":0.0,"sigma":13.2,"remaining_seconds":3600,"fraction_remaining":1.0,"p_home_cover":0.4977,"p_away_cover":0.4977,"p_push":0.0045,"cover_margin_now":0.0,"p_home_win":0.4977,"p_away_win":0.4977,"p_tie":0.0045,"projected_total":41.0,"p_over":0.4831,"p_under":0.4831,"p_total_push":0.0339,"market_win_consensus":0.4826,"market_divergence":-0.0151,"consensus_home_win":0.4901,"market_cover_consensus":0.4798,"consensus_home_cover":0.4888,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":-0.0001,"market_home_win":0.3933,"market_away_win":0.6067}},{"id":"demo-11","date":"2026-09-16T20:36:31Z","name":"LV @ DEN","state":"pre","status_detail":"16/09 20:36 UTC","status_short":"","completed":false,"halftime":false,"period":0,"clock":"","clock_seconds":0,"home":{"id":"DEN","abbr":"DEN","name":"Denver Broncos","short":"Broncos","location":"Denver","color":"#FB4F14","alt_color":"#002244","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/den.png","record":"5-6"},"away":{"id":"LV","abbr":"LV","name":"Las Vegas Raiders","short":"Raiders","location":"Las Vegas","color":"#000000","alt_color":"#A5ACAF","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/lv.png","record":"6-3"},"home_score":0,"away_score":0,"line_home":2.5,"line_display":"DEN +2.5","line_total":38.5,"odds_provider":"Demo","home_moneyline":145,"away_moneyline":-170,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"CBS","neutral_site":false,"markets":{"polymarket":{"id":"po-lv-den","title":"LV vs DEN","p_home_win":0.401,"p_away_win":0.599,"raw_home":0.409,"volume":352974.4,"implied_margin":-3.3,"p_home_cover":0.4755,"p_away_cover":0.5245,"p_push":0.0},"kalshi":{"id":"ka-lv-den","title":"LV vs DEN","p_home_win":0.3932,"p_away_win":0.6068,"raw_home":0.405,"volume":242162.96,"implied_margin":-3.6,"p_home_cover":0.4675,"p_away_cover":0.5325,"p_push":0.0}},"probs":{"margin_now":0.0,"total_now":0.0,"projected_margin":-2.5,"sigma":13.2,"remaining_seconds":3600,"fraction_remaining":1.0,"p_home_cover":0.5,"p_away_cover":0.5,"p_push":0.0,"cover_margin_now":2.5,"p_home_win":0.4208,"p_away_win":0.5748,"p_tie":0.0045,"projected_total":38.5,"p_over":0.5,"p_under":0.5,"p_total_push":0.0,"market_win_consensus":0.3971,"market_divergence":-0.0237,"consensus_home_win":0.409,"market_cover_consensus":0.4715,"consensus_home_cover":0.4858,"market_home_cover":0.5,"market_away_cover":0.5,"edge_home_cover":0.0,"market_home_win":0.3933,"market_away_win":0.6067}},{"id":"demo-01","date":"2026-09-13T19:36:31Z","name":"BUF @ KC","state":"post","status_detail":"Final","status_short":"Final","completed":true,"halftime":false,"period":4,"clock":"0:00","clock_seconds":0,"home":{"id":"KC","abbr":"KC","name":"Kansas City Chiefs","short":"Chiefs","location":"Kansas City","color":"#E31837","alt_color":"#FFB81C","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/kc.png","record":"9-6"},"away":{"id":"BUF","abbr":"BUF","name":"Buffalo Bills","short":"Bills","location":"Buffalo","color":"#00338D","alt_color":"#C60C30","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/buf.png","record":"6-4"},"home_score":13,"away_score":22,"line_home":6.5,"line_display":"KC +6.5","line_total":41.0,"odds_provider":"Demo","home_moneyline":145,"away_moneyline":-170,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"CBS","neutral_site":false,"markets":{},"probs":{"margin_now":-9.0,"total_now":35.0,"projected_margin":-9.0,"sigma":0.0,"remaining_seconds":0,"fraction_remaining":0.0,"p_home_cover":0.0,"p_away_cover":1.0,"p_push":0.0,"cover_margin_now":-2.5,"ats_result":"away","p_home_win":0.0,"p_away_win":1.0,"p_tie":0.0,"projected_total":35.0,"p_over":0.0,"p_under":1.0,"p_total_push":0.0,"total_result":"under","market_home_win":0.3933,"market_away_win":0.6067}},{"id":"demo-02","date":"2026-09-13T19:36:31Z","name":"DAL @ SF","state":"post","status_detail":"Final","status_short":"Final","completed":true,"halftime":false,"period":4,"clock":"0:00","clock_seconds":0,"home":{"id":"SF","abbr":"SF","name":"San Francisco 49ers","short":"49ers","location":"San Francisco","color":"#AA0000","alt_color":"#B3995D","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/sf.png","record":"8-8"},"away":{"id":"DAL","abbr":"DAL","name":"Dallas Cowboys","short":"Cowboys","location":"Dallas","color":"#003594","alt_color":"#869397","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/dal.png","record":"11-7"},"home_score":30,"away_score":27,"line_home":3.0,"line_display":"SF +3.0","line_total":45.0,"odds_provider":"Demo","home_moneyline":145,"away_moneyline":-170,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"NBC","neutral_site":false,"markets":{},"probs":{"margin_now":3.0,"total_now":57.0,"projected_margin":3.0,"sigma":0.0,"remaining_seconds":0,"fraction_remaining":0.0,"p_home_cover":1.0,"p_away_cover":0.0,"p_push":0.0,"cover_margin_now":6.0,"ats_result":"home","p_home_win":1.0,"p_away_win":0.0,"p_tie":0.0,"projected_total":57.0,"p_over":1.0,"p_under":0.0,"p_total_push":0.0,"total_result":"over","market_home_win":0.3933,"market_away_win":0.6067}},{"id":"demo-03","date":"2026-09-13T19:36:31Z","name":"NYG @ PHI","state":"post","status_detail":"Final","status_short":"Final","completed":true,"halftime":false,"period":4,"clock":"0:00","clock_seconds":0,"home":{"id":"PHI","abbr":"PHI","name":"Philadelphia Eagles","short":"Eagles","location":"Philadelphia","color":"#004C54","alt_color":"#A5ACAF","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/phi.png","record":"1-6"},"away":{"id":"NYG","abbr":"NYG","name":"New York Giants","short":"Giants","location":"New York","color":"#0B2265","alt_color":"#A71930","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png","record":"6-1"},"home_score":24,"away_score":30,"line_home":3.5,"line_display":"PHI +3.5","line_total":51.5,"odds_provider":"Demo","home_moneyline":145,"away_moneyline":-170,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"CBS","neutral_site":false,"markets":{},"probs":{"margin_now":-6.0,"total_now":54.0,"projected_margin":-6.0,"sigma":0.0,"remaining_seconds":0,"fraction_remaining":0.0,"p_home_cover":0.0,"p_away_cover":1.0,"p_push":0.0,"cover_margin_now":-2.5,"ats_result":"away","p_home_win":0.0,"p_away_win":1.0,"p_tie":0.0,"projected_total":54.0,"p_over":1.0,"p_under":0.0,"p_total_push":0.0,"total_result":"over","market_home_win":0.3933,"market_away_win":0.6067}},{"id":"demo-04","date":"2026-09-13T19:36:31Z","name":"CIN @ BAL","state":"post","status_detail":"Final","status_short":"Final","completed":true,"halftime":false,"period":4,"clock":"0:00","clock_seconds":0,"home":{"id":"BAL","abbr":"BAL","name":"Baltimore Ravens","short":"Ravens","location":"Baltimore","color":"#241773","alt_color":"#9E7C0C","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/bal.png","record":"8-5"},"away":{"id":"CIN","abbr":"CIN","name":"Cincinnati Bengals","short":"Bengals","location":"Cincinnati","color":"#FB4F14","alt_color":"#000000","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/cin.png","record":"9-5"},"home_score":31,"away_score":24,"line_home":-1.5,"line_display":"BAL -1.5","line_total":49.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"Prime","neutral_site":false,"markets":{},"probs":{"margin_now":7.0,"total_now":55.0,"projected_margin":7.0,"sigma":0.0,"remaining_seconds":0,"fraction_remaining":0.0,"p_home_cover":1.0,"p_away_cover":0.0,"p_push":0.0,"cover_margin_now":5.5,"ats_result":"home","p_home_win":1.0,"p_away_win":0.0,"p_tie":0.0,"projected_total":55.0,"p_over":1.0,"p_under":0.0,"p_total_push":0.0,"total_result":"over","market_home_win":0.6067,"market_away_win":0.3933}},{"id":"demo-05","date":"2026-09-13T19:36:31Z","name":"GB @ DET","state":"post","status_detail":"Final","status_short":"Final","completed":true,"halftime":false,"period":4,"clock":"0:00","clock_seconds":0,"home":{"id":"DET","abbr":"DET","name":"Detroit Lions","short":"Lions","location":"Detroit","color":"#0076B6","alt_color":"#B0B7BC","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/det.png","record":"5-3"},"away":{"id":"GB","abbr":"GB","name":"Green Bay Packers","short":"Packers","location":"Green Bay","color":"#203731","alt_color":"#FFB612","logo":"https://a.espncdn.com/i/teamlogos/nfl/500/gb.png","record":"4-8"},"home_score":28,"away_score":19,"line_home":-3.0,"line_display":"DET -3.0","line_total":47.5,"odds_provider":"Demo","home_moneyline":-170,"away_moneyline":145,"home_spread_odds":-110,"away_spread_odds":-110,"possession_home":null,"down_distance":"","possession_text":"","red_zone":false,"last_play":"","venue":"Estadio demo","broadcast":"ESPN","neutral_site":false,"markets":{},"probs":{"margin_now":9.0,"total_now":47.0,"projected_margin":9.0,"sigma":0.0,"remaining_seconds":0,"fraction_remaining":0.0,"p_home_cover":1.0,"p_away_cover":0.0,"p_push":0.0,"cover_margin_now":6.0,"ats_result":"home","p_home_win":1.0,"p_away_win":0.0,"p_tie":0.0,"projected_total":47.0,"p_over":0.0,"p_under":1.0,"p_total_push":0.0,"total_result":"under","market_home_win":0.6067,"market_away_win":0.3933}}]};
 var CFG = BOOT.config || {};
 var M = CFG.model || {};
 var LIVE = CFG.live || {};
@@ -477,6 +542,9 @@ var S = {
   quotes: BOOT.quotes || [],
   picks: BOOT.picks || null,
   pickem: null,
+  forecast: BOOT.forecast || null,
+  forecastLoading: false,
+  forecastStatus: {},
   quotesAt: BOOT.generated_at || "",
   sourceStatus: { espn: { ok: false, detail: "sin consultar" },
                   polymarket: { ok: false, detail: "sin consultar" },
@@ -966,6 +1034,314 @@ function attachMarkets(games, quotes) {
   });
 }
 
+/* ------- pronóstico: lesiones, forma de la semana previa y noticias ---- */
+var FC = CFG.forecast || {};
+
+function nodeAbbr(node) {
+  if (!node) return null;
+  var keys = ["abbreviation", "abbrev", "shortName"];
+  for (var i = 0; i < keys.length; i++) {
+    if (node[keys[i]]) {
+      var cand = canonicalAbbr(String(node[keys[i]]));
+      if (TEAM_META[cand]) return cand;
+    }
+  }
+  if (node.team && typeof node.team === "object") {
+    var nested = nodeAbbr(node.team);
+    if (nested) return nested;
+  }
+  var names = ["displayName", "name", "location", "fullName"];
+  for (var j = 0; j < names.length; j++) {
+    if (node[names[j]]) {
+      var found = abbrFromText(node[names[j]]);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+function parseInjuries(payload) {
+  var teams = (payload || {}).injuries || [];
+  var out = {};
+  teams.forEach(function (node) {
+    var abbr = nodeAbbr(node);
+    if (!abbr) return;
+    var rows = (node.injuries || []).map(function (it) {
+      var athlete = it.athlete || {};
+      var pos = (athlete.position || {}).abbreviation || (athlete.position || {}).name || "";
+      var status = it.status || (it.type || {}).description || (it.type || {}).name || "";
+      return {
+        player: athlete.displayName || athlete.shortName || "",
+        position: String(pos).toUpperCase(),
+        status: String(status),
+        detail: it.longComment || it.shortComment || ""
+      };
+    });
+    if (rows.length) out[abbr] = (out[abbr] || []).concat(rows);
+  });
+  return out;
+}
+function parseNews(payload, idToAbbr) {
+  var articles = (payload || {}).articles || [];
+  idToAbbr = idToAbbr || {};
+  return articles.map(function (art) {
+    var teams = [];
+    (art.categories || []).forEach(function (cat) {
+      var rawId = cat.teamId || ((cat.team || {}).id);
+      if (rawId !== undefined && rawId !== null && idToAbbr[String(rawId)]) {
+        teams.push(idToAbbr[String(rawId)]); return;
+      }
+      if (cat.type === "team") {
+        var found = nodeAbbr(cat.team || cat);
+        if (found) teams.push(found);
+      }
+    });
+    var headline = art.headline || art.title || "";
+    var description = art.description || "";
+    if (!teams.length) {
+      var guess = abbrFromText(headline) || abbrFromText(description);
+      if (guess) teams.push(guess);
+    }
+    return {
+      headline: headline, description: description,
+      published: art.published || art.lastModified || "",
+      teams: teams.filter(function (t, i) { return teams.indexOf(t) === i; }).sort(),
+      link: (((art.links || {}).web || {}).href) || ""
+    };
+  });
+}
+function classifyNews(article, rules) {
+  var text = ((article.headline || "") + " " + (article.description || "")).toLowerCase();
+  var total = 0, labels = [];
+  (rules || []).forEach(function (rule) {
+    var terms = rule.terms || [];
+    for (var i = 0; i < terms.length; i++) {
+      if (text.indexOf(String(terms[i]).toLowerCase()) >= 0) {
+        total += Number(rule.weight || 0);
+        labels.push(rule.label || "noticia");
+        break;
+      }
+    }
+  });
+  return { points: total, labels: labels };
+}
+function injuryPoints(rows) {
+  var posW = FC.position_weights || {}, statusW = FC.status_weights || {};
+  var cap = Number(FC.injury_cap === undefined ? 4 : FC.injury_cap);
+  var total = 0, notes = [];
+  (rows || []).forEach(function (row) {
+    var statusKey = String(row.status || "").trim().toLowerCase();
+    var ws = null;
+    Object.keys(statusW).forEach(function (k) {
+      if (ws === null && statusKey.indexOf(k) >= 0) ws = Number(statusW[k]);
+    });
+    if (ws === null) return;
+    var pos = String(row.position || "").toUpperCase();
+    var wp = Number(posW[pos] !== undefined ? posW[pos] : (posW["default"] || 0.25));
+    var pts = wp * ws;
+    if (pts >= 0.5 && notes.length < 4) {
+      notes.push((pos || "?") + " " + (row.player || "") + " (" + (row.status || "") + ")");
+    }
+    total += pts;
+  });
+  return { points: Math.min(total, cap), notes: notes };
+}
+function teamForm(games) {
+  var weight = Number(FC.form_weight === undefined ? 0.12 : FC.form_weight);
+  var cap = Number(FC.form_cap === undefined ? 2.5 : FC.form_cap);
+  var out = {};
+  (games || []).forEach(function (g) {
+    if (g.state !== "post") return;
+    var margin = (g.home_score || 0) - (g.away_score || 0);
+    var cover = (g.line_home === null || g.line_home === undefined) ? margin : margin + Number(g.line_home);
+    [["home", 1], ["away", -1]].forEach(function (pair) {
+      var abbr = g[pair[0]].abbr, sign = pair[1];
+      var node = out[abbr] || (out[abbr] = { ats: 0, margin: 0, games: 0 });
+      node.ats += sign * cover; node.margin += sign * margin; node.games++;
+    });
+  });
+  Object.keys(out).forEach(function (abbr) {
+    var node = out[abbr], n = Math.max(1, node.games);
+    node.ats_avg = node.ats / n;
+    node.margin_avg = node.margin / n;
+    node.points = clamp(weight * node.ats_avg, -cap, cap);
+  });
+  return out;
+}
+function buildForecast(games, form, injuries, news, meta, quotes) {
+  var sigma = Number(M.sigma_full_game || 13.2);
+  var hfa = Number(FC.home_field === undefined ? 2 : FC.home_field);
+  var newsCap = Number(FC.news_cap === undefined ? 1.5 : FC.news_cap);
+  var marketCap = Number(FC.market_cap === undefined ? 3 : FC.market_cap);
+  var totalCap = Number(FC.total_cap === undefined ? 6 : FC.total_cap);
+  var modelWeight = clamp(CONSENSUS.model_weight === undefined ? 0.5 : Number(CONSENSUS.model_weight), 0, 1);
+  var rules = FC.news_rules || [];
+
+  attachMarkets(games, quotes || []);
+
+  var newsByTeam = {};
+  (news || []).forEach(function (art) {
+    var res = classifyNews(art, rules);
+    if (!res.points || !art.teams.length) return;
+    art.teams.forEach(function (abbr) {
+      var node = newsByTeam[abbr] || (newsByTeam[abbr] = { points: 0, items: [] });
+      node.points += res.points;
+      node.items.push({ headline: art.headline, labels: res.labels, points: res.points, link: art.link });
+    });
+  });
+  Object.keys(newsByTeam).forEach(function (abbr) {
+    newsByTeam[abbr].points = clamp(newsByTeam[abbr].points, -newsCap, newsCap);
+  });
+
+  var rows = games.map(function (g) {
+    var home = g.home.abbr, away = g.away.abbr;
+    var line = (g.line_home === null || g.line_home === undefined) ? null : Number(g.line_home);
+    var injHome = injuryPoints(injuries[home]), injAway = injuryPoints(injuries[away]);
+    var formHome = ((form[home] || {}).points) || 0, formAway = ((form[away] || {}).points) || 0;
+    var newsHome = ((newsByTeam[home] || {}).points) || 0, newsAway = ((newsByTeam[away] || {}).points) || 0;
+
+    var base, baseSource;
+    if (line !== null) { base = -line; baseSource = "línea publicada"; }
+    else { base = hfa + (formHome - formAway); baseSource = "ventaja de local y forma (sin línea publicada)"; }
+
+    var marketNodes = g.markets || {};
+    var wins = Object.keys(marketNodes).map(function (k) { return marketNodes[k].p_home_win; })
+      .filter(function (v) { return v !== undefined && v !== null; });
+    var adjMarket = 0, marketWin = null;
+    if (wins.length) {
+      marketWin = wins.reduce(function (a, b) { return a + b; }, 0) / wins.length;
+      adjMarket = clamp((impliedMargin(marketWin, sigma) - base) * (1 - modelWeight), -marketCap, marketCap);
+    }
+    var adjInj = injAway.points - injHome.points;
+    var adjForm = line !== null ? formHome - formAway : 0;
+    var adjNews = newsHome - newsAway;
+    var adjustment = clamp(adjInj + adjForm + adjNews + adjMarket, -totalCap, totalCap);
+    var expected = base + adjustment;
+
+    var probs = line !== null
+      ? outcomeProbabilities(-line, expected, sigma)
+      : outcomeProbabilities(0, expected, sigma, 0.02);
+    var side = probs[0] >= probs[2] ? "home" : "away";
+    return {
+      matchup: matchupKey(g), game: g, date: g.date, home: home, away: away,
+      line_home: line, market: line !== null ? "spread" : "ganador",
+      base_margin: base, base_source: baseSource,
+      adj_injuries: adjInj, adj_form: adjForm, adj_news: adjNews, adj_market: adjMarket,
+      market_home_win: marketWin, adjustment: adjustment, expected_margin: expected,
+      p_home: probs[0], p_push: probs[1], p_away: probs[2],
+      pick: g[side].abbr, pick_side: side, pick_probability: Math.max(probs[0], probs[2]),
+      injuries: { home: injHome.points, away: injAway.points,
+        home_notes: injHome.notes, away_notes: injAway.notes },
+      form: { home: formHome, away: formAway },
+      news: { home: ((newsByTeam[home] || {}).items || []).slice(0, 3),
+        away: ((newsByTeam[away] || {}).items || []).slice(0, 3) }
+    };
+  });
+
+  rows.slice().sort(function (a, b) { return a.pick_probability - b.pick_probability; })
+    .forEach(function (row, i) { row.suggested_confidence = i + 1; });
+  rows.sort(function (a, b) { return b.suggested_confidence - a.suggested_confidence; });
+
+  return {
+    generated_at: new Date().toISOString(), meta: meta || {},
+    games: rows.length,
+    with_line: rows.filter(function (r) { return r.line_home !== null; }).length,
+    with_market: rows.filter(function (r) { return r.market_home_win !== null; }).length,
+    injury_teams: Object.keys(injuries || {}).length,
+    news_articles: (news || []).length,
+    news_flagged: rows.filter(function (r) { return r.adj_news !== 0; }).length,
+    rows: rows
+  };
+}
+function weekScoreboardUrl(week) {
+  var m = S.meta || {};
+  var p = ["limit=100"];
+  if (m.season) p.push("dates=" + m.season);
+  p.push("seasontype=" + (m.seasontype || 2));
+  p.push("week=" + week);
+  return ENDPOINT + "?" + p.join("&");
+}
+function contextUrl(name) {
+  var c = (SOURCES[name] || {});
+  if (name === "injuries") {
+    return c.endpoint || "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries";
+  }
+  return (c.endpoint || "https://site.api.espn.com/apis/site/v2/sports/football/nfl/news") +
+    "?" + (c.query || "limit=50");
+}
+function generateForecast() {
+  if (S.forecastLoading) return;
+  var week = parseInt($("fc-week").value, 10);
+  if (!week) { week = (S.meta.week || 0) + 1; $("fc-week").value = week; }
+  S.forecastLoading = true;
+  $("fc-status").textContent = "Consultando calendario, lesiones y noticias…";
+  var jobs = [fetchJson(weekScoreboardUrl(week), 15000),
+    fetchJson(contextUrl("injuries"), 15000), fetchJson(contextUrl("news"), 15000)];
+  Promise.all(jobs.map(function (pr) {
+    return pr.then(function (v) { return { ok: true, value: v }; },
+      function (e) { return { ok: false, error: e }; });
+  })).then(function (res) {
+    var status = {};
+    var nextGames = [];
+    if (res[0].ok) {
+      nextGames = (res[0].value.events || []).map(parseEvent).filter(function (g) { return g; });
+      status.schedule = { ok: true, detail: nextGames.length + " partidos" };
+    } else {
+      status.schedule = { ok: false, detail: errMsg(res[0].error) };
+    }
+    var injuries = {}, news = [];
+    if (res[1].ok) {
+      injuries = parseInjuries(res[1].value);
+      status.injuries = { ok: true, detail: Object.keys(injuries).length + " equipos" };
+    } else { status.injuries = { ok: false, detail: errMsg(res[1].error) }; }
+    var idToAbbr = {};
+    S.games.concat(nextGames).forEach(function (g) {
+      ["home", "away"].forEach(function (side) { if (g[side].id) idToAbbr[String(g[side].id)] = g[side].abbr; });
+    });
+    if (res[2].ok) {
+      news = parseNews(res[2].value, idToAbbr);
+      status.news = { ok: true, detail: news.length + " notas" };
+    } else { status.news = { ok: false, detail: errMsg(res[2].error) }; }
+
+    S.forecastStatus = status;
+    if (nextGames.length) {
+      S.forecast = buildForecast(nextGames, teamForm(S.games), injuries, news,
+        { season: S.meta.season, seasontype: S.meta.seasontype, week: week }, S.quotes);
+    }
+    S.forecastLoading = false;
+    renderForecast();
+  });
+}
+function applyForecastToPicks() {
+  var fc = S.forecast;
+  if (!fc || !fc.rows.length) return;
+  var meta = fc.meta || {};
+  var base = currentPicks();
+  var payload = {
+    mode: base.mode || "ats", scoring: base.scoring || "confidence",
+    push_points: base.push_points || 0,
+    season: meta.season || null, seasontype: meta.seasontype || null, week: meta.week || null,
+    picks: {}, tiebreaker: {}
+  };
+  fc.rows.forEach(function (row) {
+    payload.picks[row.matchup] = { team: row.pick, confidence: row.suggested_confidence };
+  });
+  var top = fc.rows[0];
+  if (top) payload.tiebreaker = { matchup: top.matchup, total: 45 };
+  try {
+    localStorage.setItem("nflPicks:" + [meta.season || "", meta.seasontype || "", meta.week || ""].join("-"),
+      JSON.stringify(payload));
+  } catch (e) { /* almacenamiento no disponible */ }
+  $("fc-status").textContent = "Quiniela de la semana " + (meta.week || "?") +
+    " guardada. Cambia el selector de semana para revisarla y ajustarla.";
+  if (String(meta.week) !== String(S.meta.week)) {
+    $("week").value = String(meta.week);
+    persist();
+    refresh();
+  } else {
+    loadPicksForWeek(); renderAll();
+  }
+}
+
 /* ------------------------- quiniela: metodología Yahoo Pick'em --------- */
 var PICKEM_RULES = CFG.pickem || {};
 
@@ -1087,7 +1463,11 @@ function scorePicks() {
   return S.pickem;
 }
 function savePicks() {
-  try { localStorage.setItem("nflPicks:" + weekKey(), JSON.stringify(currentPicks())); }
+  var picks = currentPicks(), m = S.meta || {};
+  if (picks.season === undefined || picks.season === null) picks.season = m.season || null;
+  if (picks.seasontype === undefined || picks.seasontype === null) picks.seasontype = m.seasontype || null;
+  if (picks.week === undefined || picks.week === null) picks.week = m.week || null;
+  try { localStorage.setItem("nflPicks:" + weekKey(), JSON.stringify(picks)); }
   catch (e) { /* almacenamiento no disponible */ }
 }
 function loadPicksForWeek() {
@@ -1095,7 +1475,11 @@ function loadPicksForWeek() {
     var raw = localStorage.getItem("nflPicks:" + weekKey());
     if (raw) { S.picks = JSON.parse(raw); return; }
   } catch (e) { /* se usa la quiniela embebida */ }
-  if (!S.picks) S.picks = BOOT.picks || emptyPicks();
+  var boot = BOOT.picks;
+  var m = S.meta || {};
+  var bootFits = boot && (boot.week === undefined || boot.week === null ||
+    !m.week || Number(boot.week) === Number(m.week));
+  S.picks = bootFits ? JSON.parse(JSON.stringify(boot)) : emptyPicks();
 }
 /* Rellena sólo los partidos que no han empezado: usar la probabilidad de un
    partido en curso o terminado sería pronosticar con el resultado a la vista.
@@ -1625,13 +2009,56 @@ function pickStateLabel(row) {
   if (row.outcome === "push") return '<span class="pill push">Push</span>';
   return '<span class="sub">' + esc(statusText(row.game)) + "</span>";
 }
+function picksWeekMismatch() {
+  var picks = currentPicks(), m = S.meta || {};
+  var fields = [["season", "temporada"], ["seasontype", "fase"], ["week", "semana"]];
+  var diffs = [];
+  fields.forEach(function (f) {
+    var want = picks[f[0]], got = m[f[0]];
+    if (want === null || want === undefined || got === null || got === undefined) return;
+    if (Number(want) !== Number(got)) diffs.push({ label: f[1], picks: want, viewing: got });
+  });
+  return diffs.length ? diffs : null;
+}
 function renderPickem() {
   var pk = scorePicks();
   var picks = currentPicks();
   var total = S.games.length;
+  var m = S.meta || {};
+  $("pk-week").textContent = "Jornada en revisión: " +
+    [m.season ? "temporada " + m.season : "", m.week ? "semana " + m.week : "jornada en curso"]
+      .filter(function (x) { return x; }).join(" · ");
+  var mismatch = picksWeekMismatch();
+  $("pk-mismatch").innerHTML = mismatch
+    ? '<div class="note"><b>Esta quiniela es de otra jornada.</b> Está capturada para ' +
+      esc(mismatch.map(function (d) { return d.label + " " + d.picks; }).join(", ")) +
+      " y estás viendo " + esc(mismatch.map(function (d) { return d.label + " " + d.viewing; }).join(", ")) +
+      '. <button class="act" id="pk-rebind">Usarla en la jornada que estoy viendo</button>' +
+      ' <button class="act" id="pk-fresh">Empezar una para esta jornada</button></div>'
+    : "";
+  if (mismatch) {
+    $("pk-rebind").addEventListener("click", function () {
+      picks.season = m.season; picks.seasontype = m.seasontype; picks.week = m.week;
+      savePicks(); renderAll();
+    });
+    $("pk-fresh").addEventListener("click", function () {
+      S.picks = emptyPicks();
+      S.picks.season = m.season; S.picks.seasontype = m.seasontype; S.picks.week = m.week;
+      savePicks(); renderAll();
+    });
+  }
   $("pk-mode").value = pk.mode;
   $("pk-scoring").value = pk.scoring;
 
+  if (mismatch) {
+    /* Una quiniela de otra jornada no se puntúa: mostrarla con números sería
+       mezclar pronósticos de una semana con resultados de otra. */
+    $("pk-kpis").innerHTML =
+      kpi("Puntos asegurados", "—", "La quiniela es de otra jornada", "") +
+      kpi("En juego ahora", "—", "Reasígnala o empieza una nueva", "") +
+      kpi("Proyección de la semana", "—", "Sin puntuar", "amber") +
+      kpi("Efectividad", "—", pk.picked + " pronósticos guardados", "");
+  } else {
   $("pk-kpis").innerHTML =
     kpi("Puntos asegurados", pk.earned.toFixed(0),
       pk.hits + " aciertos · " + pk.misses + " fallos" + (pk.pushes ? " · " + pk.pushes + " push" : ""), "green") +
@@ -1641,6 +2068,7 @@ function renderPickem() {
       "De " + pk.max_week.toFixed(0) + " posibles · máximo alcanzable " + pk.max_possible.toFixed(0), "amber") +
     kpi("Efectividad", pk.accuracy === null ? "—" : pk.accuracy.toFixed(0) + " %",
       pk.picked + " de " + total + " partidos pronosticados", "");
+  }
 
   var confOptions = function (value) {
     var html = '<option value="0">—</option>';
@@ -1703,6 +2131,113 @@ function renderPickem() {
       : (tb.final ? "Total real " + tb.actual : "Total proyectado " + Number(tb.actual).toFixed(1)) +
         " · tu pronóstico " + tb.prediction + " · diferencia " + Number(tb.difference).toFixed(1));
 }
+/* El pronóstico embebido por el script trae abreviaturas, no el partido
+   completo: se reconstruye el equipo desde la identidad oficial. */
+function teamFromAbbr(abbr) {
+  var key = canonicalAbbr(abbr), meta = TEAM_META[key] || {};
+  var names = TEAMS_ES[key] || [];
+  return {
+    abbr: key, name: names.length ? names[0] + " " + names[1] : key,
+    color: meta.primary || "#1E2761", alt_color: meta.secondary || "#8895B3",
+    logo: logoUrl(key)
+  };
+}
+function rowTeam(row, side) {
+  if (row.game && row.game[side]) return row.game[side];
+  return teamFromAbbr(row[side]);
+}
+function sideLineLabel(lineHome, side) {
+  if (lineHome === null || lineHome === undefined) return "";
+  var v = side === "home" ? Number(lineHome) : -Number(lineHome);
+  if (v === 0) return "PK";
+  return (v > 0 ? "+" : "") + v.toFixed(1);
+}
+function factorCell(value, digits) {
+  if (!value) return '<span class="sub">—</span>';
+  var cls = value > 0 ? "pos" : "neg";
+  return '<span class="num ' + cls + '">' + signed(value, digits === undefined ? 1 : digits) + "</span>";
+}
+function renderForecast() {
+  var fc = S.forecast;
+  var statusHtml = ["schedule", "injuries", "news"].map(function (k) {
+    var st = S.forecastStatus[k];
+    if (!st) return "";
+    var label = { schedule: "Calendario", injuries: "Lesiones", news: "Noticias" }[k];
+    return '<span class="chip src ' + (st.ok ? "ok" : "warn") + '"><span class="dot"></span>' +
+      label + " <em>" + esc(st.detail) + "</em></span>";
+  }).join("");
+  $("fc-sources").innerHTML = statusHtml;
+
+  if (!fc || !fc.rows || !fc.rows.length) {
+    $("fc-kpis").innerHTML = "";
+    $("forecast-table").innerHTML = '<tbody><tr><td class="empty">Pulsa «Generar pronóstico» para ' +
+      "construir la jornada siguiente con lesiones, forma y noticias.</td></tr></tbody>";
+    $("fc-news").innerHTML = "";
+    return;
+  }
+  var meta = fc.meta || {};
+  $("fc-kpis").innerHTML =
+    kpi("Jornada pronosticada", "Semana " + (meta.week || "?"),
+      fc.games + " partidos · " + fc.with_line + " con línea publicada", "") +
+    kpi("Con mercado", fc.with_market, "Partidos con cotización de Polymarket o Kalshi", "") +
+    kpi("Alertas de noticias", fc.news_flagged,
+      fc.news_articles + " notas revisadas · " + fc.injury_teams + " equipos con reporte", "amber") +
+    kpi("Ajuste promedio", (fc.rows.reduce(function (a, r) { return a + Math.abs(r.adjustment); }, 0) / fc.rows.length).toFixed(2),
+      "Puntos de corrección sobre la línea, en valor absoluto", "green");
+
+  var rows = fc.rows.map(function (r) {
+    var notes = [];
+    var inj = r.injuries || {}, newsRow = r.news || {};
+    if ((inj.home_notes || []).length) notes.push(esc(r.home) + ": " + esc(inj.home_notes.join(", ")));
+    if ((inj.away_notes || []).length) notes.push(esc(r.away) + ": " + esc(inj.away_notes.join(", ")));
+    ["home", "away"].forEach(function (side) {
+      (newsRow[side] || []).forEach(function (n) {
+        notes.push(esc(r[side]) + ": " + esc(n.headline) +
+          " <i>(" + esc((n.labels || []).join(", ")) + ")</i>");
+      });
+    });
+    return '<tr class="row"><td>' + teamCrest(rowTeam(r, "away"), "sm") + " " + esc(r.away) + " @ " +
+      teamCrest(rowTeam(r, "home"), "sm") + " " + esc(r.home) +
+      (notes.length ? '<div class="fcnotes">' + notes.join(" · ") + "</div>" : "") + "</td>" +
+      '<td class="num">' + (r.line_home === null ? '<span class="sub">sin línea</span>' : signed(r.line_home)) + "</td>" +
+      '<td class="num">' + signed(r.base_margin) + "</td>" +
+      "<td>" + factorCell(r.adj_injuries) + "</td>" +
+      "<td>" + factorCell(r.adj_form) + "</td>" +
+      "<td>" + factorCell(r.adj_news) + "</td>" +
+      "<td>" + factorCell(r.adj_market) + "</td>" +
+      '<td class="num">' + signed(r.expected_margin) + "</td>" +
+      "<td><b>" + esc(r.pick) + "</b> " +
+      esc(sideLineLabel(r.line_home, r.pick_side)) + "</td>" +
+      '<td class="num">' + pct(r.pick_probability, 1) + "</td>" +
+      '<td class="num">' + r.suggested_confidence + "</td></tr>";
+  }).join("");
+  $("forecast-table").innerHTML =
+    "<thead><tr><th>Partido</th><th>Línea</th><th>Base</th><th>Lesiones</th><th>Forma</th>" +
+    "<th>Noticias</th><th>Mercado</th><th>Margen esperado</th><th>Pick sugerido</th>" +
+    "<th>Prob.</th><th>Confianza</th></tr></thead><tbody>" + rows + "</tbody>";
+  wireLogos();
+
+  var flagged = [];
+  fc.rows.forEach(function (r) {
+    ["home", "away"].forEach(function (side) {
+      ((r.news || {})[side] || []).forEach(function (n) {
+        flagged.push({ team: r[side], headline: n.headline, labels: n.labels || [],
+          points: n.points, link: n.link });
+      });
+    });
+  });
+  var seen = {};
+  flagged = flagged.filter(function (n) {
+    var k = n.team + "|" + n.headline;
+    if (seen[k]) return false; seen[k] = true; return true;
+  });
+  $("fc-news").innerHTML = flagged.length
+    ? "<h3>Noticias que mueven el pronóstico</h3><ul>" + flagged.slice(0, 12).map(function (n) {
+      return "<li><b>" + esc(n.team) + "</b> · " + esc(n.headline) +
+        ' <span class="sub">(' + esc((n.labels || []).join(", ")) + " " + signed(n.points) + ")</span></li>";
+    }).join("") + "</ul>"
+    : '<div class="sub">Ninguna nota disparó una de las reglas configuradas.</div>';
+}
 function renderAll() {
   attachMarkets(S.games, S.quotes);
   S.games.forEach(evaluateGame);
@@ -1713,7 +2248,7 @@ function renderAll() {
   });
   S.summary = summarize(S.games);
   renderStatus(); renderSources(); renderKpis(); renderGames(); renderAts();
-  renderTotals(); renderMarkets(); renderPickem(); renderSummary();
+  renderTotals(); renderMarkets(); renderPickem(); renderForecast(); renderSummary();
 }
 
 /* ------------------------------------------------------------ refresco */
@@ -1772,19 +2307,26 @@ function refresh() {
     return pr.then(function (v) { return { ok: true, value: v }; },
       function (e) { return { ok: false, error: e }; });
   })).then(function (res) {
+    var prevWeek = weekKey();
     var espn = res[0];
     if (espn.ok) {
       var raw = espn.value;
       var games = (raw.events || []).map(parseEvent).filter(function (g) { return g; });
       S.games = games;
+      /* La semana pedida manda sobre la que eche el feed: la quiniela y el
+         pronóstico tienen que corresponder a la jornada que se está revisando. */
+      var requestedWeek = parseInt($("week").value, 10) || null;
       S.meta = {
         season: (raw.season || {}).year || ((raw.leagues || [{}])[0].season || {}).year,
         seasontype: (raw.season || {}).type || parseInt($("stype").value, 10),
-        week: (raw.week || {}).number || parseInt($("week").value, 10) || null
+        week: requestedWeek || (raw.week || {}).number || null
       };
       S.online = true; S.error = ""; S.updated = new Date().toISOString();
       S.sourceStatus.espn = { ok: true, detail: games.length + " partidos" };
-      if (weekKey() !== prevWeek) loadPicksForWeek();
+      if (weekKey() !== prevWeek) {
+        loadPicksForWeek();
+        $("fc-week").value = (S.meta.week || 0) + 1;
+      }
       if (S.meta.season) $("season").value = S.meta.season;
       if (S.meta.seasontype) $("stype").value = String(S.meta.seasontype);
       persist();
@@ -1882,6 +2424,8 @@ function bind() {
     savePicks(); renderPickem();
   });
   $("pk-lock").addEventListener("change", function () { renderPickem(); });
+  $("fc-generate").addEventListener("click", generateForecast);
+  $("fc-apply").addEventListener("click", applyForecastToPicks);
   ["pk-mode", "pk-scoring"].forEach(function (id) {
     $(id).addEventListener("change", function () {
       var picks = currentPicks();
@@ -1938,6 +2482,7 @@ function init() {
     if ([].slice.call($("every").options).some(function (o) { return o.value === opt; })) $("every").value = opt;
   }
   restore();
+  if (!$("fc-week").value) $("fc-week").value = ((S.meta || {}).week || 0) + 1;
   loadPicksForWeek();
   bind();
   renderAll();

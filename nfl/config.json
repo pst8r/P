@@ -45,10 +45,131 @@
       "enabled": true,
       "endpoint": "https://api.elections.kalshi.com/trade-api/v2/markets",
       "series_ticker": "KXNFLGAME"
+    },
+    "injuries": {
+      "enabled": true,
+      "endpoint": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries"
+    },
+    "news": {
+      "enabled": true,
+      "endpoint": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/news",
+      "query": "limit=50"
     }
   },
   "consensus": {
     "model_weight": 0.5
+  },
+  "forecast": {
+    "home_field": 2.0,
+    "form_weight": 0.12,
+    "form_cap": 2.5,
+    "injury_cap": 4.0,
+    "news_cap": 1.5,
+    "market_cap": 3.0,
+    "total_cap": 6.0,
+    "position_weights": {
+      "QB": 2.2,
+      "RB": 0.5,
+      "WR": 0.6,
+      "TE": 0.4,
+      "OT": 0.5,
+      "OG": 0.4,
+      "C": 0.4,
+      "OL": 0.45,
+      "G": 0.4,
+      "T": 0.5,
+      "DE": 0.6,
+      "DT": 0.5,
+      "EDGE": 0.6,
+      "LB": 0.4,
+      "CB": 0.5,
+      "S": 0.4,
+      "FS": 0.4,
+      "SS": 0.4,
+      "K": 0.3,
+      "P": 0.15,
+      "LS": 0.1,
+      "FB": 0.2,
+      "default": 0.25
+    },
+    "status_weights": {
+      "out": 1.0,
+      "injured reserve": 1.0,
+      "suspension": 1.0,
+      "suspended": 1.0,
+      "doubtful": 0.75,
+      "questionable": 0.35,
+      "probable": 0.1,
+      "day-to-day": 0.2,
+      "day to day": 0.2
+    },
+    "news_rules": [
+      {
+        "label": "fuera de cancha",
+        "weight": -0.8,
+        "terms": [
+          "suspended",
+          "suspension",
+          "arrest",
+          "charged",
+          "lawsuit",
+          "police",
+          "personal conduct",
+          "indicted",
+          "investigation",
+          "banned",
+          "fired",
+          "steps down",
+          "resigns",
+          "death",
+          "hospitalized"
+        ]
+      },
+      {
+        "label": "plantel inestable",
+        "weight": -0.4,
+        "terms": [
+          "trade request",
+          "contract dispute",
+          "holdout",
+          "benched",
+          "released",
+          "waived",
+          "locker room",
+          "illness outbreak",
+          "coordinator change"
+        ]
+      },
+      {
+        "label": "refuerzo",
+        "weight": 0.3,
+        "terms": [
+          "activated",
+          "returns",
+          "cleared to play",
+          "expected to play",
+          "signs",
+          "extension",
+          "reinstated"
+        ]
+      },
+      {
+        "label": "logística",
+        "weight": -0.3,
+        "terms": [
+          "london",
+          "munich",
+          "international series",
+          "short week",
+          "thursday night",
+          "travel",
+          "blizzard",
+          "high winds",
+          "hurricane",
+          "field conditions"
+        ]
+      }
+    ]
   },
   "pickem": {
     "mode": "ats",

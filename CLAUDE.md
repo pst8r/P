@@ -86,7 +86,9 @@ plus a self-contained `nfl.html` dashboard with cover/push/win/total
 probabilities, market-implied cover probabilities and a model/market consensus.
 It also scores the user's own pick'em entry (Yahoo Pro Football Pick'em rules:
 straight-up or against-the-spread, standard or confidence points, tiebreaker on
-a game's combined total) against live results.
+a game's combined total) against live results, and builds a forecast for the
+next week from ESPN's injury report, ESPN news headlines (keyword-classified,
+including off-field items), the previous week's form and the prediction markets.
 
 - Pure standard library; no dependencies. `--demo` builds the sample output
   offline with deterministic synthetic games.
@@ -102,6 +104,13 @@ a game's combined total) against live results.
   or in the browser's localStorage per season/phase/week; keys are `AWAY@HOME`.
   Keep the two honesty rules: auto-fill only touches games that have not started,
   and started games are locked by default.
+- Picks are sealed with season/phase/week and are NOT scored against a different
+  week — both in Python and in the page. The requested week wins over whatever
+  the feed echoes back.
+- Forecast adjustments (injuries, form, news, market) are each capped and always
+  displayed broken down, with the injuries and headlines that caused them. Keep
+  it that way: it is an information organiser, not a verdict. News weights live
+  in `forecast.news_rules` and are keyword-based.
 - Official team colors live in `TEAM_META`; crests come from ESPN's logo CDN with
   a colored-badge fallback. This is a private dashboard — keep the note that the
   marks belong to the clubs, and do not add redistribution features.

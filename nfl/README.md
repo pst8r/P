@@ -11,7 +11,12 @@ oficiales de los 32 equipos. Es una herramienta privada de análisis.
 
 Incluye una sección de **quiniela propia** con la metodología de Yahoo Fantasy Pick'em: capturas
 tus pronósticos, el tablero los contrasta contra los resultados en vivo y calcula cuántos puntos
-llevas y cuántos proyectas terminar la semana.
+llevas y cuántos proyectas terminar la semana. La quiniela siempre corresponde a la jornada que
+estás revisando.
+
+Y un **pronóstico de la jornada siguiente** que ordena la información disponible: reporte de
+lesiones, desempeño de la semana anterior, noticias del plantel —incluidas las que no son
+deportivas— y cotizaciones de los mercados de predicción.
 
 Genera dos artefactos en `output/`:
 
@@ -56,6 +61,8 @@ Sólo usa la librería estándar de Python 3.9+. No hay dependencias que instala
 | ESPN | Marcador, cuarto, reloj, posesión, down & distance, línea, total y momios | `site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard` |
 | Polymarket | Precio del mercado del ganador (dólares por acción = probabilidad) | `gamma-api.polymarket.com/events?tag_slug=nfl` |
 | Kalshi | Precio del mercado del ganador (centavos = probabilidad), serie `KXNFLGAME` | `api.elections.kalshi.com/trade-api/v2/markets` |
+| ESPN · lesiones | Reporte de lesiones por equipo (jugador, posición, estatus) | `site.api.espn.com/.../nfl/injuries` |
+| ESPN · noticias | Titulares de la liga con los equipos que menciona cada uno | `site.api.espn.com/.../nfl/news` |
 | ESPN CDN | Escudos oficiales de los equipos | `a.espncdn.com/i/teamlogos/nfl/500/{abbr}.png` |
 
 Las tres consultas salen **en paralelo** en cada refresco y son independientes: si una falla,
@@ -97,7 +104,7 @@ redistribuye ni comercializa esos activos.
 | Auto | Intervalo de auto-refresco; se pausa cuando la pestaña no está visible. |
 | Actualizar ahora | Fuerza una consulta inmediata. |
 | Filtros | Todos · En vivo · Por jugar · Finalizados · **Cobertura apretada** (partidos en vivo cuyo spread sigue indefinido, < 65 %). |
-| Pestañas | Marcadores (tarjetas), Spread ATS, Totales, **Mercados** (Polymarket · Kalshi · modelo), **Mi quiniela**, Resumen y Metodología. |
+| Pestañas | Marcadores (tarjetas), Spread ATS, Totales, **Mercados** (Polymarket · Kalshi · modelo), **Mi quiniela**, **Pronóstico**, Resumen y Metodología. |
 | Chips de fuente | Estado de ESPN, Polymarket y Kalshi en la última lectura. |
 
 Las preferencias de temporada, fase, semana e intervalo se guardan en el navegador.
@@ -137,6 +144,16 @@ puntos y proyección.
 3. Fija el desempate: partido y total combinado.
 4. La quiniela se guarda sola en el navegador, por temporada, fase y semana.
 
+### La quiniela sigue a la jornada
+
+Cada quiniela queda sellada con temporada, fase y semana. Al cambiar de jornada en el selector se
+carga la quiniela de esa jornada, y la semana que pides manda sobre la que devuelva el feed.
+
+Si abres una quiniela capturada para otra semana, el tablero **no la puntúa** —mezclar
+pronósticos de una semana con resultados de otra no significa nada— y ofrece dos salidas:
+reasignarla a la jornada que estás viendo o empezar una nueva. El script hace lo mismo: si
+`picks.json` trae una semana distinta a la de la instantánea, avisa y no la puntúa.
+
 El botón **Exportar JSON** descarga un `picks.json` con el mismo formato que lee el script; si lo
 guardas en `nfl/picks.json`, la instantánea que genera Python ya viene con tu quiniela puntuada
 (útil para versionarla o para abrir el tablero en otro equipo). **Importar JSON** hace el camino
@@ -159,6 +176,55 @@ Dos reglas para que el ejercicio sea honesto:
 
 El tablero avisa si repites un valor de confianza, si dejas huecos en el rango 1..N o si faltan
 partidos por pronosticar.
+
+## Pronóstico de la jornada siguiente
+
+La pestaña **Pronóstico** construye la semana que viene con la información que ya existe. Parte
+del margen que implica la línea publicada y le aplica cuatro ajustes, cada uno con tope propio y
+un tope conjunto:
+
+| Ajuste | De dónde sale | Tope |
+|---|---|---|
+| Lesiones | Reporte oficial: cada jugador pesa por posición y estatus (fuera, duda, probable). El quarterback domina la escala. | `injury_cap`, 4.0 pts por equipo |
+| Forma | Margen contra la línea de la semana anterior, escalado. Una semana es muestra chica, por eso pesa poco. | `form_cap`, 2.5 pts |
+| Noticias | Titulares clasificados por reglas de palabras clave en cuatro categorías. | `news_cap`, 1.5 pts por equipo |
+| Mercado | Diferencia entre el margen que implica el precio de Polymarket o Kalshi y la base, con el peso del consenso. | `market_cap`, 3.0 pts |
+| **Conjunto** | Suma de los cuatro | `total_cap`, 6.0 pts |
+
+Las categorías de noticias, configurables en `forecast.news_rules`:
+
+| Categoría | Qué detecta | Peso |
+|---|---|---|
+| Fuera de cancha | Suspensiones, arrestos, demandas, investigaciones, despidos de entrenador | −0.8 |
+| Plantel inestable | Solicitudes de traspaso, disputas de contrato, bajas, cambios de coordinador | −0.4 |
+| Refuerzo | Altas, regresos, jugadores activados o autorizados a jugar | +0.3 |
+| Logística | Juegos internacionales, semana corta, clima extremo, viajes | −0.3 |
+
+El resultado por partido es el margen esperado, el lado sugerido, su probabilidad de cubrir y la
+confianza ordenada de menor a mayor certeza, como pide Yahoo. Cada fila muestra las lesiones y
+los titulares que movieron el número, para que puedas discutir el ajuste en lugar de aceptarlo.
+
+**Aplicar a mi quiniela** guarda esos picks en la semana pronosticada y lleva el tablero a esa
+jornada para que la ajustes a mano.
+
+```bash
+# Genera también el pronóstico de la jornada siguiente en la instantánea
+python3 nfl/nfl_dashboard.py --forecast
+
+# Pronostica una jornada concreta
+python3 nfl/nfl_dashboard.py --forecast-week 7
+```
+
+### Límites del pronóstico
+
+- La clasificación de noticias es por palabras clave, no por lectura: puede marcar de más o
+  pasar por alto un matiz. Los titulares que la dispararon se muestran siempre.
+- El peso de una lesión sale de la posición, no del jugador concreto ni de la calidad de su
+  reemplazo.
+- Con una sola semana de resultados la forma es ruido; gana peso conforme avanza la temporada
+  sólo si amplías la muestra.
+- Si la jornada siguiente aún no tiene líneas publicadas, la base es ventaja de local más forma,
+  bastante más débil. La columna lo indica.
 
 ## Modelo
 
@@ -221,6 +287,7 @@ terminados no se calcula.
 | `live` | `endpoint` del marcador, `refresh_seconds` inicial y `fetch_on_load`. |
 | `sources` | `polymarket` (`enabled`, `endpoint`, `query`) y `kalshi` (`enabled`, `endpoint`, `series_ticker`). Poner `enabled: false` apaga esa fuente en el script y en el navegador. |
 | `consensus` | `model_weight`: peso del modelo frente a los mercados (0 = sólo mercados, 1 = sólo modelo). |
+| `forecast` | `home_field`, pesos y topes de cada ajuste (`form_weight`, `form_cap`, `injury_cap`, `news_cap`, `market_cap`, `total_cap`), `position_weights`, `status_weights` y `news_rules`. |
 | `pickem` | `mode` (`ats` o `su`), `scoring` (`confidence` o `standard`) y `push_points` por omisión de la quiniela. |
 | `assets` | `logos` (usar escudos o sólo colores) y `logo_template`. |
 | `model` | `sigma_full_game`, `sigma_total`, `sigma_overtime`, `sigma_floor`, `possession_points`, `default_total` y los pesos `key_numbers` por margen. |

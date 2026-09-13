@@ -892,7 +892,7 @@ DEMO_MATCHUPS = [
 ]
 
 
-def demo_games(cfg: dict, seed: int = 20250913) -> List[dict]:
+def demo_games(cfg: dict, seed: int = 20250913, all_pre: bool = False) -> List[dict]:
     rnd = random.Random(seed)
     now = dt.datetime.now(dt.timezone.utc)
     games: List[dict] = []
@@ -906,7 +906,7 @@ def demo_games(cfg: dict, seed: int = 20250913) -> List[dict]:
                 "record": "%d-%d" % (rnd.randint(1, 11), rnd.randint(1, 8))}
 
     # 5 finalizados, 5 en curso (incluye medio tiempo y tiempo extra), el resto por jugar
-    plan = (["post"] * 5) + ["in", "in", "in", "half", "ot"] + ["pre"] * 6
+    plan = ["pre"] * 16 if all_pre else (["post"] * 5) + ["in", "in", "in", "half", "ot"] + ["pre"] * 6
 
     for i, (home_abbr, away_abbr) in enumerate(DEMO_MATCHUPS):
         kind = plan[i % len(plan)]
@@ -1021,9 +1021,345 @@ def demo_quotes(games: List[dict], cfg: dict, seed: int = 7311) -> List[dict]:
     return quotes
 
 
+def demo_context(games: List[dict], seed: int = 991) -> Tuple[Dict[str, List[dict]], List[dict]]:
+    """Reporte de lesiones y titulares sintéticos para el modo demo."""
+    rnd = random.Random(seed)
+    positions = ["QB", "RB", "WR", "TE", "OT", "DE", "LB", "CB", "S", "K"]
+    statuses = ["Out", "Doubtful", "Questionable", "Injured Reserve"]
+    abbrs = sorted({g["home"]["abbr"] for g in games} | {g["away"]["abbr"] for g in games})
+    injuries: Dict[str, List[dict]] = {}
+    for abbr in abbrs:
+        rows = []
+        for _ in range(rnd.randint(1, 5)):
+            rows.append({
+                "player": "Jugador %d" % rnd.randint(10, 99),
+                "position": rnd.choice(positions),
+                "status": rnd.choice(statuses),
+                "detail": "Reporte semanal del equipo.",
+            })
+        injuries[abbr] = rows
+
+    plantillas = [
+        ("%s starting QB suspended two games for violation of the personal conduct policy", "grave"),
+        ("%s head coach fired after slow start", "grave"),
+        ("%s player arrested, team says it is gathering information", "grave"),
+        ("%s star receiver requests trade amid contract dispute", "moderado"),
+        ("%s travels to London for the international series", "logistico"),
+        ("%s activates veteran lineman, expected to play Sunday", "positivo"),
+        ("%s opens as favorite after strong defensive showing", "neutro"),
+    ]
+    news: List[dict] = []
+    for abbr in rnd.sample(abbrs, min(10, len(abbrs))):
+        texto, _ = rnd.choice(plantillas)
+        news.append({
+            "headline": texto % abbr,
+            "description": "Nota sintética del modo demo.",
+            "published": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+            "teams": [abbr],
+            "link": "",
+        })
+    return injuries, news
+
+
 # ---------------------------------------------------------------------------
 # Reporte
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Lesiones, noticias y pronóstico de la jornada siguiente
+# ---------------------------------------------------------------------------
+#
+# El pronóstico parte de la línea publicada (el mejor consenso disponible) y le
+# aplica tres ajustes acotados: el reporte de lesiones, el desempeño de la
+# semana anterior y las noticias de cada plantel, incluidas las que no son
+# deportivas (suspensiones, asuntos legales, cambios de entrenador, viajes).
+# Todos los ajustes tienen tope y se muestran desglosados: la idea es ordenar la
+# información disponible, no esconder un veredicto.
+
+ESPN_INJURIES = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries"
+ESPN_NEWS = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/news"
+
+
+def _node_abbr(node: dict) -> Optional[str]:
+    """Abreviatura de un nodo de equipo, venga como sea que venga el feed."""
+    for key in ("abbreviation", "abbrev", "shortName"):
+        raw = node.get(key)
+        if raw:
+            cand = canonical_abbr(str(raw))
+            if cand in TEAM_META:
+                return cand
+    team = node.get("team") if isinstance(node.get("team"), dict) else {}
+    if team:
+        found = _node_abbr(team)
+        if found:
+            return found
+    for key in ("displayName", "name", "location", "fullName"):
+        if node.get(key):
+            found = abbr_from_text(node[key])
+            if found:
+                return found
+    return None
+
+
+def parse_injuries(payload) -> Dict[str, List[dict]]:
+    """Reporte de lesiones por equipo: {ABBR: [{jugador, posición, estatus}]}."""
+    teams = (payload or {}).get("injuries") or []
+    out: Dict[str, List[dict]] = {}
+    for node in teams:
+        abbr = _node_abbr(node)
+        if not abbr:
+            continue
+        items = node.get("injuries") or []
+        rows = []
+        for it in items:
+            athlete = it.get("athlete") or {}
+            position = ((athlete.get("position") or {}).get("abbreviation")
+                        or (athlete.get("position") or {}).get("name") or "")
+            status = (it.get("status") or (it.get("type") or {}).get("description")
+                      or (it.get("type") or {}).get("name") or "")
+            rows.append({
+                "player": athlete.get("displayName") or athlete.get("shortName") or "",
+                "position": str(position).upper(),
+                "status": str(status),
+                "detail": it.get("longComment") or it.get("shortComment") or "",
+            })
+        if rows:
+            out.setdefault(abbr, []).extend(rows)
+    return out
+
+
+def parse_news(payload, id_to_abbr: Optional[Dict[str, str]] = None) -> List[dict]:
+    """Titulares de la liga con los equipos que menciona cada uno."""
+    articles = (payload or {}).get("articles") or []
+    id_to_abbr = id_to_abbr or {}
+    out: List[dict] = []
+    for art in articles:
+        headline = art.get("headline") or art.get("title") or ""
+        description = art.get("description") or ""
+        teams: List[str] = []
+        for cat in (art.get("categories") or []):
+            raw_id = cat.get("teamId") or ((cat.get("team") or {}).get("id"))
+            if raw_id is not None and str(raw_id) in id_to_abbr:
+                teams.append(id_to_abbr[str(raw_id)])
+                continue
+            if cat.get("type") == "team":
+                found = _node_abbr(cat.get("team") or cat)
+                if found:
+                    teams.append(found)
+        if not teams:
+            found = abbr_from_text(headline) or abbr_from_text(description)
+            if found:
+                teams.append(found)
+        out.append({
+            "headline": headline,
+            "description": description,
+            "published": art.get("published") or art.get("lastModified") or "",
+            "teams": sorted(set(teams)),
+            "link": (((art.get("links") or {}).get("web") or {}).get("href") or ""),
+        })
+    return out
+
+
+def classify_news(article: dict, rules: List[dict]) -> Tuple[float, List[str]]:
+    """Puntos y etiquetas que aporta un titular según las reglas configuradas."""
+    text = (" ".join([article.get("headline") or "", article.get("description") or ""])).lower()
+    total, labels = 0.0, []
+    for rule in rules:
+        for term in rule.get("terms", []):
+            if term.lower() in text:
+                total += float(rule.get("weight", 0))
+                labels.append(rule.get("label", "noticia"))
+                break
+    return total, labels
+
+
+def injury_points(rows: List[dict], cfg: dict) -> Tuple[float, List[str]]:
+    """Convierte un reporte de lesiones en puntos de desventaja, con tope."""
+    f = cfg.get("forecast", {})
+    pos_w = f.get("position_weights", {})
+    status_w = f.get("status_weights", {})
+    cap = float(f.get("injury_cap", 4.0))
+    total, notes = 0.0, []
+    for row in rows or []:
+        status_key = str(row.get("status", "")).strip().lower()
+        weight_status = None
+        for key, value in status_w.items():
+            if key in status_key:
+                weight_status = float(value)
+                break
+        if weight_status is None:
+            continue
+        pos = str(row.get("position", "")).upper()
+        weight_pos = float(pos_w.get(pos, pos_w.get("default", 0.2)))
+        points = weight_pos * weight_status
+        if points >= 0.5:
+            notes.append("%s %s (%s)" % (pos or "?", row.get("player") or "", row.get("status") or ""))
+        total += points
+    return (min(total, cap), notes[:4])
+
+
+def team_form(form_games: List[dict], cfg: dict) -> Dict[str, dict]:
+    """Desempeño de la semana anterior: margen contra la línea y diferencia de puntos."""
+    f = cfg.get("forecast", {})
+    weight = float(f.get("form_weight", 0.12))
+    cap = float(f.get("form_cap", 2.5))
+    out: Dict[str, dict] = {}
+    for g in form_games or []:
+        if g.get("state") != "post":
+            continue
+        margin = (g.get("home_score") or 0) - (g.get("away_score") or 0)
+        line = g.get("line_home")
+        cover = margin + float(line) if line is not None else float(margin)
+        for side, sign in (("home", 1.0), ("away", -1.0)):
+            abbr = g[side]["abbr"]
+            node = out.setdefault(abbr, {"ats": 0.0, "margin": 0.0, "games": 0,
+                                         "points_for": 0, "points_against": 0})
+            node["ats"] += sign * cover
+            node["margin"] += sign * margin
+            node["games"] += 1
+            node["points_for"] += (g.get("home_score") or 0) if side == "home" else (g.get("away_score") or 0)
+            node["points_against"] += (g.get("away_score") or 0) if side == "home" else (g.get("home_score") or 0)
+    for abbr, node in out.items():
+        n = max(1, node["games"])
+        node["ats_avg"] = round(node["ats"] / n, 2)
+        node["margin_avg"] = round(node["margin"] / n, 2)
+        node["points"] = round(clamp(weight * node["ats_avg"], -cap, cap), 2)
+    return out
+
+
+def build_forecast(games: List[dict], cfg: dict, form: Dict[str, dict],
+                   injuries: Dict[str, List[dict]], news: List[dict],
+                   meta: Optional[dict] = None, quotes: Optional[List[dict]] = None) -> dict:
+    """Pronóstico por partido de una jornada que aún no se juega."""
+    f = cfg.get("forecast", {})
+    sigma = float(cfg.get("model", {}).get("sigma_full_game", 13.2))
+    weights = cfg.get("model", {}).get("key_numbers", {})
+    hfa = float(f.get("home_field", 2.0))
+    news_cap = float(f.get("news_cap", 1.5))
+    total_cap = float(f.get("total_cap", 6.0))
+    rules = f.get("news_rules", [])
+
+    news_by_team: Dict[str, dict] = {}
+    for art in news or []:
+        points, labels = classify_news(art, rules)
+        if points == 0 or not art.get("teams"):
+            continue
+        for abbr in art["teams"]:
+            node = news_by_team.setdefault(abbr, {"points": 0.0, "items": []})
+            node["points"] += points
+            node["items"].append({"headline": art.get("headline", ""), "labels": labels,
+                                  "points": round(points, 2), "link": art.get("link", "")})
+    for node in news_by_team.values():
+        node["points"] = round(clamp(node["points"], -news_cap, news_cap), 2)
+
+    if quotes:
+        attach_markets(games, quotes)
+    market_cap = float(f.get("market_cap", 3.0))
+    model_weight = clamp(float(cfg.get("consensus", {}).get("model_weight", 0.5)), 0.0, 1.0)
+
+    rows: List[dict] = []
+    for g in games:
+        home, away = g["home"]["abbr"], g["away"]["abbr"]
+        line = g.get("line_home")
+        inj_home, inj_home_notes = injury_points(injuries.get(home, []), cfg)
+        inj_away, inj_away_notes = injury_points(injuries.get(away, []), cfg)
+        form_home = float((form.get(home) or {}).get("points", 0.0))
+        form_away = float((form.get(away) or {}).get("points", 0.0))
+        news_home = float((news_by_team.get(home) or {}).get("points", 0.0))
+        news_away = float((news_by_team.get(away) or {}).get("points", 0.0))
+
+        if line is not None:
+            base = -float(line)
+            base_source = "línea publicada"
+        else:
+            base = hfa + (form_home - form_away)
+            base_source = "ventaja de local y forma (sin línea publicada)"
+
+        market_nodes = g.get("markets") or {}
+        market_wins = [float(m["p_home_win"]) for m in market_nodes.values()
+                       if m.get("p_home_win") is not None]
+        adj_market = 0.0
+        market_win = None
+        if market_wins:
+            market_win = sum(market_wins) / len(market_wins)
+            implied = implied_margin(market_win, sigma)
+            adj_market = clamp((implied - base) * (1.0 - model_weight), -market_cap, market_cap)
+
+        adj_inj = inj_away - inj_home
+        adj_form = form_home - form_away if line is not None else 0.0
+        adj_news = news_home - news_away
+        adjustment = clamp(adj_inj + adj_form + adj_news + adj_market, -total_cap, total_cap)
+        expected = base + adjustment
+
+        if line is not None:
+            p_home, p_push, p_away = outcome_probabilities(-float(line), expected, sigma, weights)
+            market = "spread"
+        else:
+            p_home, p_push, p_away = outcome_probabilities(0.0, expected, sigma, weights, max_push=0.02)
+            market = "ganador"
+        side = "home" if p_home >= p_away else "away"
+        rows.append({
+            "matchup": matchup_key(g), "game_id": g.get("id"), "date": g.get("date"),
+            "home": home, "away": away, "line_home": line, "market": market,
+            "base_margin": round(base, 2), "base_source": base_source,
+            "adj_injuries": round(adj_inj, 2), "adj_form": round(adj_form, 2),
+            "adj_news": round(adj_news, 2), "adj_market": round(adj_market, 2),
+            "market_home_win": round(market_win, 4) if market_win is not None else None,
+            "adjustment": round(adjustment, 2),
+            "expected_margin": round(expected, 2),
+            "p_home": round(p_home, 4), "p_away": round(p_away, 4), "p_push": round(p_push, 4),
+            "pick": g[side]["abbr"], "pick_side": side,
+            "pick_probability": round(max(p_home, p_away), 4),
+            "injuries": {"home": round(inj_home, 2), "away": round(inj_away, 2),
+                         "home_notes": inj_home_notes, "away_notes": inj_away_notes},
+            "form": {"home": form_home, "away": form_away},
+            "news": {"home": (news_by_team.get(home) or {}).get("items", [])[:3],
+                     "away": (news_by_team.get(away) or {}).get("items", [])[:3]},
+        })
+
+    ranked = sorted(rows, key=lambda r: r["pick_probability"])
+    for i, row in enumerate(ranked, start=1):
+        row["suggested_confidence"] = i
+
+    return {
+        "generated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "meta": meta or {},
+        "games": len(rows),
+        "with_line": sum(1 for r in rows if r.get("line_home") is not None),
+        "injury_teams": len(injuries or {}),
+        "news_articles": len(news or []),
+        "news_flagged": sum(1 for r in rows if r["adj_news"] != 0),
+        "with_market": sum(1 for r in rows if r.get("market_home_win") is not None),
+        "rows": sorted(rows, key=lambda r: -r["suggested_confidence"]),
+    }
+
+
+def fetch_context(cfg: dict, id_to_abbr: Dict[str, str]) -> Tuple[Dict[str, List[dict]], List[dict], Dict[str, str]]:
+    """Consulta lesiones y noticias; devuelve también el estado de cada fuente."""
+    sources = cfg.get("sources", {})
+    status: Dict[str, str] = {}
+    injuries: Dict[str, List[dict]] = {}
+    news: List[dict] = []
+
+    inj_cfg = sources.get("injuries", {})
+    if inj_cfg.get("enabled", True):
+        try:
+            injuries = parse_injuries(http_json(inj_cfg.get("endpoint", ESPN_INJURIES)))
+            status["injuries"] = "ok (%d equipos)" % len(injuries)
+        except Exception as exc:
+            status["injuries"] = "error: %s" % exc
+
+    news_cfg = sources.get("news", {})
+    if news_cfg.get("enabled", True):
+        url = news_cfg.get("endpoint", ESPN_NEWS) + "?" + (news_cfg.get("query") or "limit=50")
+        try:
+            news = parse_news(http_json(url), id_to_abbr)
+            status["news"] = "ok (%d notas)" % len(news)
+        except Exception as exc:
+            status["news"] = "error: %s" % exc
+
+    return injuries, news, status
+
 
 # ---------------------------------------------------------------------------
 # Quiniela propia — metodología Yahoo Fantasy Pick'em
@@ -1078,10 +1414,38 @@ def pick_outcome(g: dict, side: str, mode: str) -> Optional[str]:
     return "hit" if result == side else "miss"
 
 
-def score_picks(games: List[dict], picks: Optional[dict], cfg: dict) -> Optional[dict]:
+def picks_week_mismatch(picks: Optional[dict], meta: Optional[dict]) -> Optional[dict]:
+    """La quiniela sólo puntúa contra la jornada para la que se capturó."""
+    if not picks or not meta:
+        return None
+    fields = (("season", "temporada"), ("seasontype", "fase"), ("week", "semana"))
+    diffs = []
+    for key, label in fields:
+        want, got = picks.get(key), meta.get(key)
+        if want is None or got is None:
+            continue
+        if int(want) != int(got):
+            diffs.append({"field": label, "picks": want, "viewing": got})
+    if not diffs:
+        return None
+    return {
+        "diffs": diffs,
+        "picks_week": {k: picks.get(k) for k, _ in fields},
+        "viewing_week": {k: meta.get(k) for k, _ in fields},
+    }
+
+
+def score_picks(games: List[dict], picks: Optional[dict], cfg: dict,
+                meta: Optional[dict] = None) -> Optional[dict]:
     """Puntaje obtenido, en juego y proyectado de la quiniela del usuario."""
     if not picks or not picks.get("picks"):
         return None
+    mismatch = picks_week_mismatch(picks, meta)
+    if mismatch:
+        return {"week_mismatch": mismatch, "rows": [], "issues": [
+            "La quiniela es de otra jornada (%s) y no se puntúa contra la que estás viendo (%s)." % (
+                " ".join("%s %s" % (d["field"], d["picks"]) for d in mismatch["diffs"]),
+                " ".join("%s %s" % (d["field"], d["viewing"]) for d in mismatch["diffs"]))]}
     rules = cfg.get("pickem", {})
     mode = (picks.get("mode") or rules.get("mode", "ats")).lower()
     scoring = (picks.get("scoring") or rules.get("scoring", "confidence")).lower()
@@ -1218,7 +1582,6 @@ def demo_picks(games: List[dict], cfg: dict, seed: int = 4242) -> dict:
     tb = ranked[-1][1] if ranked else None
     return {
         "mode": "ats", "scoring": "confidence",
-        "season": None, "week": None,
         "tiebreaker": {"matchup": matchup_key(tb), "total": 45} if tb else {},
         "picks": picks,
     }
@@ -1269,7 +1632,8 @@ def summarize(games: List[dict]) -> dict:
 def build_report(games: List[dict], cfg: dict, meta: dict, source: str,
                  quotes: Optional[List[dict]] = None,
                  source_status: Optional[Dict[str, str]] = None,
-                 picks: Optional[dict] = None) -> dict:
+                 picks: Optional[dict] = None,
+                 forecast: Optional[dict] = None) -> dict:
     if quotes:
         attach_markets(games, quotes)
     for g in games:
@@ -1287,7 +1651,8 @@ def build_report(games: List[dict], cfg: dict, meta: dict, source: str,
         "team_aliases": TEAM_ALIASES,
         "summary": summarize(games),
         "picks": picks or None,
-        "pickem": score_picks(games, picks, cfg),
+        "pickem": score_picks(games, picks, cfg, meta),
+        "forecast": forecast,
         "games": games,
     }
 
@@ -1404,7 +1769,15 @@ select.cf:disabled{opacity:.55;cursor:not-allowed}
 button.pk.sel{border-color:var(--cyan);color:var(--white);background:rgba(0,217,255,.10)}
 label.act.file{cursor:pointer;display:inline-flex;align-items:center}
 select.cf{padding:5px 8px;font-size:12px}
-#pk-kpis{margin:4px 0 14px}
+#pk-kpis,#fc-kpis{margin:4px 0 14px}
+#fc-sources{margin:0 0 12px}
+.fcnotes{font-size:11px;color:var(--mute);white-space:normal;max-width:430px;margin-top:4px;line-height:1.35}
+.fcnotes i{color:var(--amber);font-style:normal}
+.fcnews{margin-top:16px}
+.fcnews h3{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan);margin:0 0 8px}
+.fcnews ul{margin:0;padding-left:18px;font-size:12.5px;color:var(--ice)}
+.fcnews li{margin-bottom:5px}
+#pk-week{margin-bottom:8px}
 .trow .nm{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .trow .nm small{display:block;color:var(--mute);font-size:11px;font-weight:400}
 .trow .ball{color:var(--amber);font-size:12px;width:14px;text-align:center}
@@ -1516,6 +1889,7 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
   <button data-tab="totals">Totales</button>
   <button data-tab="markets">Mercados</button>
   <button data-tab="picks">Mi quiniela</button>
+  <button data-tab="forecast">Pronóstico</button>
   <button data-tab="summary">Resumen</button>
   <button data-tab="method">Metodología</button>
 </div>
@@ -1561,6 +1935,8 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
     <h3>Mi quiniela · metodología Yahoo Pick'em</h3>
     <div class="hint sub">Elige un equipo por partido y reparte la confianza. El acierto paga los
       puntos asignados; el fallo, cero. Los puntos se recalculan con cada refresco del marcador.</div>
+    <div class="sub" id="pk-week"></div>
+    <div id="pk-mismatch"></div>
     <div class="pkctl">
       <div class="ctlgroup">
         <label for="pk-mode">Pronóstico</label>
@@ -1605,6 +1981,34 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
   </div>
 </section>
 
+<section data-panel="forecast">
+  <div class="card">
+    <h3>Pronóstico de la jornada siguiente</h3>
+    <div class="hint sub">Parte de la línea publicada y la corrige con cuatro fuentes: el reporte
+      de lesiones, el desempeño de la semana anterior, las noticias del plantel —incluidas las que
+      no son deportivas— y los mercados de predicción. Cada ajuste tiene tope y se muestra
+      desglosado para que puedas discutirlo, no para que lo aceptes a ciegas.</div>
+    <div class="pkctl">
+      <div class="ctlgroup">
+        <label for="fc-week">Semana a pronosticar</label>
+        <input type="number" id="fc-week" min="1" max="22" step="1">
+      </div>
+      <button class="act" id="fc-generate">Generar pronóstico</button>
+      <button class="act" id="fc-apply">Aplicar a mi quiniela</button>
+      <span class="sub" id="fc-status"></span>
+    </div>
+    <div class="sources" id="fc-sources"></div>
+    <div class="kpis" id="fc-kpis"></div>
+    <div class="tscroll"><table id="forecast-table"></table></div>
+    <div class="fcnews" id="fc-news"></div>
+    <div class="note" style="margin-top:16px"><b>Cómo leerlo.</b> «Base» es el margen que implica
+      la línea publicada; si no hay línea, la ventaja de local más la forma. Las columnas de
+      lesiones, forma, noticias y mercado son puntos sumados o restados al margen del local, con
+      tope individual y un tope conjunto. El pick sugerido es el lado con mayor probabilidad de
+      cubrir y la confianza se ordena de menor a mayor certeza, como pide Yahoo.</div>
+  </div>
+</section>
+
 <section data-panel="summary">
   <div class="grid2">
     <div class="card"><h3>Cobertura de la jornada</h3><div id="ats-record"></div></div>
@@ -1642,6 +2046,32 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
     <p>Cuando el feed trae momios, se convierten a probabilidad implícita y se les retira la
     comisión repartiéndola entre ambos lados. La columna <i>edge</i> es la diferencia entre la
     probabilidad del modelo y esa probabilidad sin comisión: positiva favorece al local.</p>
+    <h3>Pronóstico de la jornada siguiente</h3>
+    <p>El botón <i>Generar pronóstico</i> consulta el calendario de la semana objetivo, el reporte
+    de lesiones de la liga y las noticias del día, y los combina con lo que ya está en el tablero:
+    el desempeño de la semana en revisión y las cotizaciones de los mercados de predicción.</p>
+    <ul>
+      <li><b>Base</b>: el margen que implica la línea publicada. Cuando todavía no hay línea, la
+      ventaja de local más la diferencia de forma entre los dos equipos.</li>
+      <li><b>Lesiones</b>: cada jugador del reporte pesa según su posición y su estatus (fuera,
+      duda, probable). El quarterback domina la escala; el total por equipo tiene tope.</li>
+      <li><b>Forma</b>: margen contra la línea de la semana anterior, escalado y acotado. Una
+      semana es una muestra pequeña, por eso pesa poco.</li>
+      <li><b>Noticias</b>: los titulares se clasifican con reglas de palabras clave configurables
+      en <code>forecast.news_rules</code>, con cuatro categorías: asuntos fuera de cancha
+      (suspensiones, temas legales, despidos), plantel inestable (traspasos, disputas de
+      contrato), refuerzos (regresos y altas) y logística (viajes internacionales, semana corta,
+      clima extremo).</li>
+      <li><b>Mercado</b>: si Polymarket o Kalshi ya cotizan el partido, la diferencia entre el
+      margen que implica ese precio y la base entra con el peso del consenso.</li>
+    </ul>
+    <p>La suma de ajustes está acotada y cada columna se muestra por separado, con las lesiones y
+    los titulares que la originaron. <i>Aplicar a mi quiniela</i> guarda los picks sugeridos en la
+    semana pronosticada, con la confianza ordenada de menor a mayor certeza.</p>
+    <p><b>Límites.</b> La clasificación de noticias es por palabras clave, no por lectura: puede
+    marcar de más o pasar por alto un matiz. El peso de una lesión sale de la posición, no del
+    jugador concreto ni de su reemplazo. Trátalo como un ordenador de información, no como un
+    veredicto.</p>
     <h3>Quiniela (metodología Yahoo Pick'em)</h3>
     <p>Yahoo Pro Football Pick'em combina dos ajustes, ambos disponibles en la pestaña
     <i>Mi quiniela</i>:</p>
@@ -1775,6 +2205,9 @@ var S = {
   quotes: BOOT.quotes || [],
   picks: BOOT.picks || null,
   pickem: null,
+  forecast: BOOT.forecast || null,
+  forecastLoading: false,
+  forecastStatus: {},
   quotesAt: BOOT.generated_at || "",
   sourceStatus: { espn: { ok: false, detail: "sin consultar" },
                   polymarket: { ok: false, detail: "sin consultar" },
@@ -2264,6 +2697,314 @@ function attachMarkets(games, quotes) {
   });
 }
 
+/* ------- pronóstico: lesiones, forma de la semana previa y noticias ---- */
+var FC = CFG.forecast || {};
+
+function nodeAbbr(node) {
+  if (!node) return null;
+  var keys = ["abbreviation", "abbrev", "shortName"];
+  for (var i = 0; i < keys.length; i++) {
+    if (node[keys[i]]) {
+      var cand = canonicalAbbr(String(node[keys[i]]));
+      if (TEAM_META[cand]) return cand;
+    }
+  }
+  if (node.team && typeof node.team === "object") {
+    var nested = nodeAbbr(node.team);
+    if (nested) return nested;
+  }
+  var names = ["displayName", "name", "location", "fullName"];
+  for (var j = 0; j < names.length; j++) {
+    if (node[names[j]]) {
+      var found = abbrFromText(node[names[j]]);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+function parseInjuries(payload) {
+  var teams = (payload || {}).injuries || [];
+  var out = {};
+  teams.forEach(function (node) {
+    var abbr = nodeAbbr(node);
+    if (!abbr) return;
+    var rows = (node.injuries || []).map(function (it) {
+      var athlete = it.athlete || {};
+      var pos = (athlete.position || {}).abbreviation || (athlete.position || {}).name || "";
+      var status = it.status || (it.type || {}).description || (it.type || {}).name || "";
+      return {
+        player: athlete.displayName || athlete.shortName || "",
+        position: String(pos).toUpperCase(),
+        status: String(status),
+        detail: it.longComment || it.shortComment || ""
+      };
+    });
+    if (rows.length) out[abbr] = (out[abbr] || []).concat(rows);
+  });
+  return out;
+}
+function parseNews(payload, idToAbbr) {
+  var articles = (payload || {}).articles || [];
+  idToAbbr = idToAbbr || {};
+  return articles.map(function (art) {
+    var teams = [];
+    (art.categories || []).forEach(function (cat) {
+      var rawId = cat.teamId || ((cat.team || {}).id);
+      if (rawId !== undefined && rawId !== null && idToAbbr[String(rawId)]) {
+        teams.push(idToAbbr[String(rawId)]); return;
+      }
+      if (cat.type === "team") {
+        var found = nodeAbbr(cat.team || cat);
+        if (found) teams.push(found);
+      }
+    });
+    var headline = art.headline || art.title || "";
+    var description = art.description || "";
+    if (!teams.length) {
+      var guess = abbrFromText(headline) || abbrFromText(description);
+      if (guess) teams.push(guess);
+    }
+    return {
+      headline: headline, description: description,
+      published: art.published || art.lastModified || "",
+      teams: teams.filter(function (t, i) { return teams.indexOf(t) === i; }).sort(),
+      link: (((art.links || {}).web || {}).href) || ""
+    };
+  });
+}
+function classifyNews(article, rules) {
+  var text = ((article.headline || "") + " " + (article.description || "")).toLowerCase();
+  var total = 0, labels = [];
+  (rules || []).forEach(function (rule) {
+    var terms = rule.terms || [];
+    for (var i = 0; i < terms.length; i++) {
+      if (text.indexOf(String(terms[i]).toLowerCase()) >= 0) {
+        total += Number(rule.weight || 0);
+        labels.push(rule.label || "noticia");
+        break;
+      }
+    }
+  });
+  return { points: total, labels: labels };
+}
+function injuryPoints(rows) {
+  var posW = FC.position_weights || {}, statusW = FC.status_weights || {};
+  var cap = Number(FC.injury_cap === undefined ? 4 : FC.injury_cap);
+  var total = 0, notes = [];
+  (rows || []).forEach(function (row) {
+    var statusKey = String(row.status || "").trim().toLowerCase();
+    var ws = null;
+    Object.keys(statusW).forEach(function (k) {
+      if (ws === null && statusKey.indexOf(k) >= 0) ws = Number(statusW[k]);
+    });
+    if (ws === null) return;
+    var pos = String(row.position || "").toUpperCase();
+    var wp = Number(posW[pos] !== undefined ? posW[pos] : (posW["default"] || 0.25));
+    var pts = wp * ws;
+    if (pts >= 0.5 && notes.length < 4) {
+      notes.push((pos || "?") + " " + (row.player || "") + " (" + (row.status || "") + ")");
+    }
+    total += pts;
+  });
+  return { points: Math.min(total, cap), notes: notes };
+}
+function teamForm(games) {
+  var weight = Number(FC.form_weight === undefined ? 0.12 : FC.form_weight);
+  var cap = Number(FC.form_cap === undefined ? 2.5 : FC.form_cap);
+  var out = {};
+  (games || []).forEach(function (g) {
+    if (g.state !== "post") return;
+    var margin = (g.home_score || 0) - (g.away_score || 0);
+    var cover = (g.line_home === null || g.line_home === undefined) ? margin : margin + Number(g.line_home);
+    [["home", 1], ["away", -1]].forEach(function (pair) {
+      var abbr = g[pair[0]].abbr, sign = pair[1];
+      var node = out[abbr] || (out[abbr] = { ats: 0, margin: 0, games: 0 });
+      node.ats += sign * cover; node.margin += sign * margin; node.games++;
+    });
+  });
+  Object.keys(out).forEach(function (abbr) {
+    var node = out[abbr], n = Math.max(1, node.games);
+    node.ats_avg = node.ats / n;
+    node.margin_avg = node.margin / n;
+    node.points = clamp(weight * node.ats_avg, -cap, cap);
+  });
+  return out;
+}
+function buildForecast(games, form, injuries, news, meta, quotes) {
+  var sigma = Number(M.sigma_full_game || 13.2);
+  var hfa = Number(FC.home_field === undefined ? 2 : FC.home_field);
+  var newsCap = Number(FC.news_cap === undefined ? 1.5 : FC.news_cap);
+  var marketCap = Number(FC.market_cap === undefined ? 3 : FC.market_cap);
+  var totalCap = Number(FC.total_cap === undefined ? 6 : FC.total_cap);
+  var modelWeight = clamp(CONSENSUS.model_weight === undefined ? 0.5 : Number(CONSENSUS.model_weight), 0, 1);
+  var rules = FC.news_rules || [];
+
+  attachMarkets(games, quotes || []);
+
+  var newsByTeam = {};
+  (news || []).forEach(function (art) {
+    var res = classifyNews(art, rules);
+    if (!res.points || !art.teams.length) return;
+    art.teams.forEach(function (abbr) {
+      var node = newsByTeam[abbr] || (newsByTeam[abbr] = { points: 0, items: [] });
+      node.points += res.points;
+      node.items.push({ headline: art.headline, labels: res.labels, points: res.points, link: art.link });
+    });
+  });
+  Object.keys(newsByTeam).forEach(function (abbr) {
+    newsByTeam[abbr].points = clamp(newsByTeam[abbr].points, -newsCap, newsCap);
+  });
+
+  var rows = games.map(function (g) {
+    var home = g.home.abbr, away = g.away.abbr;
+    var line = (g.line_home === null || g.line_home === undefined) ? null : Number(g.line_home);
+    var injHome = injuryPoints(injuries[home]), injAway = injuryPoints(injuries[away]);
+    var formHome = ((form[home] || {}).points) || 0, formAway = ((form[away] || {}).points) || 0;
+    var newsHome = ((newsByTeam[home] || {}).points) || 0, newsAway = ((newsByTeam[away] || {}).points) || 0;
+
+    var base, baseSource;
+    if (line !== null) { base = -line; baseSource = "línea publicada"; }
+    else { base = hfa + (formHome - formAway); baseSource = "ventaja de local y forma (sin línea publicada)"; }
+
+    var marketNodes = g.markets || {};
+    var wins = Object.keys(marketNodes).map(function (k) { return marketNodes[k].p_home_win; })
+      .filter(function (v) { return v !== undefined && v !== null; });
+    var adjMarket = 0, marketWin = null;
+    if (wins.length) {
+      marketWin = wins.reduce(function (a, b) { return a + b; }, 0) / wins.length;
+      adjMarket = clamp((impliedMargin(marketWin, sigma) - base) * (1 - modelWeight), -marketCap, marketCap);
+    }
+    var adjInj = injAway.points - injHome.points;
+    var adjForm = line !== null ? formHome - formAway : 0;
+    var adjNews = newsHome - newsAway;
+    var adjustment = clamp(adjInj + adjForm + adjNews + adjMarket, -totalCap, totalCap);
+    var expected = base + adjustment;
+
+    var probs = line !== null
+      ? outcomeProbabilities(-line, expected, sigma)
+      : outcomeProbabilities(0, expected, sigma, 0.02);
+    var side = probs[0] >= probs[2] ? "home" : "away";
+    return {
+      matchup: matchupKey(g), game: g, date: g.date, home: home, away: away,
+      line_home: line, market: line !== null ? "spread" : "ganador",
+      base_margin: base, base_source: baseSource,
+      adj_injuries: adjInj, adj_form: adjForm, adj_news: adjNews, adj_market: adjMarket,
+      market_home_win: marketWin, adjustment: adjustment, expected_margin: expected,
+      p_home: probs[0], p_push: probs[1], p_away: probs[2],
+      pick: g[side].abbr, pick_side: side, pick_probability: Math.max(probs[0], probs[2]),
+      injuries: { home: injHome.points, away: injAway.points,
+        home_notes: injHome.notes, away_notes: injAway.notes },
+      form: { home: formHome, away: formAway },
+      news: { home: ((newsByTeam[home] || {}).items || []).slice(0, 3),
+        away: ((newsByTeam[away] || {}).items || []).slice(0, 3) }
+    };
+  });
+
+  rows.slice().sort(function (a, b) { return a.pick_probability - b.pick_probability; })
+    .forEach(function (row, i) { row.suggested_confidence = i + 1; });
+  rows.sort(function (a, b) { return b.suggested_confidence - a.suggested_confidence; });
+
+  return {
+    generated_at: new Date().toISOString(), meta: meta || {},
+    games: rows.length,
+    with_line: rows.filter(function (r) { return r.line_home !== null; }).length,
+    with_market: rows.filter(function (r) { return r.market_home_win !== null; }).length,
+    injury_teams: Object.keys(injuries || {}).length,
+    news_articles: (news || []).length,
+    news_flagged: rows.filter(function (r) { return r.adj_news !== 0; }).length,
+    rows: rows
+  };
+}
+function weekScoreboardUrl(week) {
+  var m = S.meta || {};
+  var p = ["limit=100"];
+  if (m.season) p.push("dates=" + m.season);
+  p.push("seasontype=" + (m.seasontype || 2));
+  p.push("week=" + week);
+  return ENDPOINT + "?" + p.join("&");
+}
+function contextUrl(name) {
+  var c = (SOURCES[name] || {});
+  if (name === "injuries") {
+    return c.endpoint || "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries";
+  }
+  return (c.endpoint || "https://site.api.espn.com/apis/site/v2/sports/football/nfl/news") +
+    "?" + (c.query || "limit=50");
+}
+function generateForecast() {
+  if (S.forecastLoading) return;
+  var week = parseInt($("fc-week").value, 10);
+  if (!week) { week = (S.meta.week || 0) + 1; $("fc-week").value = week; }
+  S.forecastLoading = true;
+  $("fc-status").textContent = "Consultando calendario, lesiones y noticias…";
+  var jobs = [fetchJson(weekScoreboardUrl(week), 15000),
+    fetchJson(contextUrl("injuries"), 15000), fetchJson(contextUrl("news"), 15000)];
+  Promise.all(jobs.map(function (pr) {
+    return pr.then(function (v) { return { ok: true, value: v }; },
+      function (e) { return { ok: false, error: e }; });
+  })).then(function (res) {
+    var status = {};
+    var nextGames = [];
+    if (res[0].ok) {
+      nextGames = (res[0].value.events || []).map(parseEvent).filter(function (g) { return g; });
+      status.schedule = { ok: true, detail: nextGames.length + " partidos" };
+    } else {
+      status.schedule = { ok: false, detail: errMsg(res[0].error) };
+    }
+    var injuries = {}, news = [];
+    if (res[1].ok) {
+      injuries = parseInjuries(res[1].value);
+      status.injuries = { ok: true, detail: Object.keys(injuries).length + " equipos" };
+    } else { status.injuries = { ok: false, detail: errMsg(res[1].error) }; }
+    var idToAbbr = {};
+    S.games.concat(nextGames).forEach(function (g) {
+      ["home", "away"].forEach(function (side) { if (g[side].id) idToAbbr[String(g[side].id)] = g[side].abbr; });
+    });
+    if (res[2].ok) {
+      news = parseNews(res[2].value, idToAbbr);
+      status.news = { ok: true, detail: news.length + " notas" };
+    } else { status.news = { ok: false, detail: errMsg(res[2].error) }; }
+
+    S.forecastStatus = status;
+    if (nextGames.length) {
+      S.forecast = buildForecast(nextGames, teamForm(S.games), injuries, news,
+        { season: S.meta.season, seasontype: S.meta.seasontype, week: week }, S.quotes);
+    }
+    S.forecastLoading = false;
+    renderForecast();
+  });
+}
+function applyForecastToPicks() {
+  var fc = S.forecast;
+  if (!fc || !fc.rows.length) return;
+  var meta = fc.meta || {};
+  var base = currentPicks();
+  var payload = {
+    mode: base.mode || "ats", scoring: base.scoring || "confidence",
+    push_points: base.push_points || 0,
+    season: meta.season || null, seasontype: meta.seasontype || null, week: meta.week || null,
+    picks: {}, tiebreaker: {}
+  };
+  fc.rows.forEach(function (row) {
+    payload.picks[row.matchup] = { team: row.pick, confidence: row.suggested_confidence };
+  });
+  var top = fc.rows[0];
+  if (top) payload.tiebreaker = { matchup: top.matchup, total: 45 };
+  try {
+    localStorage.setItem("nflPicks:" + [meta.season || "", meta.seasontype || "", meta.week || ""].join("-"),
+      JSON.stringify(payload));
+  } catch (e) { /* almacenamiento no disponible */ }
+  $("fc-status").textContent = "Quiniela de la semana " + (meta.week || "?") +
+    " guardada. Cambia el selector de semana para revisarla y ajustarla.";
+  if (String(meta.week) !== String(S.meta.week)) {
+    $("week").value = String(meta.week);
+    persist();
+    refresh();
+  } else {
+    loadPicksForWeek(); renderAll();
+  }
+}
+
 /* ------------------------- quiniela: metodología Yahoo Pick'em --------- */
 var PICKEM_RULES = CFG.pickem || {};
 
@@ -2385,7 +3126,11 @@ function scorePicks() {
   return S.pickem;
 }
 function savePicks() {
-  try { localStorage.setItem("nflPicks:" + weekKey(), JSON.stringify(currentPicks())); }
+  var picks = currentPicks(), m = S.meta || {};
+  if (picks.season === undefined || picks.season === null) picks.season = m.season || null;
+  if (picks.seasontype === undefined || picks.seasontype === null) picks.seasontype = m.seasontype || null;
+  if (picks.week === undefined || picks.week === null) picks.week = m.week || null;
+  try { localStorage.setItem("nflPicks:" + weekKey(), JSON.stringify(picks)); }
   catch (e) { /* almacenamiento no disponible */ }
 }
 function loadPicksForWeek() {
@@ -2393,7 +3138,11 @@ function loadPicksForWeek() {
     var raw = localStorage.getItem("nflPicks:" + weekKey());
     if (raw) { S.picks = JSON.parse(raw); return; }
   } catch (e) { /* se usa la quiniela embebida */ }
-  if (!S.picks) S.picks = BOOT.picks || emptyPicks();
+  var boot = BOOT.picks;
+  var m = S.meta || {};
+  var bootFits = boot && (boot.week === undefined || boot.week === null ||
+    !m.week || Number(boot.week) === Number(m.week));
+  S.picks = bootFits ? JSON.parse(JSON.stringify(boot)) : emptyPicks();
 }
 /* Rellena sólo los partidos que no han empezado: usar la probabilidad de un
    partido en curso o terminado sería pronosticar con el resultado a la vista.
@@ -2923,13 +3672,56 @@ function pickStateLabel(row) {
   if (row.outcome === "push") return '<span class="pill push">Push</span>';
   return '<span class="sub">' + esc(statusText(row.game)) + "</span>";
 }
+function picksWeekMismatch() {
+  var picks = currentPicks(), m = S.meta || {};
+  var fields = [["season", "temporada"], ["seasontype", "fase"], ["week", "semana"]];
+  var diffs = [];
+  fields.forEach(function (f) {
+    var want = picks[f[0]], got = m[f[0]];
+    if (want === null || want === undefined || got === null || got === undefined) return;
+    if (Number(want) !== Number(got)) diffs.push({ label: f[1], picks: want, viewing: got });
+  });
+  return diffs.length ? diffs : null;
+}
 function renderPickem() {
   var pk = scorePicks();
   var picks = currentPicks();
   var total = S.games.length;
+  var m = S.meta || {};
+  $("pk-week").textContent = "Jornada en revisión: " +
+    [m.season ? "temporada " + m.season : "", m.week ? "semana " + m.week : "jornada en curso"]
+      .filter(function (x) { return x; }).join(" · ");
+  var mismatch = picksWeekMismatch();
+  $("pk-mismatch").innerHTML = mismatch
+    ? '<div class="note"><b>Esta quiniela es de otra jornada.</b> Está capturada para ' +
+      esc(mismatch.map(function (d) { return d.label + " " + d.picks; }).join(", ")) +
+      " y estás viendo " + esc(mismatch.map(function (d) { return d.label + " " + d.viewing; }).join(", ")) +
+      '. <button class="act" id="pk-rebind">Usarla en la jornada que estoy viendo</button>' +
+      ' <button class="act" id="pk-fresh">Empezar una para esta jornada</button></div>'
+    : "";
+  if (mismatch) {
+    $("pk-rebind").addEventListener("click", function () {
+      picks.season = m.season; picks.seasontype = m.seasontype; picks.week = m.week;
+      savePicks(); renderAll();
+    });
+    $("pk-fresh").addEventListener("click", function () {
+      S.picks = emptyPicks();
+      S.picks.season = m.season; S.picks.seasontype = m.seasontype; S.picks.week = m.week;
+      savePicks(); renderAll();
+    });
+  }
   $("pk-mode").value = pk.mode;
   $("pk-scoring").value = pk.scoring;
 
+  if (mismatch) {
+    /* Una quiniela de otra jornada no se puntúa: mostrarla con números sería
+       mezclar pronósticos de una semana con resultados de otra. */
+    $("pk-kpis").innerHTML =
+      kpi("Puntos asegurados", "—", "La quiniela es de otra jornada", "") +
+      kpi("En juego ahora", "—", "Reasígnala o empieza una nueva", "") +
+      kpi("Proyección de la semana", "—", "Sin puntuar", "amber") +
+      kpi("Efectividad", "—", pk.picked + " pronósticos guardados", "");
+  } else {
   $("pk-kpis").innerHTML =
     kpi("Puntos asegurados", pk.earned.toFixed(0),
       pk.hits + " aciertos · " + pk.misses + " fallos" + (pk.pushes ? " · " + pk.pushes + " push" : ""), "green") +
@@ -2939,6 +3731,7 @@ function renderPickem() {
       "De " + pk.max_week.toFixed(0) + " posibles · máximo alcanzable " + pk.max_possible.toFixed(0), "amber") +
     kpi("Efectividad", pk.accuracy === null ? "—" : pk.accuracy.toFixed(0) + " %",
       pk.picked + " de " + total + " partidos pronosticados", "");
+  }
 
   var confOptions = function (value) {
     var html = '<option value="0">—</option>';
@@ -3001,6 +3794,113 @@ function renderPickem() {
       : (tb.final ? "Total real " + tb.actual : "Total proyectado " + Number(tb.actual).toFixed(1)) +
         " · tu pronóstico " + tb.prediction + " · diferencia " + Number(tb.difference).toFixed(1));
 }
+/* El pronóstico embebido por el script trae abreviaturas, no el partido
+   completo: se reconstruye el equipo desde la identidad oficial. */
+function teamFromAbbr(abbr) {
+  var key = canonicalAbbr(abbr), meta = TEAM_META[key] || {};
+  var names = TEAMS_ES[key] || [];
+  return {
+    abbr: key, name: names.length ? names[0] + " " + names[1] : key,
+    color: meta.primary || "#1E2761", alt_color: meta.secondary || "#8895B3",
+    logo: logoUrl(key)
+  };
+}
+function rowTeam(row, side) {
+  if (row.game && row.game[side]) return row.game[side];
+  return teamFromAbbr(row[side]);
+}
+function sideLineLabel(lineHome, side) {
+  if (lineHome === null || lineHome === undefined) return "";
+  var v = side === "home" ? Number(lineHome) : -Number(lineHome);
+  if (v === 0) return "PK";
+  return (v > 0 ? "+" : "") + v.toFixed(1);
+}
+function factorCell(value, digits) {
+  if (!value) return '<span class="sub">—</span>';
+  var cls = value > 0 ? "pos" : "neg";
+  return '<span class="num ' + cls + '">' + signed(value, digits === undefined ? 1 : digits) + "</span>";
+}
+function renderForecast() {
+  var fc = S.forecast;
+  var statusHtml = ["schedule", "injuries", "news"].map(function (k) {
+    var st = S.forecastStatus[k];
+    if (!st) return "";
+    var label = { schedule: "Calendario", injuries: "Lesiones", news: "Noticias" }[k];
+    return '<span class="chip src ' + (st.ok ? "ok" : "warn") + '"><span class="dot"></span>' +
+      label + " <em>" + esc(st.detail) + "</em></span>";
+  }).join("");
+  $("fc-sources").innerHTML = statusHtml;
+
+  if (!fc || !fc.rows || !fc.rows.length) {
+    $("fc-kpis").innerHTML = "";
+    $("forecast-table").innerHTML = '<tbody><tr><td class="empty">Pulsa «Generar pronóstico» para ' +
+      "construir la jornada siguiente con lesiones, forma y noticias.</td></tr></tbody>";
+    $("fc-news").innerHTML = "";
+    return;
+  }
+  var meta = fc.meta || {};
+  $("fc-kpis").innerHTML =
+    kpi("Jornada pronosticada", "Semana " + (meta.week || "?"),
+      fc.games + " partidos · " + fc.with_line + " con línea publicada", "") +
+    kpi("Con mercado", fc.with_market, "Partidos con cotización de Polymarket o Kalshi", "") +
+    kpi("Alertas de noticias", fc.news_flagged,
+      fc.news_articles + " notas revisadas · " + fc.injury_teams + " equipos con reporte", "amber") +
+    kpi("Ajuste promedio", (fc.rows.reduce(function (a, r) { return a + Math.abs(r.adjustment); }, 0) / fc.rows.length).toFixed(2),
+      "Puntos de corrección sobre la línea, en valor absoluto", "green");
+
+  var rows = fc.rows.map(function (r) {
+    var notes = [];
+    var inj = r.injuries || {}, newsRow = r.news || {};
+    if ((inj.home_notes || []).length) notes.push(esc(r.home) + ": " + esc(inj.home_notes.join(", ")));
+    if ((inj.away_notes || []).length) notes.push(esc(r.away) + ": " + esc(inj.away_notes.join(", ")));
+    ["home", "away"].forEach(function (side) {
+      (newsRow[side] || []).forEach(function (n) {
+        notes.push(esc(r[side]) + ": " + esc(n.headline) +
+          " <i>(" + esc((n.labels || []).join(", ")) + ")</i>");
+      });
+    });
+    return '<tr class="row"><td>' + teamCrest(rowTeam(r, "away"), "sm") + " " + esc(r.away) + " @ " +
+      teamCrest(rowTeam(r, "home"), "sm") + " " + esc(r.home) +
+      (notes.length ? '<div class="fcnotes">' + notes.join(" · ") + "</div>" : "") + "</td>" +
+      '<td class="num">' + (r.line_home === null ? '<span class="sub">sin línea</span>' : signed(r.line_home)) + "</td>" +
+      '<td class="num">' + signed(r.base_margin) + "</td>" +
+      "<td>" + factorCell(r.adj_injuries) + "</td>" +
+      "<td>" + factorCell(r.adj_form) + "</td>" +
+      "<td>" + factorCell(r.adj_news) + "</td>" +
+      "<td>" + factorCell(r.adj_market) + "</td>" +
+      '<td class="num">' + signed(r.expected_margin) + "</td>" +
+      "<td><b>" + esc(r.pick) + "</b> " +
+      esc(sideLineLabel(r.line_home, r.pick_side)) + "</td>" +
+      '<td class="num">' + pct(r.pick_probability, 1) + "</td>" +
+      '<td class="num">' + r.suggested_confidence + "</td></tr>";
+  }).join("");
+  $("forecast-table").innerHTML =
+    "<thead><tr><th>Partido</th><th>Línea</th><th>Base</th><th>Lesiones</th><th>Forma</th>" +
+    "<th>Noticias</th><th>Mercado</th><th>Margen esperado</th><th>Pick sugerido</th>" +
+    "<th>Prob.</th><th>Confianza</th></tr></thead><tbody>" + rows + "</tbody>";
+  wireLogos();
+
+  var flagged = [];
+  fc.rows.forEach(function (r) {
+    ["home", "away"].forEach(function (side) {
+      ((r.news || {})[side] || []).forEach(function (n) {
+        flagged.push({ team: r[side], headline: n.headline, labels: n.labels || [],
+          points: n.points, link: n.link });
+      });
+    });
+  });
+  var seen = {};
+  flagged = flagged.filter(function (n) {
+    var k = n.team + "|" + n.headline;
+    if (seen[k]) return false; seen[k] = true; return true;
+  });
+  $("fc-news").innerHTML = flagged.length
+    ? "<h3>Noticias que mueven el pronóstico</h3><ul>" + flagged.slice(0, 12).map(function (n) {
+      return "<li><b>" + esc(n.team) + "</b> · " + esc(n.headline) +
+        ' <span class="sub">(' + esc((n.labels || []).join(", ")) + " " + signed(n.points) + ")</span></li>";
+    }).join("") + "</ul>"
+    : '<div class="sub">Ninguna nota disparó una de las reglas configuradas.</div>';
+}
 function renderAll() {
   attachMarkets(S.games, S.quotes);
   S.games.forEach(evaluateGame);
@@ -3011,7 +3911,7 @@ function renderAll() {
   });
   S.summary = summarize(S.games);
   renderStatus(); renderSources(); renderKpis(); renderGames(); renderAts();
-  renderTotals(); renderMarkets(); renderPickem(); renderSummary();
+  renderTotals(); renderMarkets(); renderPickem(); renderForecast(); renderSummary();
 }
 
 /* ------------------------------------------------------------ refresco */
@@ -3070,19 +3970,26 @@ function refresh() {
     return pr.then(function (v) { return { ok: true, value: v }; },
       function (e) { return { ok: false, error: e }; });
   })).then(function (res) {
+    var prevWeek = weekKey();
     var espn = res[0];
     if (espn.ok) {
       var raw = espn.value;
       var games = (raw.events || []).map(parseEvent).filter(function (g) { return g; });
       S.games = games;
+      /* La semana pedida manda sobre la que eche el feed: la quiniela y el
+         pronóstico tienen que corresponder a la jornada que se está revisando. */
+      var requestedWeek = parseInt($("week").value, 10) || null;
       S.meta = {
         season: (raw.season || {}).year || ((raw.leagues || [{}])[0].season || {}).year,
         seasontype: (raw.season || {}).type || parseInt($("stype").value, 10),
-        week: (raw.week || {}).number || parseInt($("week").value, 10) || null
+        week: requestedWeek || (raw.week || {}).number || null
       };
       S.online = true; S.error = ""; S.updated = new Date().toISOString();
       S.sourceStatus.espn = { ok: true, detail: games.length + " partidos" };
-      if (weekKey() !== prevWeek) loadPicksForWeek();
+      if (weekKey() !== prevWeek) {
+        loadPicksForWeek();
+        $("fc-week").value = (S.meta.week || 0) + 1;
+      }
       if (S.meta.season) $("season").value = S.meta.season;
       if (S.meta.seasontype) $("stype").value = String(S.meta.seasontype);
       persist();
@@ -3180,6 +4087,8 @@ function bind() {
     savePicks(); renderPickem();
   });
   $("pk-lock").addEventListener("change", function () { renderPickem(); });
+  $("fc-generate").addEventListener("click", generateForecast);
+  $("fc-apply").addEventListener("click", applyForecastToPicks);
   ["pk-mode", "pk-scoring"].forEach(function (id) {
     $(id).addEventListener("change", function () {
       var picks = currentPicks();
@@ -3236,6 +4145,7 @@ function init() {
     if ([].slice.call($("every").options).some(function (o) { return o.value === opt; })) $("every").value = opt;
   }
   restore();
+  if (!$("fc-week").value) $("fc-week").value = ((S.meta || {}).week || 0) + 1;
   loadPicksForWeek();
   bind();
   renderAll();
@@ -3284,8 +4194,37 @@ DEFAULT_SETTINGS = {
         "polymarket": {"enabled": True, "endpoint": POLYMARKET_EVENTS,
                        "query": "tag_slug=nfl&closed=false&limit=200"},
         "kalshi": {"enabled": True, "endpoint": KALSHI_MARKETS, "series_ticker": KALSHI_NFL_SERIES},
+        "injuries": {"enabled": True, "endpoint": ESPN_INJURIES},
+        "news": {"enabled": True, "endpoint": ESPN_NEWS, "query": "limit=50"},
     },
     "consensus": {"model_weight": 0.5},
+    "forecast": {
+        "home_field": 2.0,
+        "form_weight": 0.12, "form_cap": 2.5,
+        "injury_cap": 4.0, "news_cap": 1.5, "market_cap": 3.0, "total_cap": 6.0,
+        "position_weights": {"QB": 2.2, "RB": 0.5, "WR": 0.6, "TE": 0.4, "OT": 0.5, "OG": 0.4,
+                             "C": 0.4, "OL": 0.45, "G": 0.4, "T": 0.5, "DE": 0.6, "DT": 0.5,
+                             "EDGE": 0.6, "LB": 0.4, "CB": 0.5, "S": 0.4, "FS": 0.4, "SS": 0.4,
+                             "K": 0.3, "P": 0.15, "LS": 0.1, "FB": 0.2, "default": 0.25},
+        "status_weights": {"out": 1.0, "injured reserve": 1.0, "suspension": 1.0, "suspended": 1.0,
+                           "doubtful": 0.75, "questionable": 0.35, "probable": 0.1,
+                           "day-to-day": 0.2, "day to day": 0.2},
+        "news_rules": [
+            {"label": "fuera de cancha", "weight": -0.8,
+             "terms": ["suspended", "suspension", "arrest", "charged", "lawsuit", "police",
+                       "personal conduct", "indicted", "investigation", "banned", "fired",
+                       "steps down", "resigns", "death", "hospitalized"]},
+            {"label": "plantel inestable", "weight": -0.4,
+             "terms": ["trade request", "contract dispute", "holdout", "benched", "released",
+                       "waived", "locker room", "illness outbreak", "coordinator change"]},
+            {"label": "refuerzo", "weight": 0.3,
+             "terms": ["activated", "returns", "cleared to play", "expected to play", "signs",
+                       "extension", "reinstated"]},
+            {"label": "logística", "weight": -0.3,
+             "terms": ["london", "munich", "international series", "short week", "thursday night",
+                       "travel", "blizzard", "high winds", "hurricane", "field conditions"]},
+        ],
+    },
     "pickem": {"mode": "ats", "scoring": "confidence", "push_points": 0},
     "assets": {"logos": True, "logo_template": LOGO_TEMPLATE},
     "defaults": {"seasontype": 2},
@@ -3317,6 +4256,10 @@ def main(argv=None) -> int:
     ap.add_argument("--demo", action="store_true", help="Datos sintéticos: no requiere red")
     ap.add_argument("--no-markets", action="store_true",
                     help="Omite Polymarket y Kalshi en la instantánea")
+    ap.add_argument("--forecast", action="store_true",
+                    help="Genera el pronóstico de la jornada siguiente (lesiones, forma y noticias)")
+    ap.add_argument("--forecast-week", type=int, default=None,
+                    help="Jornada a pronosticar (por omisión, la siguiente a la revisada)")
     ap.add_argument("--picks", default=None,
                     help="Archivo JSON con la quiniela propia (por omisión nfl/picks.json si existe)")
     args = ap.parse_args(argv)
@@ -3352,13 +4295,45 @@ def main(argv=None) -> int:
             if detail.startswith("error"):
                 print("%s: %s" % (name, detail), file=sys.stderr)
 
+    forecast = None
+    # En modo demo el pronóstico se genera siempre: no cuesta red y la
+    # instantánea de ejemplo debe mostrar la pestaña completa.
+    if args.forecast or args.forecast_week or source == "demo":
+        base_week = args.forecast_week or ((meta.get("week") or 0) + 1)
+        id_to_abbr = {}
+        for g in games:
+            for side in ("home", "away"):
+                if g[side].get("id"):
+                    id_to_abbr[str(g[side]["id"])] = g[side]["abbr"]
+        if source == "demo":
+            next_games = demo_games(cfg, seed=20250913 + base_week, all_pre=True)
+            injuries, news = demo_context(next_games)
+            ctx_status = {"injuries": "demo", "news": "demo"}
+        else:
+            try:
+                next_games, _ = fetch_scoreboard(meta.get("season"), base_week,
+                                                 meta.get("seasontype") or 2, None)
+            except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError, ValueError) as exc:
+                print("No se pudo consultar la jornada %s (%s)." % (base_week, exc), file=sys.stderr)
+                next_games = []
+            injuries, news, ctx_status = fetch_context(cfg, id_to_abbr)
+        if next_games:
+            forecast = build_forecast(next_games, cfg, team_form(games, cfg), injuries, news,
+                                      {"season": meta.get("season"),
+                                       "seasontype": meta.get("seasontype"), "week": base_week},
+                                      quotes)
+            forecast["source_status"] = ctx_status
+            status.update(ctx_status)
+
     picks_path = args.picks or os.path.join(HERE, "picks.json")
     picks = load_picks(picks_path)
-    report = build_report(games, cfg, meta, source, quotes, status, picks)
+    report = build_report(games, cfg, meta, source, quotes, status, picks, forecast)
     if picks is None and source == "demo" and not args.picks:
         # La instantánea de ejemplo muestra la sección con una quiniela sintética.
         picks = demo_picks(report["games"], cfg)
-        report = build_report(report["games"], cfg, meta, source, quotes, status, picks)
+        picks.update({"season": meta.get("season"), "seasontype": meta.get("seasontype"),
+                      "week": meta.get("week")})
+        report = build_report(report["games"], cfg, meta, source, quotes, status, picks, forecast)
 
     os.makedirs(args.out_dir, exist_ok=True)
     json_path = os.path.join(args.out_dir, "nfl.json")
@@ -3376,12 +4351,18 @@ def main(argv=None) -> int:
           % (", ".join("%s %s" % (k, v) for k, v in (report["source_status"] or {}).items()) or "sin consultar",
              matched))
     pk = report.get("pickem")
-    if pk:
+    if pk and pk.get("week_mismatch"):
+        print("Quiniela: corresponde a otra jornada, no se puntúa.", file=sys.stderr)
+    elif pk:
         print("Quiniela (%s · %s): %.1f pts asegurados · proyección %.1f de %.0f posibles · %d aciertos / %d fallos"
               % (pk["mode"], pk["scoring"], pk["earned"], pk["projected"], pk["max_week"],
                  pk["hits"], pk["misses"]))
         for issue in pk.get("issues", []):
             print("  aviso: %s" % issue, file=sys.stderr)
+    fc = report.get("forecast")
+    if fc:
+        print("Pronóstico semana %s: %d partidos (%d con línea) · %d con alerta de noticias · %d equipos con reporte de lesiones"
+              % (fc["meta"].get("week"), fc["games"], fc["with_line"], fc["news_flagged"], fc["injury_teams"]))
     print("Instantánea: %s" % json_path)
     print("Dashboard : %s" % html_path)
     return 0
