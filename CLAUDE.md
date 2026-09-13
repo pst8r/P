@@ -76,6 +76,23 @@ volatility squeeze, ORB) with entry/stop/target/position size, and writes
 - Client-facing text in the dashboard is Spanish. It is an analysis tool, not
   investment advice; keep the disclaimer.
 
+### About the NFL dashboard
+
+`nfl/nfl_dashboard.py` reads ESPN's public NFL scoreboard API (scores, clock,
+possession, spread/total/moneyline), models the final margin as a normal
+distribution updated with each refresh, and writes `nfl/output/nfl.json` plus a
+self-contained `nfl.html` dashboard with cover/push/win/total probabilities.
+
+- Pure standard library; no dependencies. `--demo` builds the sample output
+  offline with deterministic synthetic games.
+- The dashboard carries the same model in JavaScript and queries the API from
+  the browser, so it keeps refreshing without re-running the script. Keep the
+  Python and JS implementations in sync when changing the model.
+- `python3 nfl/nfl_dashboard.py --demo` regenerates the committed sample output
+  — run it after changing the script or the HTML template.
+- Same house rules as the monitor: self-contained HTML (no CDN, hand-rolled SVG),
+  Spanish client-facing text, and the "not betting advice" disclaimer stays.
+
 ## Development workflow
 
 There is nothing to build, lint, or test for the diagrams. For the monitor,
