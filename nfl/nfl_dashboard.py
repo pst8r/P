@@ -54,17 +54,79 @@ ESPN_SCOREBOARD = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/sc
 
 SEASON_TYPES = {1: "Pretemporada", 2: "Temporada regular", 3: "Postemporada", 4: "Pro Bowl"}
 
-# Colores primarios por equipo (respaldo cuando el feed no trae color)
-TEAM_COLORS = {
-    "ARI": "#97233F", "ATL": "#A71930", "BAL": "#241773", "BUF": "#00338D",
-    "CAR": "#0085CA", "CHI": "#0B162A", "CIN": "#FB4F14", "CLE": "#311D00",
-    "DAL": "#041E42", "DEN": "#FB4F14", "DET": "#0076B6", "GB": "#203731",
-    "HOU": "#03202F", "IND": "#002C5F", "JAX": "#006778", "KC": "#E31837",
-    "LAC": "#0080C6", "LAR": "#003594", "LV": "#000000", "MIA": "#008E97",
-    "MIN": "#4F2683", "NE": "#002244", "NO": "#D3BC8D", "NYG": "#0B2265",
-    "NYJ": "#125740", "PHI": "#004C54", "PIT": "#FFB612", "SEA": "#002244",
-    "SF": "#AA0000", "TB": "#D50A0A", "TEN": "#0C2340", "WSH": "#5A1414",
+# Identidad oficial por equipo: color primario, secundario y clave del logo.
+# Fuente: guías de marca de los clubes. Uso privado del tablero.
+TEAM_META = {
+    "ARI": {"primary": "#97233F", "secondary": "#FFB612"},
+    "ATL": {"primary": "#A71930", "secondary": "#A5ACAF"},
+    "BAL": {"primary": "#241773", "secondary": "#9E7C0C"},
+    "BUF": {"primary": "#00338D", "secondary": "#C60C30"},
+    "CAR": {"primary": "#0085CA", "secondary": "#BFC0BF"},
+    "CHI": {"primary": "#0B162A", "secondary": "#C83803"},
+    "CIN": {"primary": "#FB4F14", "secondary": "#000000"},
+    "CLE": {"primary": "#311D00", "secondary": "#FF3C00"},
+    "DAL": {"primary": "#003594", "secondary": "#869397"},
+    "DEN": {"primary": "#FB4F14", "secondary": "#002244"},
+    "DET": {"primary": "#0076B6", "secondary": "#B0B7BC"},
+    "GB":  {"primary": "#203731", "secondary": "#FFB612"},
+    "HOU": {"primary": "#03202F", "secondary": "#A71930"},
+    "IND": {"primary": "#002C5F", "secondary": "#A2AAAD"},
+    "JAX": {"primary": "#006778", "secondary": "#D7A22A"},
+    "KC":  {"primary": "#E31837", "secondary": "#FFB81C"},
+    "LAC": {"primary": "#0080C6", "secondary": "#FFC20E"},
+    "LAR": {"primary": "#003594", "secondary": "#FFA300"},
+    "LV":  {"primary": "#000000", "secondary": "#A5ACAF"},
+    "MIA": {"primary": "#008E97", "secondary": "#FC4C02"},
+    "MIN": {"primary": "#4F2683", "secondary": "#FFC62F"},
+    "NE":  {"primary": "#002244", "secondary": "#C60C30"},
+    "NO":  {"primary": "#D3BC8D", "secondary": "#101820"},
+    "NYG": {"primary": "#0B2265", "secondary": "#A71930"},
+    "NYJ": {"primary": "#125740", "secondary": "#FFFFFF"},
+    "PHI": {"primary": "#004C54", "secondary": "#A5ACAF"},
+    "PIT": {"primary": "#FFB612", "secondary": "#101820"},
+    "SEA": {"primary": "#002244", "secondary": "#69BE28"},
+    "SF":  {"primary": "#AA0000", "secondary": "#B3995D"},
+    "TB":  {"primary": "#D50A0A", "secondary": "#FF7900"},
+    "TEN": {"primary": "#0C2340", "secondary": "#4B92DB"},
+    "WSH": {"primary": "#5A1414", "secondary": "#FFB612"},
 }
+TEAMS = {
+    "ARI": ("Arizona", "Cardinals"), "ATL": ("Atlanta", "Falcons"),
+    "BAL": ("Baltimore", "Ravens"), "BUF": ("Buffalo", "Bills"),
+    "CAR": ("Carolina", "Panthers"), "CHI": ("Chicago", "Bears"),
+    "CIN": ("Cincinnati", "Bengals"), "CLE": ("Cleveland", "Browns"),
+    "DAL": ("Dallas", "Cowboys"), "DEN": ("Denver", "Broncos"),
+    "DET": ("Detroit", "Lions"), "GB": ("Green Bay", "Packers"),
+    "HOU": ("Houston", "Texans"), "IND": ("Indianapolis", "Colts"),
+    "JAX": ("Jacksonville", "Jaguars"), "KC": ("Kansas City", "Chiefs"),
+    "LAC": ("Los Angeles", "Chargers"), "LAR": ("Los Angeles", "Rams"),
+    "LV": ("Las Vegas", "Raiders"), "MIA": ("Miami", "Dolphins"),
+    "MIN": ("Minnesota", "Vikings"), "NE": ("New England", "Patriots"),
+    "NO": ("New Orleans", "Saints"), "NYG": ("New York", "Giants"),
+    "NYJ": ("New York", "Jets"), "PHI": ("Philadelphia", "Eagles"),
+    "PIT": ("Pittsburgh", "Steelers"), "SEA": ("Seattle", "Seahawks"),
+    "SF": ("San Francisco", "49ers"), "TB": ("Tampa Bay", "Buccaneers"),
+    "TEN": ("Tennessee", "Titans"), "WSH": ("Washington", "Commanders"),
+}
+
+# Alias de abreviatura usados por otras fuentes (Kalshi, Polymarket, feeds antiguos)
+TEAM_ALIASES = {
+    "WAS": "WSH", "WFT": "WSH", "JAC": "JAX", "LA": "LAR", "STL": "LAR",
+    "SD": "LAC", "OAK": "LV", "LVR": "LV", "ARZ": "ARI", "BLT": "BAL",
+    "CLV": "CLE", "HST": "HOU", "KAN": "KC", "NOR": "NO", "NWE": "NE",
+    "SFO": "SF", "TAM": "TB", "GNB": "GB", "NYA": "NYJ",
+}
+TEAM_COLORS = {k: v["primary"] for k, v in TEAM_META.items()}
+LOGO_TEMPLATE = "https://a.espncdn.com/i/teamlogos/nfl/500/{abbr}.png"
+
+
+def canonical_abbr(abbr: str) -> str:
+    a = (abbr or "").upper().strip()
+    return TEAM_ALIASES.get(a, a)
+
+
+def logo_url(abbr: str) -> str:
+    return LOGO_TEMPLATE.format(abbr=canonical_abbr(abbr).lower())
 
 
 # ---------------------------------------------------------------------------
@@ -217,6 +279,261 @@ def total_distribution(total_now: float, line_total: Optional[float], state: str
             "fraction": frac}
 
 
+# ---------------------------------------------------------------------------
+# Mercados de predicción (Polymarket · Kalshi)
+# ---------------------------------------------------------------------------
+#
+# Ambas plataformas cotizan el ganador de cada partido en probabilidad directa
+# (Polymarket en dólares por acción, Kalshi en centavos). Esa probabilidad se
+# traduce a un margen esperado invirtiendo la normal del modelo, y de ahí a una
+# probabilidad implícita de cubrir el spread, comparable con la del modelo.
+
+POLYMARKET_EVENTS = "https://gamma-api.polymarket.com/events"
+KALSHI_MARKETS = "https://api.elections.kalshi.com/trade-api/v2/markets"
+KALSHI_NFL_SERIES = "KXNFLGAME"
+
+
+def inv_norm_cdf(p: float) -> float:
+    """Inversa de la normal estándar (Acklam); error < 1e-9 en (0,1)."""
+    if p <= 0.0:
+        return -8.0
+    if p >= 1.0:
+        return 8.0
+    a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02,
+         1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00]
+    b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02,
+         6.680131188771972e+01, -1.328068155288572e+01]
+    c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00,
+         -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00]
+    d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00,
+         3.754408661907416e+00]
+    plow, phigh = 0.02425, 1 - 0.02425
+    if p < plow:
+        q = math.sqrt(-2 * math.log(p))
+        return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / \
+               ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
+    if p > phigh:
+        q = math.sqrt(-2 * math.log(1 - p))
+        return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / \
+               ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1)
+    q = p - 0.5
+    r = q * q
+    return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / \
+           (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1)
+
+
+def implied_margin(p_home_win: float, sigma: float) -> float:
+    """Margen esperado que justifica una probabilidad de victoria del local."""
+    return sigma * inv_norm_cdf(clamp(p_home_win, 0.001, 0.999))
+
+
+def name_lookup() -> Dict[str, str]:
+    """Nombre de equipo (apodo, ciudad, completo) -> abreviatura canónica."""
+    out: Dict[str, str] = {}
+    for abbr, (loc, nick) in TEAMS.items():
+        out[nick.upper()] = abbr
+        out[("%s %s" % (loc, nick)).upper()] = abbr
+        out[loc.upper()] = abbr
+        out[abbr] = abbr
+    for alias, abbr in TEAM_ALIASES.items():
+        out[alias] = abbr
+    # Ciudades compartidas: se resuelven por apodo, no por ubicación
+    for shared in ("LOS ANGELES", "NEW YORK"):
+        out.pop(shared, None)
+    return out
+
+
+NAME_TO_ABBR = name_lookup()
+
+
+def abbr_from_text(text: str) -> Optional[str]:
+    if not text:
+        return None
+    up = str(text).upper().strip()
+    if up in NAME_TO_ABBR:
+        return NAME_TO_ABBR[up]
+    for name, abbr in NAME_TO_ABBR.items():
+        if len(name) > 3 and name in up:
+            return abbr
+    tokens = [t.strip(".,-_") for t in up.replace("-", " ").split()]
+    for t in tokens:
+        if t in NAME_TO_ABBR:
+            return NAME_TO_ABBR[t]
+    return None
+
+
+def _as_list(value):
+    """Gamma devuelve `outcomes`/`outcomePrices` como lista o como JSON en texto."""
+    if isinstance(value, list):
+        return value
+    if isinstance(value, str) and value.strip().startswith("["):
+        try:
+            return json.loads(value)
+        except ValueError:
+            return []
+    return []
+
+
+def parse_polymarket(payload) -> List[dict]:
+    """Normaliza eventos de la API Gamma a cotizaciones por partido."""
+    events = payload if isinstance(payload, list) else (payload or {}).get("events") or []
+    quotes: List[dict] = []
+    for ev in events:
+        markets = ev.get("markets") or ([ev] if ev.get("outcomes") else [])
+        for mk in markets:
+            kind = (mk.get("sportsMarketType") or "").lower()
+            if kind and kind not in ("winner", "moneyline"):
+                continue
+            outcomes = _as_list(mk.get("outcomes"))
+            prices = _as_list(mk.get("outcomePrices"))
+            if len(outcomes) != 2:
+                continue
+            teams: Dict[str, float] = {}
+            for i, label in enumerate(outcomes):
+                abbr = abbr_from_text(label)
+                price = None
+                if i < len(prices):
+                    try:
+                        price = float(prices[i])
+                    except (TypeError, ValueError):
+                        price = None
+                if abbr and price is not None:
+                    teams[abbr] = clamp(price, 0.0, 1.0)
+            if len(teams) != 2:
+                slug_abbrs = [a for a in (abbr_from_text(tok) for tok in
+                                          str(mk.get("slug") or ev.get("slug") or "").split("-")) if a]
+                if len(set(slug_abbrs)) == 2 and len(prices) == 2:
+                    try:
+                        teams = {slug_abbrs[0]: clamp(float(prices[0]), 0, 1),
+                                 slug_abbrs[1]: clamp(float(prices[1]), 0, 1)}
+                    except (TypeError, ValueError):
+                        continue
+            if len(teams) != 2:
+                continue
+            try:
+                volume = float(mk.get("volume") or ev.get("volume") or 0)
+            except (TypeError, ValueError):
+                volume = 0.0
+            quotes.append({
+                "source": "polymarket",
+                "id": mk.get("slug") or ev.get("slug") or str(mk.get("id") or ""),
+                "title": mk.get("question") or ev.get("title") or "",
+                "teams": teams,
+                "volume": volume,
+                "start": mk.get("gameStartTime") or ev.get("startDate") or "",
+                "closed": bool(mk.get("closed") or ev.get("closed")),
+            })
+    return quotes
+
+
+def _kalshi_price(mk: dict) -> Optional[float]:
+    bid, ask = mk.get("yes_bid"), mk.get("yes_ask")
+    try:
+        if bid is not None and ask is not None and float(ask) > 0:
+            return clamp((float(bid) + float(ask)) / 200.0, 0.0, 1.0)
+    except (TypeError, ValueError):
+        pass
+    for key in ("last_price", "previous_price"):
+        try:
+            if mk.get(key) is not None:
+                return clamp(float(mk[key]) / 100.0, 0.0, 1.0)
+        except (TypeError, ValueError):
+            continue
+    return None
+
+
+def parse_kalshi(payload) -> List[dict]:
+    """Agrupa los mercados por evento: cada equipo es un contrato «Yes»."""
+    markets = (payload or {}).get("markets") or []
+    by_event: Dict[str, dict] = {}
+    for mk in markets:
+        ticker = str(mk.get("ticker") or "")
+        event_ticker = str(mk.get("event_ticker") or ticker.rsplit("-", 1)[0])
+        price = _kalshi_price(mk)
+        if price is None:
+            continue
+        abbr = None
+        parts = ticker.split("-")
+        if len(parts) >= 3:
+            abbr = canonical_abbr(parts[-1])
+            if abbr not in TEAM_META:
+                abbr = None
+        if abbr is None:
+            abbr = abbr_from_text(mk.get("yes_sub_title") or mk.get("title") or "")
+        if abbr is None:
+            continue
+        node = by_event.setdefault(event_ticker, {
+            "source": "kalshi", "id": event_ticker,
+            "title": mk.get("title") or "", "teams": {}, "volume": 0.0,
+            "start": mk.get("open_time") or "", "closed": (mk.get("status") or "") not in ("open", "active"),
+        })
+        node["teams"][abbr] = price
+        try:
+            node["volume"] += float(mk.get("volume") or 0)
+        except (TypeError, ValueError):
+            pass
+    return [q for q in by_event.values() if len(q["teams"]) == 2]
+
+
+def normalize_quote(teams: Dict[str, float]) -> Dict[str, float]:
+    """Reparte el diferencial (ambos lados rara vez suman exactamente 1)."""
+    total = sum(teams.values())
+    if total <= 0:
+        return teams
+    return {k: v / total for k, v in teams.items()}
+
+
+def attach_markets(games: List[dict], quotes: List[dict]) -> None:
+    """Empareja cada cotización con su partido por pareja de equipos."""
+    for g in games:
+        pair = {g["home"]["abbr"], g["away"]["abbr"]}
+        found = g.setdefault("markets", {})
+        for q in quotes:
+            if set(q["teams"].keys()) != pair or q.get("closed"):
+                continue
+            prev = found.get(q["source"])
+            if prev and prev.get("volume", 0) >= q.get("volume", 0):
+                continue
+            norm = normalize_quote(q["teams"])
+            found[q["source"]] = {
+                "id": q.get("id", ""), "title": q.get("title", ""),
+                "p_home_win": round(norm.get(g["home"]["abbr"], 0.5), 4),
+                "p_away_win": round(norm.get(g["away"]["abbr"], 0.5), 4),
+                "raw_home": round(q["teams"].get(g["home"]["abbr"], 0.0), 4),
+                "volume": round(q.get("volume", 0.0), 2),
+            }
+
+
+def fetch_markets(cfg: dict) -> Tuple[List[dict], Dict[str, str]]:
+    """Consulta las fuentes habilitadas; devuelve cotizaciones y estado por fuente."""
+    sources = cfg.get("sources", {})
+    quotes: List[dict] = []
+    status: Dict[str, str] = {}
+
+    pm = sources.get("polymarket", {})
+    if pm.get("enabled", True):
+        url = pm.get("endpoint", POLYMARKET_EVENTS) + "?" + (pm.get("query") or "tag_slug=nfl&closed=false&limit=200")
+        try:
+            found = parse_polymarket(http_json(url))
+            quotes.extend(found)
+            status["polymarket"] = "ok (%d mercados)" % len(found)
+        except Exception as exc:                      # red, formato o bloqueo
+            status["polymarket"] = "error: %s" % exc
+
+    kal = sources.get("kalshi", {})
+    if kal.get("enabled", True):
+        url = kal.get("endpoint", KALSHI_MARKETS) + "?series_ticker=%s&status=open&limit=500" % \
+            kal.get("series_ticker", KALSHI_NFL_SERIES)
+        try:
+            found = parse_kalshi(http_json(url))
+            quotes.extend(found)
+            status["kalshi"] = "ok (%d eventos)" % len(found)
+        except Exception as exc:
+            status["kalshi"] = "error: %s" % exc
+
+    return quotes, status
+
+
 def evaluate_game(g: dict, cfg: dict) -> dict:
     """Añade a un partido normalizado sus probabilidades de spread, total y victoria."""
     weights = cfg.get("model", {}).get("key_numbers", {})
@@ -268,6 +585,37 @@ def evaluate_game(g: dict, cfg: dict) -> dict:
         if state == "post":
             out["total_result"] = ("over" if total_now > float(line_total)
                                    else "under" if total_now < float(line_total) else "push")
+
+    # ---- Mercados de predicción (Polymarket · Kalshi) --------------------
+    markets = g.get("markets") or {}
+    market_wins: List[float] = []
+    for src in ("polymarket", "kalshi"):
+        node = markets.get(src)
+        if not node or node.get("p_home_win") is None:
+            continue
+        p_win = clamp(float(node["p_home_win"]), 0.0, 1.0)
+        market_wins.append(p_win)
+        if sigma > 0:
+            mu_m = implied_margin(p_win, sigma)
+            node["implied_margin"] = round(mu_m, 1)
+            if line_home is not None:
+                ph, pp, pa = outcome_probabilities(-float(line_home), mu_m, sigma, weights)
+                node["p_home_cover"] = round(ph, 4)
+                node["p_away_cover"] = round(pa, 4)
+                node["p_push"] = round(pp, 4)
+    if market_wins:
+        cons_cfg = cfg.get("consensus", {})
+        w_model = clamp(float(cons_cfg.get("model_weight", 0.5)), 0.0, 1.0)
+        market_win = sum(market_wins) / len(market_wins)
+        out["market_win_consensus"] = round(market_win, 4)
+        out["market_divergence"] = round(market_win - float(out["p_home_win"]), 4)
+        out["consensus_home_win"] = round(w_model * float(out["p_home_win"]) + (1 - w_model) * market_win, 4)
+        covers = [m["p_home_cover"] for m in markets.values() if m.get("p_home_cover") is not None]
+        if covers and out.get("p_home_cover") is not None:
+            market_cover = sum(covers) / len(covers)
+            out["market_cover_consensus"] = round(market_cover, 4)
+            out["consensus_home_cover"] = round(
+                w_model * float(out["p_home_cover"]) + (1 - w_model) * market_cover, 4)
 
     # ---- Ventaja contra el mercado ---------------------------------------
     mkt_home = american_to_prob(g.get("home_spread_odds"))
@@ -433,14 +781,19 @@ def parse_event(ev: dict) -> Optional[dict]:
             if r.get("type") in ("total", None) or r.get("name") == "overall":
                 record = r.get("summary") or ""
                 break
-        color = t.get("color") or ""
+        key = canonical_abbr(abbr)
+        meta = TEAM_META.get(key, {})
+        feed_color = t.get("color") or ""
+        feed_alt = t.get("alternateColor") or ""
         return {
             "id": str(t.get("id") or ""),
-            "abbr": abbr,
+            "abbr": key or abbr,
             "name": t.get("displayName") or t.get("name") or abbr,
             "short": t.get("shortDisplayName") or t.get("name") or abbr,
             "location": t.get("location") or "",
-            "color": ("#" + color) if color and not color.startswith("#") else (color or TEAM_COLORS.get(abbr, "#1E2761")),
+            "color": meta.get("primary") or (("#" + feed_color) if feed_color else "#1E2761"),
+            "alt_color": meta.get("secondary") or (("#" + feed_alt) if feed_alt else "#8895B3"),
+            "logo": t.get("logo") or logo_url(key or abbr),
             "record": record,
         }
 
@@ -531,25 +884,6 @@ def fetch_scoreboard(season: Optional[int], week: Optional[int], seasontype: Opt
 # Datos sintéticos (--demo): permiten probar el tablero sin red
 # ---------------------------------------------------------------------------
 
-TEAMS = {
-    "ARI": ("Arizona", "Cardinals"), "ATL": ("Atlanta", "Falcons"),
-    "BAL": ("Baltimore", "Ravens"), "BUF": ("Buffalo", "Bills"),
-    "CAR": ("Carolina", "Panthers"), "CHI": ("Chicago", "Bears"),
-    "CIN": ("Cincinnati", "Bengals"), "CLE": ("Cleveland", "Browns"),
-    "DAL": ("Dallas", "Cowboys"), "DEN": ("Denver", "Broncos"),
-    "DET": ("Detroit", "Lions"), "GB": ("Green Bay", "Packers"),
-    "HOU": ("Houston", "Texans"), "IND": ("Indianapolis", "Colts"),
-    "JAX": ("Jacksonville", "Jaguars"), "KC": ("Kansas City", "Chiefs"),
-    "LAC": ("Los Angeles", "Chargers"), "LAR": ("Los Angeles", "Rams"),
-    "LV": ("Las Vegas", "Raiders"), "MIA": ("Miami", "Dolphins"),
-    "MIN": ("Minnesota", "Vikings"), "NE": ("New England", "Patriots"),
-    "NO": ("New Orleans", "Saints"), "NYG": ("New York", "Giants"),
-    "NYJ": ("New York", "Jets"), "PHI": ("Philadelphia", "Eagles"),
-    "PIT": ("Pittsburgh", "Steelers"), "SEA": ("Seattle", "Seahawks"),
-    "SF": ("San Francisco", "49ers"), "TB": ("Tampa Bay", "Buccaneers"),
-    "TEN": ("Tennessee", "Titans"), "WSH": ("Washington", "Commanders"),
-}
-
 DEMO_MATCHUPS = [
     ("KC", "BUF"), ("SF", "DAL"), ("PHI", "NYG"), ("BAL", "CIN"),
     ("DET", "GB"), ("MIA", "NYJ"), ("HOU", "IND"), ("LAR", "SEA"),
@@ -565,8 +899,10 @@ def demo_games(cfg: dict, seed: int = 20250913) -> List[dict]:
 
     def team_block(abbr: str) -> dict:
         loc, nick = TEAMS[abbr]
+        meta = TEAM_META.get(abbr, {})
         return {"id": abbr, "abbr": abbr, "name": "%s %s" % (loc, nick), "short": nick,
-                "location": loc, "color": TEAM_COLORS.get(abbr, "#1E2761"),
+                "location": loc, "color": meta.get("primary", "#1E2761"),
+                "alt_color": meta.get("secondary", "#8895B3"), "logo": logo_url(abbr),
                 "record": "%d-%d" % (rnd.randint(1, 11), rnd.randint(1, 8))}
 
     # 5 finalizados, 5 en curso (incluye medio tiempo y tiempo extra), el resto por jugar
@@ -659,6 +995,32 @@ def demo_games(cfg: dict, seed: int = 20250913) -> List[dict]:
     return games
 
 
+def demo_quotes(games: List[dict], cfg: dict, seed: int = 7311) -> List[dict]:
+    """Cotizaciones sintéticas de Polymarket y Kalshi alrededor de la línea."""
+    rnd = random.Random(seed)
+    sigma = float(cfg.get("model", {}).get("sigma_full_game", 13.2))
+    quotes: List[dict] = []
+    for g in games:
+        if g.get("line_home") is None or g.get("state") == "post":
+            continue
+        base = norm_cdf(-float(g["line_home"]) / sigma)
+        home, away = g["home"]["abbr"], g["away"]["abbr"]
+        for source, spread_cents in (("polymarket", 0.02), ("kalshi", 0.03)):
+            if rnd.random() < 0.15:       # no todos los partidos tienen mercado
+                continue
+            p = clamp(base + rnd.gauss(0, 0.035), 0.03, 0.97)
+            quotes.append({
+                "source": source,
+                "id": "%s-%s-%s" % (source[:2], away.lower(), home.lower()),
+                "title": "%s vs %s" % (away, home),
+                "teams": {home: round(p, 3), away: round(1 - p + spread_cents, 3)},
+                "volume": round(rnd.uniform(15000, 900000), 2),
+                "start": g.get("date", ""),
+                "closed": False,
+            })
+    return quotes
+
+
 # ---------------------------------------------------------------------------
 # Reporte
 # ---------------------------------------------------------------------------
@@ -698,16 +1060,24 @@ def summarize(games: List[dict]) -> dict:
     }
 
 
-def build_report(games: List[dict], cfg: dict, meta: dict, source: str) -> dict:
+def build_report(games: List[dict], cfg: dict, meta: dict, source: str,
+                 quotes: Optional[List[dict]] = None,
+                 source_status: Optional[Dict[str, str]] = None) -> dict:
+    if quotes:
+        attach_markets(games, quotes)
     for g in games:
         evaluate_game(g, cfg)
     games.sort(key=lambda g: ({"in": 0, "pre": 1, "post": 2}.get(g.get("state"), 3), g.get("date") or ""))
     return {
         "generated_at": dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
         "source": source,
+        "source_status": source_status or {},
         "meta": meta,
         "config": cfg,
-        "team_colors": TEAM_COLORS,
+        "quotes": quotes or [],
+        "teams": {k: list(v) for k, v in TEAMS.items()},
+        "team_meta": TEAM_META,
+        "team_aliases": TEAM_ALIASES,
         "summary": summarize(games),
         "games": games,
     }
@@ -752,6 +1122,11 @@ h1 .light{color:var(--ice);font-style:italic;font-weight:400}
 .chip.bad .dot{background:var(--rose);box-shadow:0 0 9px var(--rose)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 .chip.loading .dot{animation:pulse 1s infinite}
+.sources{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}
+.chip.src{font-size:11.5px;padding:5px 11px;gap:7px}
+.chip.src em{font-style:normal;color:var(--mute)}
+.chip.src.ok .dot{background:var(--green);box-shadow:0 0 8px var(--green)}
+.chip.src.warn .dot{background:var(--amber);box-shadow:0 0 8px var(--amber)}
 
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:18px 0 4px}
 .controls label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-right:4px}
@@ -792,8 +1167,24 @@ button.act.on{border-color:var(--cyan);color:var(--cyan)}
 .tag.rz{color:var(--rose);border-color:rgba(255,92,122,.45);background:rgba(255,92,122,.10)}
 
 .teams{display:flex;flex-direction:column;gap:7px}
-.trow{display:grid;grid-template-columns:14px 1fr auto auto;align-items:center;gap:9px}
-.trow .sq{width:12px;height:12px;border-radius:3px;box-shadow:0 0 0 1px rgba(255,255,255,.15) inset}
+.trow{display:grid;grid-template-columns:26px 1fr auto auto;align-items:center;gap:9px}
+.crest{width:26px;height:26px;object-fit:contain;display:inline-block;vertical-align:middle;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
+.crest.sm{width:18px;height:18px;margin-right:2px}
+.crest.fallback{border-radius:5px;font-size:9px;font-weight:800;letter-spacing:.02em;color:#fff;
+  display:inline-flex;align-items:center;justify-content:center;text-align:center;line-height:1;
+  box-shadow:0 0 0 1px rgba(255,255,255,.18) inset}
+.crest.sm.fallback{font-size:7px;border-radius:4px}
+.teamstrip{display:flex;height:4px;border-radius:3px;overflow:hidden;margin:-4px -4px 2px}
+.teamstrip i{flex:1}
+.mkts{display:flex;gap:7px;flex-wrap:wrap;border-top:1px dashed var(--divider);padding-top:9px}
+.mk{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:11px;
+  border:1px solid var(--divider);color:var(--mute);background:rgba(30,41,82,.5)}
+.mk b{color:var(--ice);font-family:var(--mono);font-weight:600}
+.mk.polymarket{border-color:rgba(0,217,255,.35)}
+.mk.kalshi{border-color:rgba(61,214,140,.35)}
+.mk.cons{border-color:rgba(255,184,0,.4);color:var(--amber)}
+.mk.cons b{color:var(--amber)}
+.stale{color:var(--amber);font-weight:700}
 .trow .nm{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .trow .nm small{display:block;color:var(--mute);font-size:11px;font-weight:400}
 .trow .ball{color:var(--amber);font-size:12px;width:14px;text-align:center}
@@ -864,6 +1255,8 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
   </div>
 </header>
 
+<div class="sources" id="sources"></div>
+
 <div class="controls">
   <div class="ctlgroup">
     <label for="season">Temporada</label>
@@ -901,6 +1294,7 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
   <button data-tab="scores" class="active">Marcadores</button>
   <button data-tab="ats">Spread (ATS)</button>
   <button data-tab="totals">Totales</button>
+  <button data-tab="markets">Mercados</button>
   <button data-tab="summary">Resumen</button>
   <button data-tab="method">Metodología</button>
 </div>
@@ -928,6 +1322,16 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
   <div class="card">
     <h3>Over / Under</h3>
     <div class="tscroll"><table id="totals-table"></table></div>
+  </div>
+</section>
+
+<section data-panel="markets">
+  <div class="card">
+    <h3>Polymarket · Kalshi · modelo</h3>
+    <div class="hint sub">Probabilidad de que gane el local según cada fuente, el margen que esa
+      probabilidad implica y la probabilidad de cubrir que se deriva de él.</div>
+    <div class="tscroll"><table id="markets-table"></table></div>
+    <div class="sub" id="markets-note" style="margin-top:10px"></div>
   </div>
 </section>
 
@@ -968,14 +1372,37 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
     <p>Cuando el feed trae momios, se convierten a probabilidad implícita y se les retira la
     comisión repartiéndola entre ambos lados. La columna <i>edge</i> es la diferencia entre la
     probabilidad del modelo y esa probabilidad sin comisión: positiva favorece al local.</p>
+    <h3>Mercados de predicción</h3>
+    <p>Además de las casas de apuestas, el tablero consulta <b>Polymarket</b> (API Gamma) y
+    <b>Kalshi</b> (API pública de mercados). Ambas cotizan al ganador del partido en
+    probabilidad directa: Polymarket en dólares por acción y Kalshi en centavos, donde el
+    precio medio entre compra y venta es la probabilidad. Los dos lados se normalizan para que
+    sumen 100 %.</p>
+    <ul>
+      <li>Esa probabilidad de victoria se convierte en <b>margen implícito</b> invirtiendo la
+      normal del modelo, y de ahí sale la <b>probabilidad de cubrir implícita en el mercado</b>,
+      comparable con la del modelo sobre la misma línea.</li>
+      <li>El <b>consenso</b> mezcla modelo y mercados con el peso definido en
+      <code>consensus.model_weight</code> (0.5 por omisión).</li>
+      <li>La <b>divergencia</b> es cuánto se separa el mercado del modelo en la probabilidad de
+      que gane el local: es la señal de dónde revisar el partido.</li>
+      <li>El emparejamiento entre fuentes se hace por pareja de equipos, con alias de
+      abreviatura, así que un mercado sin contraparte en el marcador simplemente se ignora.</li>
+    </ul>
     <h3>Datos</h3>
     <p id="method-source">Marcador, situación de campo y líneas provienen de la API pública de
-    resultados de ESPN, consultada directamente desde el navegador en cada refresco.</p>
+    resultados de ESPN; los logos oficiales, de su CDN de escudos. Todo se consulta
+    directamente desde el navegador en cada refresco. Si una fuente falla, las demás siguen
+    funcionando y el tablero conserva la última lectura disponible marcándola con asterisco.</p>
     <h3>Límites</h3>
     <ul>
       <li>No modela posición en el campo, downs restantes, tiempos fuera ni lesiones.</li>
       <li>Las líneas del feed suelen ser de cierre, no en vivo: el <i>edge</i> mostrado
       compara un modelo en vivo contra un precio previo al partido.</li>
+      <li>Kalshi y Polymarket cotizan al ganador, no al spread: la probabilidad de cubrir que
+      se les atribuye es una derivación del modelo, no un precio observado.</li>
+      <li>Un mercado con poco volumen puede tener un diferencial amplio; el volumen se muestra
+      en la pestaña Mercados para juzgarlo.</li>
       <li>Los pesos de números clave son una calibración heurística, no un ajuste a una
       muestra específica.</li>
     </ul>
@@ -993,14 +1420,76 @@ var CFG = BOOT.config || {};
 var M = CFG.model || {};
 var LIVE = CFG.live || {};
 var KEYW = M.key_numbers || {};
-var COLORS = BOOT.team_colors || {};
+var TEAM_META = BOOT.team_meta || {};
+var TEAM_ALIASES = BOOT.team_aliases || {};
+var TEAMS_ES = BOOT.teams || {};
+var ASSETS = CFG.assets || {};
+var SOURCES = CFG.sources || {};
+var CONSENSUS = CFG.consensus || {};
 var ENDPOINT = LIVE.endpoint || "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard";
+var LOGO_TEMPLATE = ASSETS.logo_template || "https://a.espncdn.com/i/teamlogos/nfl/500/{abbr}.png";
+
+function canonicalAbbr(abbr) {
+  var a = String(abbr || "").toUpperCase().trim();
+  return TEAM_ALIASES[a] || a;
+}
+function logoUrl(abbr) {
+  return LOGO_TEMPLATE.replace("{abbr}", canonicalAbbr(abbr).toLowerCase());
+}
+function luminance(hex) {
+  var h = String(hex || "").replace("#", "");
+  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+  if (h.length !== 6) return 0.5;
+  var v = [0, 2, 4].map(function (i) {
+    var c = parseInt(h.substr(i, 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+}
+function hexToRgb(hex) {
+  var h = String(hex || "").replace("#", "");
+  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+  if (h.length !== 6) return [30, 39, 97];
+  return [0, 2, 4].map(function (i) { return parseInt(h.substr(i, 2), 16); });
+}
+function rgbToHex(rgb) {
+  return "#" + rgb.map(function (v) {
+    var s = Math.max(0, Math.min(255, Math.round(v))).toString(16);
+    return s.length < 2 ? "0" + s : s;
+  }).join("");
+}
+function mix(hex, target, amount) {
+  var a = hexToRgb(hex), b = hexToRgb(target);
+  return rgbToHex([0, 1, 2].map(function (i) { return a[i] + (b[i] - a[i]) * amount; }));
+}
+/* Varios primarios oficiales son casi negros (Raiders, Bears, Patriots) y algún
+   secundario es blanco puro: sobre el fondo oscuro del tablero hay que llevar el
+   color a un rango visible sin perder la identidad del equipo. */
+function displayColor(team) {
+  var primary = team.color || "#1E2761", alt = team.alt_color || "";
+  var candidates = [primary, alt].filter(function (c) { return c; });
+  for (var i = 0; i < candidates.length; i++) {
+    var l = luminance(candidates[i]);
+    if (l >= 0.06 && l <= 0.75) return candidates[i];
+  }
+  var base = primary;
+  if (luminance(base) > 0.75) return mix(base, "#000000", 0.25);
+  var out = base;
+  for (var step = 0; step < 4 && luminance(out) < 0.06; step++) out = mix(out, "#FFFFFF", 0.22);
+  return out;
+}
+function textOn(hex) { return luminance(hex) > 0.28 ? "#0A1438" : "#FFFFFF"; }
 
 var S = {
   games: BOOT.games || [],
   meta: BOOT.meta || {},
   summary: BOOT.summary || {},
   source: BOOT.source || "demo",
+  quotes: BOOT.quotes || [],
+  quotesAt: BOOT.generated_at || "",
+  sourceStatus: { espn: { ok: false, detail: "sin consultar" },
+                  polymarket: { ok: false, detail: "sin consultar" },
+                  kalshi: { ok: false, detail: "sin consultar" } },
   updated: BOOT.generated_at || "",
   online: false,
   error: "",
@@ -1020,6 +1509,32 @@ function erf(x) {
 function normCdf(z) { return 0.5 * (1 + erf(z / Math.SQRT2)); }
 function normPdf(x, mu, s) { if (s <= 0) return 0; var z = (x - mu) / s; return Math.exp(-0.5 * z * z) / (s * Math.sqrt(2 * Math.PI)); }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function invNormCdf(p) {
+  if (p <= 0) return -8; if (p >= 1) return 8;
+  var a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02,
+    1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+  var b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02,
+    6.680131188771972e+01, -1.328068155288572e+01];
+  var c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00,
+    -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+  var d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00,
+    3.754408661907416e+00];
+  var plow = 0.02425, phigh = 1 - plow, q, r;
+  if (p < plow) {
+    q = Math.sqrt(-2 * Math.log(p));
+    return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+  }
+  if (p > phigh) {
+    q = Math.sqrt(-2 * Math.log(1 - p));
+    return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+  }
+  q = p - 0.5; r = q * q;
+  return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q /
+    (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+}
+function impliedMargin(pHomeWin, sigma) { return sigma * invNormCdf(clamp(pHomeWin, 0.001, 0.999)); }
 function keyMultiplier(k) {
   var key = String(Math.abs(Math.round(k)));
   var w = KEYW[key];
@@ -1113,6 +1628,37 @@ function evaluateGame(g) {
     out.p_over = t[0]; out.p_total_push = t[1]; out.p_under = t[2];
     if (state === "post") out.total_result = totalNow > lineTotal ? "over" : (totalNow < lineTotal ? "under" : "push");
   }
+  var markets = g.markets || {};
+  var marketWins = [];
+  ["polymarket", "kalshi"].forEach(function (src) {
+    var node = markets[src];
+    if (!node || node.p_home_win === null || node.p_home_win === undefined) return;
+    var pWin = clamp(Number(node.p_home_win), 0, 1);
+    marketWins.push(pWin);
+    if (sigma > 0) {
+      var muM = impliedMargin(pWin, sigma);
+      node.implied_margin = Math.round(muM * 10) / 10;
+      if (line !== null && isFinite(line)) {
+        var rm = outcomeProbabilities(-line, muM, sigma);
+        node.p_home_cover = rm[0]; node.p_push = rm[1]; node.p_away_cover = rm[2];
+      }
+    }
+  });
+  if (marketWins.length) {
+    var wModel = clamp(CONSENSUS.model_weight === undefined ? 0.5 : Number(CONSENSUS.model_weight), 0, 1);
+    var marketWin = marketWins.reduce(function (a, b) { return a + b; }, 0) / marketWins.length;
+    out.market_win_consensus = marketWin;
+    out.market_divergence = marketWin - out.p_home_win;
+    out.consensus_home_win = wModel * out.p_home_win + (1 - wModel) * marketWin;
+    var covers = Object.keys(markets).map(function (k) { return markets[k].p_home_cover; })
+      .filter(function (v) { return v !== undefined && v !== null; });
+    if (covers.length && out.p_home_cover !== undefined) {
+      var marketCover = covers.reduce(function (a, b) { return a + b; }, 0) / covers.length;
+      out.market_cover_consensus = marketCover;
+      out.consensus_home_cover = wModel * out.p_home_cover + (1 - wModel) * marketCover;
+    }
+  }
+
   var mk = devig(americanToProb(g.home_spread_odds), americanToProb(g.away_spread_odds));
   if (mk[0] !== null && out.p_home_cover !== undefined && state !== "post") {
     out.market_home_cover = mk[0];
@@ -1196,12 +1742,19 @@ function teamBlock(c) {
   for (var i = 0; i < recs.length; i++) {
     if (recs[i].type === "total" || recs[i].name === "overall" || !recs[i].type) { rec = recs[i].summary || ""; break; }
   }
-  var color = t.color ? (t.color.charAt(0) === "#" ? t.color : "#" + t.color) : (COLORS[abbr] || "#1E2761");
+  var key = canonicalAbbr(abbr);
+  var meta = TEAM_META[key] || {};
+  var feed = t.color ? (t.color.charAt(0) === "#" ? t.color : "#" + t.color) : "";
+  var feedAlt = t.alternateColor ? (t.alternateColor.charAt(0) === "#" ? t.alternateColor : "#" + t.alternateColor) : "";
   return {
-    id: String(t.id || ""), abbr: abbr,
+    id: String(t.id || ""), abbr: key || abbr,
     name: t.displayName || t.name || abbr,
     short: t.shortDisplayName || t.name || abbr,
-    location: t.location || "", color: color, record: rec
+    location: t.location || "",
+    color: meta.primary || feed || "#1E2761",
+    alt_color: meta.secondary || feedAlt || "#8895B3",
+    logo: t.logo || logoUrl(key || abbr),
+    record: rec
   };
 }
 function parseEvent(ev) {
@@ -1289,6 +1842,139 @@ function summarize(games) {
   };
 }
 
+/* ------------------------------- mercados de predicción (PM · Kalshi) */
+var NAME_TO_ABBR = (function () {
+  var out = {};
+  Object.keys(TEAMS_ES).forEach(function (abbr) {
+    var loc = TEAMS_ES[abbr][0], nick = TEAMS_ES[abbr][1];
+    out[nick.toUpperCase()] = abbr;
+    out[(loc + " " + nick).toUpperCase()] = abbr;
+    out[loc.toUpperCase()] = abbr;
+    out[abbr] = abbr;
+  });
+  Object.keys(TEAM_ALIASES).forEach(function (a) { out[a] = TEAM_ALIASES[a]; });
+  delete out["LOS ANGELES"]; delete out["NEW YORK"];   /* ciudades compartidas */
+  return out;
+})();
+function abbrFromText(text) {
+  if (!text) return null;
+  var up = String(text).toUpperCase().trim();
+  if (NAME_TO_ABBR[up]) return NAME_TO_ABBR[up];
+  var names = Object.keys(NAME_TO_ABBR);
+  for (var i = 0; i < names.length; i++) {
+    if (names[i].length > 3 && up.indexOf(names[i]) >= 0) return NAME_TO_ABBR[names[i]];
+  }
+  var toks = up.replace(/-/g, " ").split(/\s+/).map(function (t) { return t.replace(/^[.,_-]+|[.,_-]+$/g, ""); });
+  for (var j = 0; j < toks.length; j++) if (NAME_TO_ABBR[toks[j]]) return NAME_TO_ABBR[toks[j]];
+  return null;
+}
+function asList(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string" && value.trim().charAt(0) === "[") {
+    try { return JSON.parse(value); } catch (e) { return []; }
+  }
+  return [];
+}
+function parsePolymarket(payload) {
+  var events = Array.isArray(payload) ? payload : ((payload || {}).events || []);
+  var quotes = [];
+  events.forEach(function (ev) {
+    var markets = ev.markets || (ev.outcomes ? [ev] : []);
+    markets.forEach(function (mk) {
+      var kind = String(mk.sportsMarketType || "").toLowerCase();
+      if (kind && kind !== "winner" && kind !== "moneyline") return;
+      var outcomes = asList(mk.outcomes), prices = asList(mk.outcomePrices);
+      if (outcomes.length !== 2) return;
+      var teams = {};
+      outcomes.forEach(function (label, i) {
+        var abbr = abbrFromText(label), price = parseFloat(prices[i]);
+        if (abbr && isFinite(price)) teams[abbr] = clamp(price, 0, 1);
+      });
+      if (Object.keys(teams).length !== 2) {
+        var slugAbbrs = String(mk.slug || ev.slug || "").split("-").map(abbrFromText)
+          .filter(function (a) { return a; });
+        var uniq = slugAbbrs.filter(function (a, i) { return slugAbbrs.indexOf(a) === i; });
+        if (uniq.length === 2 && prices.length === 2 && isFinite(parseFloat(prices[0]))) {
+          teams = {}; teams[uniq[0]] = clamp(parseFloat(prices[0]), 0, 1);
+          teams[uniq[1]] = clamp(parseFloat(prices[1]), 0, 1);
+        }
+      }
+      if (Object.keys(teams).length !== 2) return;
+      quotes.push({
+        source: "polymarket",
+        id: mk.slug || ev.slug || String(mk.id || ""),
+        title: mk.question || ev.title || "",
+        teams: teams,
+        volume: parseFloat(mk.volume || ev.volume || 0) || 0,
+        start: mk.gameStartTime || ev.startDate || "",
+        closed: !!(mk.closed || ev.closed)
+      });
+    });
+  });
+  return quotes;
+}
+function kalshiPrice(mk) {
+  var bid = parseFloat(mk.yes_bid), ask = parseFloat(mk.yes_ask);
+  if (isFinite(bid) && isFinite(ask) && ask > 0) return clamp((bid + ask) / 200, 0, 1);
+  var last = parseFloat(mk.last_price);
+  if (isFinite(last)) return clamp(last / 100, 0, 1);
+  var prev = parseFloat(mk.previous_price);
+  return isFinite(prev) ? clamp(prev / 100, 0, 1) : null;
+}
+function parseKalshi(payload) {
+  var markets = (payload || {}).markets || [];
+  var byEvent = {};
+  markets.forEach(function (mk) {
+    var ticker = String(mk.ticker || "");
+    var eventTicker = String(mk.event_ticker || ticker.split("-").slice(0, -1).join("-"));
+    var price = kalshiPrice(mk);
+    if (price === null) return;
+    var abbr = null, parts = ticker.split("-");
+    if (parts.length >= 3) {
+      var cand = canonicalAbbr(parts[parts.length - 1]);
+      if (TEAM_META[cand]) abbr = cand;
+    }
+    if (!abbr) abbr = abbrFromText(mk.yes_sub_title || mk.title || "");
+    if (!abbr) return;
+    if (!byEvent[eventTicker]) {
+      byEvent[eventTicker] = {
+        source: "kalshi", id: eventTicker, title: mk.title || "", teams: {}, volume: 0,
+        start: mk.open_time || "",
+        closed: ["open", "active"].indexOf(String(mk.status || "")) < 0
+      };
+    }
+    byEvent[eventTicker].teams[abbr] = price;
+    byEvent[eventTicker].volume += parseFloat(mk.volume || 0) || 0;
+  });
+  return Object.keys(byEvent).map(function (k) { return byEvent[k]; })
+    .filter(function (q) { return Object.keys(q.teams).length === 2; });
+}
+function normalizeQuote(teams) {
+  var total = Object.keys(teams).reduce(function (a, k) { return a + teams[k]; }, 0);
+  if (total <= 0) return teams;
+  var out = {};
+  Object.keys(teams).forEach(function (k) { out[k] = teams[k] / total; });
+  return out;
+}
+function attachMarkets(games, quotes) {
+  games.forEach(function (g) {
+    var pair = [g.home.abbr, g.away.abbr].sort().join("|");
+    g.markets = {};
+    (quotes || []).forEach(function (q) {
+      if (q.closed) return;
+      if (Object.keys(q.teams).sort().join("|") !== pair) return;
+      var prev = g.markets[q.source];
+      if (prev && (prev.volume || 0) >= (q.volume || 0)) return;
+      var norm = normalizeQuote(q.teams);
+      g.markets[q.source] = {
+        id: q.id || "", title: q.title || "",
+        p_home_win: norm[g.home.abbr], p_away_win: norm[g.away.abbr],
+        raw_home: q.teams[g.home.abbr], volume: q.volume || 0, stale: !!q.stale
+      };
+    });
+  });
+}
+
 /* ------------------------------------------------------------- formato */
 function $(id) { return document.getElementById(id); }
 function esc(s) {
@@ -1327,6 +2013,37 @@ function statusText(g) {
   return "Q" + (g.period || 1) + " " + (g.clock || "");
 }
 function probClass(p) { return p >= 0.6 ? "green" : (p <= 0.4 ? "rose" : "amber"); }
+function teamCrest(t, size) {
+  var color = displayColor(t), abbr = esc(t.abbr || "");
+  var cls = "crest" + (size === "sm" ? " sm" : "");
+  if (ASSETS.logos === false) {
+    return '<span class="' + cls + ' fallback" style="background:' + esc(color) + ";color:" + textOn(color) +
+      '">' + abbr + "</span>";
+  }
+  return '<img class="' + cls + '" src="' + esc(t.logo || logoUrl(t.abbr)) + '" alt="' + esc(t.name || t.abbr) +
+    '" loading="lazy" data-abbr="' + abbr + '" data-color="' + esc(color) + '">';
+}
+/* Si el CDN de logos no está disponible (offline o red restringida) se
+   sustituye la imagen por un escudo con los colores oficiales del equipo. */
+function wireLogos() {
+  var imgs = document.querySelectorAll("img.crest");
+  Array.prototype.forEach.call(imgs, function (img) {
+    if (img.dataset.wired) return;
+    img.dataset.wired = "1";
+    img.addEventListener("error", function () {
+      var span = document.createElement("span");
+      var bg = img.dataset.color || "#1E2761";
+      span.className = img.className + " fallback";
+      span.style.background = bg;
+      span.style.color = textOn(bg);
+      span.textContent = img.dataset.abbr || "";
+      if (img.parentNode) img.parentNode.replaceChild(span, img);
+    }, { once: true });
+  });
+}
+function centsChip(label, p, cls) {
+  return '<span class="mk ' + (cls || "") + '">' + esc(label) + " <b>" + pct(p, 0) + "</b></span>";
+}
 function downDistance(txt) {
   if (!txt) return "";
   return String(txt)
@@ -1368,8 +2085,7 @@ function teamRow(g, side) {
     (g.possession_home === (side === "home"))) ? "●" : "";
   var sub = [t.record || "", side === "home" ? "local" : "visitante", lineLabel(g, side)]
     .filter(function (x) { return x; }).join(" · ");
-  return '<div class="' + cls + '">' +
-    '<i class="sq" style="background:' + esc(t.color || "#1E2761") + '"></i>' +
+  return '<div class="' + cls + '">' + teamCrest(t) +
     '<div class="nm">' + esc(t.name || t.abbr) + "<small>" + esc(sub) + "</small></div>" +
     '<div class="ball">' + ball + "</div>" +
     '<div class="sc">' + (g.state === "pre" ? "—" : esc(score)) + "</div></div>";
@@ -1390,6 +2106,8 @@ function gameCard(g) {
 
   var meta = [g.broadcast, g.venue].filter(function (x) { return x; }).join(" · ");
   var html = '<article class="game' + (g.state === "in" ? " islive" : "") + '">';
+  html += '<div class="teamstrip"><i style="background:' + esc(displayColor(g.away)) + '"></i>' +
+    '<i style="background:' + esc(displayColor(g.home)) + '"></i></div>';
   html += '<div class="ghead">' + tag + "<span>" + esc(meta) + "</span></div>";
   html += '<div class="teams">' + teamRow(g, "away") + teamRow(g, "home") + "</div>";
 
@@ -1429,6 +2147,19 @@ function gameCard(g) {
     html += '<div class="proj"><span>Sin línea: sólo marcador y proyección <b>' + signed(p.projected_margin) + "</b></span></div>";
   }
 
+  var mkeys = Object.keys(g.markets || {});
+  if (mkeys.length) {
+    var chips = mkeys.map(function (src) {
+      var node = g.markets[src];
+      var label = (src === "polymarket" ? "Polymarket" : "Kalshi") + " · " + g.home.abbr;
+      return centsChip(label + (node.stale ? " *" : ""), node.p_home_win, src);
+    });
+    if (p.consensus_home_cover !== undefined) {
+      chips.push(centsChip("Consenso cubre " + g.home.abbr, p.consensus_home_cover, "cons"));
+    }
+    html += '<div class="mkts">' + chips.join("") + "</div>";
+  }
+
   if (g.state === "in") {
     var bits = [];
     if (g.down_distance) bits.push("<b>" + esc(downDistance(g.down_distance)) + "</b>");
@@ -1454,6 +2185,7 @@ function renderGames() {
   $("games").innerHTML = list.length
     ? list.map(gameCard).join("")
     : '<div class="empty">No hay partidos con este filtro.</div>';
+  wireLogos();
 }
 
 function sortGames(list) {
@@ -1474,6 +2206,14 @@ function sortGames(list) {
       case "pts": return p.total_now;
       case "projt": return p.projected_total;
       case "over": return p.p_over === undefined ? -1 : p.p_over;
+      case "pwin": return p.p_home_win;
+      case "pm": return (g.markets && g.markets.polymarket) ? g.markets.polymarket.p_home_win : -1;
+      case "kal": return (g.markets && g.markets.kalshi) ? g.markets.kalshi.p_home_win : -1;
+      case "cwin": return p.consensus_home_win === undefined ? -1 : p.consensus_home_win;
+      case "div": return p.market_divergence === undefined ? -9 : Math.abs(p.market_divergence);
+      case "mcover": return p.market_cover_consensus === undefined ? -1 : p.market_cover_consensus;
+      case "ccover": return p.consensus_home_cover === undefined ? -1 : p.consensus_home_cover;
+      case "vol": return Object.keys(g.markets || {}).reduce(function (a, k) { return a + (g.markets[k].volume || 0); }, 0);
       case "result": return p.total_result || "";
       default: return g.date || "";
     }
@@ -1626,11 +2366,62 @@ function renderStatus() {
   $("updated").textContent = (when && !isNaN(when.getTime()))
     ? "Actualizado " + when.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
     : "";
-  $("foot").innerHTML = "Fuente: " + (S.online ? "API pública de resultados de ESPN, consultada desde este navegador." : "instantánea generada localmente (" + esc(S.source) + ").") +
-    (S.error ? " Último intento: " + esc(S.error) + "." : "") +
-    " Modelo normal con pesos de números clave. Herramienta de análisis: no es asesoría de apuestas.";
+  var mkOk = ["polymarket", "kalshi"].filter(function (k) { return (S.sourceStatus[k] || {}).ok; });
+  $("foot").innerHTML = "Fuentes: " +
+    (S.online ? "marcador y líneas de la API pública de ESPN" : "instantánea local (" + esc(S.source) + ")") +
+    (mkOk.length ? " · mercados de " + mkOk.map(function (k) { return k === "polymarket" ? "Polymarket" : "Kalshi"; }).join(" y ") : " · sin mercados en esta lectura") +
+    ". " + (S.error ? "Último intento del marcador: " + esc(S.error) + ". " : "") +
+    "Escudos y colores son marcas registradas de cada club, usadas aquí en un tablero privado de análisis. " +
+    "Modelo normal con pesos de números clave: herramienta de análisis, no es asesoría de apuestas.";
+}
+function renderSources() {
+  var labels = { espn: "ESPN · marcador y líneas", polymarket: "Polymarket", kalshi: "Kalshi" };
+  var html = Object.keys(labels).map(function (k) {
+    var st = S.sourceStatus[k] || { ok: false, detail: "sin consultar" };
+    return '<span class="chip src ' + (st.ok ? "ok" : "warn") + '"><span class="dot"></span>' +
+      esc(labels[k]) + ' <em>' + esc(st.detail) + "</em></span>";
+  }).join("");
+  $("sources").innerHTML = html;
+}
+function renderMarkets() {
+  var list = S.games.filter(function (g) { return Object.keys(g.markets || {}).length; });
+  var cols = [["Partido", "game"], ["Estado", "state"], ["Modelo gana local", "pwin"],
+  ["Polymarket", "pm"], ["Kalshi", "kal"], ["Consenso gana", "cwin"], ["Divergencia", "div"],
+  ["Cubre: modelo", "phome"], ["Cubre: mercado", "mcover"], ["Consenso cubre", "ccover"], ["Volumen", "vol"]];
+  var rows = sortGames(list).map(function (g) {
+    var p = g.probs || {}, m = g.markets || {};
+    var pm = m.polymarket, kal = m.kalshi;
+    var vol = (pm ? pm.volume : 0) + (kal ? kal.volume : 0);
+    var div = p.market_divergence;
+    var divCls = div === undefined ? "" : (Math.abs(div) >= 0.05 ? (div > 0 ? "pos" : "neg") : "flat");
+    var cell = function (node) {
+      if (!node) return "—";
+      return '<span class="num">' + pct(node.p_home_win, 1) + "</span>" + (node.stale ? ' <span class="stale">*</span>' : "");
+    };
+    return '<tr class="row"><td>' + teamCrest(g.away, "sm") + " " + esc(g.away.abbr) + " @ " +
+      teamCrest(g.home, "sm") + " " + esc(g.home.abbr) + "</td>" +
+      "<td>" + esc(statusText(g)) + "</td>" +
+      '<td class="num">' + pct(p.p_home_win, 1) + "</td>" +
+      "<td>" + cell(pm) + "</td><td>" + cell(kal) + "</td>" +
+      '<td class="num">' + (p.consensus_home_win === undefined ? "—" : pct(p.consensus_home_win, 1)) + "</td>" +
+      '<td class="num ' + divCls + '">' + (div === undefined ? "—" : signed(100 * div, 1) + " pp") + "</td>" +
+      '<td class="num">' + (p.p_home_cover === undefined ? "—" : pct(p.p_home_cover, 1)) + "</td>" +
+      '<td class="num">' + (p.market_cover_consensus === undefined ? "—" : pct(p.market_cover_consensus, 1)) + "</td>" +
+      '<td class="num">' + (p.consensus_home_cover === undefined ? "—" : pct(p.consensus_home_cover, 1)) + "</td>" +
+      '<td class="num">' + (vol ? "$" + Math.round(vol).toLocaleString("es-MX") : "—") + "</td></tr>";
+  }).join("");
+  $("markets-table").innerHTML = head(cols) + "<tbody>" +
+    (rows || '<tr><td colspan="11" class="empty">Sin cotizaciones para esta jornada. Revisa el estado de las fuentes arriba.</td></tr>') +
+    "</tbody>";
+  var when = S.quotesAt ? new Date(S.quotesAt) : null;
+  wireLogos();
+  $("markets-note").textContent = "Todas las probabilidades son del equipo local. " +
+    (when && !isNaN(when.getTime()) ? "Última lectura de mercados: " +
+      when.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }) + ". " : "") +
+    "El asterisco marca una cotización conservada de la lectura anterior.";
 }
 function renderAll() {
+  attachMarkets(S.games, S.quotes);
   S.games.forEach(evaluateGame);
   S.games.sort(function (a, b) {
     var ord = { "in": 0, pre: 1, post: 2 };
@@ -1638,7 +2429,8 @@ function renderAll() {
     return d !== 0 ? d : String(a.date).localeCompare(String(b.date));
   });
   S.summary = summarize(S.games);
-  renderStatus(); renderKpis(); renderGames(); renderAts(); renderTotals(); renderSummary();
+  renderStatus(); renderSources(); renderKpis(); renderGames(); renderAts();
+  renderTotals(); renderMarkets(); renderSummary();
 }
 
 /* ------------------------------------------------------------ refresco */
@@ -1663,17 +2455,43 @@ function buildUrl() {
   }
   return ENDPOINT + "?" + p.join("&");
 }
-function refresh() {
-  if (S.loading) return;
-  S.loading = true; renderStatus();
+function fetchJson(url, timeoutMs) {
   var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
-  var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 15000);
-  fetch(buildUrl(), { cache: "no-store", signal: ctrl ? ctrl.signal : undefined })
+  var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, timeoutMs || 15000);
+  return fetch(url, { cache: "no-store", signal: ctrl ? ctrl.signal : undefined })
     .then(function (r) {
       if (!r.ok) throw new Error("HTTP " + r.status);
       return r.json();
     })
-    .then(function (raw) {
+    .then(function (v) { clearTimeout(timer); return v; },
+      function (e) { clearTimeout(timer); throw e; });
+}
+function errMsg(e) {
+  if (e && e.name === "AbortError") return "tiempo de espera agotado";
+  if (e && e.message === "Failed to fetch") return "bloqueado por el navegador (CORS o red)";
+  return (e && e.message) ? e.message : "error de red";
+}
+function marketUrl(name) {
+  var c = SOURCES[name] || {};
+  if (name === "polymarket") {
+    return (c.endpoint || "https://gamma-api.polymarket.com/events") + "?" +
+      (c.query || "tag_slug=nfl&closed=false&limit=200");
+  }
+  return (c.endpoint || "https://api.elections.kalshi.com/trade-api/v2/markets") +
+    "?series_ticker=" + (c.series_ticker || "KXNFLGAME") + "&status=open&limit=500";
+}
+function refresh() {
+  if (S.loading) return;
+  S.loading = true; renderStatus();
+  var names = ["polymarket", "kalshi"].filter(function (n) { return (SOURCES[n] || {}).enabled !== false; });
+  var jobs = [fetchJson(buildUrl(), 15000)].concat(names.map(function (n) { return fetchJson(marketUrl(n), 15000); }));
+  Promise.all(jobs.map(function (pr) {
+    return pr.then(function (v) { return { ok: true, value: v }; },
+      function (e) { return { ok: false, error: e }; });
+  })).then(function (res) {
+    var espn = res[0];
+    if (espn.ok) {
+      var raw = espn.value;
       var games = (raw.events || []).map(parseEvent).filter(function (g) { return g; });
       S.games = games;
       S.meta = {
@@ -1682,22 +2500,41 @@ function refresh() {
         week: (raw.week || {}).number || parseInt($("week").value, 10) || null
       };
       S.online = true; S.error = ""; S.updated = new Date().toISOString();
+      S.sourceStatus.espn = { ok: true, detail: games.length + " partidos" };
       if (S.meta.season) $("season").value = S.meta.season;
-      if (S.meta.seasontype) { $("stype").value = String(S.meta.seasontype); }
-      renderAll();
+      if (S.meta.seasontype) $("stype").value = String(S.meta.seasontype);
       persist();
-    })
-    .catch(function (e) {
+    } else {
       S.online = false;
-      S.error = (e && e.name === "AbortError") ? "tiempo de espera agotado" : (e && e.message ? e.message : "error de red");
-      renderStatus();
-    })
-    .then(function () {
-      clearTimeout(timer);
-      S.loading = false;
-      S.nextIn = parseInt($("every").value, 10) || 0;
-      renderStatus();
+      S.error = errMsg(espn.error);
+      S.sourceStatus.espn = { ok: false, detail: S.error };
+    }
+
+    var quotes = [];
+    names.forEach(function (n, i) {
+      var r = res[i + 1];
+      if (r.ok) {
+        var parsed = n === "polymarket" ? parsePolymarket(r.value) : parseKalshi(r.value);
+        quotes = quotes.concat(parsed);
+        S.sourceStatus[n] = { ok: true, detail: parsed.length + " mercados" };
+        if (parsed.length) S.quotesAt = new Date().toISOString();
+      } else {
+        var kept = (S.quotes || []).filter(function (q) { return q.source === n; })
+          .map(function (q) { var c = {}; Object.keys(q).forEach(function (k) { c[k] = q[k]; }); c.stale = true; return c; });
+        quotes = quotes.concat(kept);
+        S.sourceStatus[n] = { ok: false, detail: errMsg(r.error) + (kept.length ? " · se conserva la última lectura" : "") };
+      }
     });
+    ["polymarket", "kalshi"].forEach(function (n) {
+      if (names.indexOf(n) < 0) S.sourceStatus[n] = { ok: false, detail: "desactivado en config" };
+    });
+    S.quotes = quotes;
+    renderAll();
+  }).then(function () {
+    S.loading = false;
+    S.nextIn = parseInt($("every").value, 10) || 0;
+    renderStatus();
+  });
 }
 function persist() {
   try {
@@ -1736,12 +2573,12 @@ function bind() {
     b.classList.add("active");
     renderGames();
   });
-  ["ats-table", "totals-table"].forEach(function (id) {
+  ["ats-table", "totals-table", "markets-table"].forEach(function (id) {
     $(id).addEventListener("click", function (e) {
       var th = e.target.closest("th[data-sort]"); if (!th) return;
       var k = th.dataset.sort;
       if (S.sort.key === k) S.sort.dir *= -1; else { S.sort.key = k; S.sort.dir = k === "game" || k === "state" ? 1 : -1; }
-      renderAts(); renderTotals();
+      renderAts(); renderTotals(); renderMarkets();
     });
   });
   $("reload").addEventListener("click", function () { refresh(); });
@@ -1820,6 +2657,13 @@ DEFAULT_SETTINGS = {
             "28": 1.2, "default": 0.9,
         },
     },
+    "sources": {
+        "polymarket": {"enabled": True, "endpoint": POLYMARKET_EVENTS,
+                       "query": "tag_slug=nfl&closed=false&limit=200"},
+        "kalshi": {"enabled": True, "endpoint": KALSHI_MARKETS, "series_ticker": KALSHI_NFL_SERIES},
+    },
+    "consensus": {"model_weight": 0.5},
+    "assets": {"logos": True, "logo_template": LOGO_TEMPLATE},
     "defaults": {"seasontype": 2},
 }
 
@@ -1847,17 +2691,19 @@ def main(argv=None) -> int:
                     help="1 pretemporada · 2 regular · 3 postemporada · 4 Pro Bowl")
     ap.add_argument("--dates", default=None, help="Filtro de fechas de ESPN (YYYYMMDD o YYYYMMDD-YYYYMMDD)")
     ap.add_argument("--demo", action="store_true", help="Datos sintéticos: no requiere red")
+    ap.add_argument("--no-markets", action="store_true",
+                    help="Omite Polymarket y Kalshi en la instantánea")
     args = ap.parse_args(argv)
 
     cfg = load_config(args.config)
     seasontype = args.seasontype or (cfg.get("defaults", {}).get("seasontype") if args.week else None)
 
+    demo_meta = {"season": args.season or dt.date.today().year,
+                 "seasontype": args.seasontype or 2,
+                 "week": args.week or 3, "url": "demo"}
+
     if args.demo:
-        games = demo_games(cfg)
-        meta = {"season": args.season or dt.date.today().year,
-                "seasontype": args.seasontype or 2,
-                "week": args.week or 3, "url": "demo"}
-        source = "demo"
+        games, meta, source = demo_games(cfg), demo_meta, "demo"
     else:
         try:
             games, meta = fetch_scoreboard(args.season, args.week, seasontype, args.dates)
@@ -1866,13 +2712,21 @@ def main(argv=None) -> int:
             print("No se pudo consultar el marcador (%s). Se genera la instantánea con --demo;" % exc,
                   file=sys.stderr)
             print("el dashboard seguirá intentando la conexión en vivo desde el navegador.", file=sys.stderr)
-            games = demo_games(cfg)
-            meta = {"season": args.season or dt.date.today().year,
-                    "seasontype": args.seasontype or 2, "week": args.week or 1,
-                    "url": "demo", "error": str(exc)}
-            source = "demo"
+            games, source = demo_games(cfg), "demo"
+            meta = dict(demo_meta, week=args.week or 1, error=str(exc))
 
-    report = build_report(games, cfg, meta, source)
+    if args.no_markets:
+        quotes, status = [], {"polymarket": "desactivado", "kalshi": "desactivado"}
+    elif source == "demo":
+        quotes = demo_quotes(games, cfg)
+        status = {"polymarket": "demo", "kalshi": "demo"}
+    else:
+        quotes, status = fetch_markets(cfg)
+        for name, detail in status.items():
+            if detail.startswith("error"):
+                print("%s: %s" % (name, detail), file=sys.stderr)
+
+    report = build_report(games, cfg, meta, source, quotes, status)
 
     os.makedirs(args.out_dir, exist_ok=True)
     json_path = os.path.join(args.out_dir, "nfl.json")
@@ -1885,6 +2739,10 @@ def main(argv=None) -> int:
     s = report["summary"]
     print("Partidos: %d (%d en vivo · %d finales · %d por jugar) · fuente: %s"
           % (s["games"], s["live"], s["final"], s["scheduled"], source))
+    matched = sum(1 for g in report["games"] if g.get("markets"))
+    print("Mercados de predicción: %s · partidos con cotización: %d"
+          % (", ".join("%s %s" % (k, v) for k, v in (report["source_status"] or {}).items()) or "sin consultar",
+             matched))
     print("Instantánea: %s" % json_path)
     print("Dashboard : %s" % html_path)
     return 0

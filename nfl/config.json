@@ -12,13 +12,49 @@
     "possession_points": 1.1,
     "default_total": 44.0,
     "key_numbers": {
-      "0": 0.15, "1": 1.1, "2": 1.2, "3": 3.4, "4": 1.3, "5": 1.0, "6": 1.9,
-      "7": 2.6, "8": 1.2, "9": 1.1, "10": 2.0, "11": 1.1, "13": 1.1,
-      "14": 1.8, "16": 1.1, "17": 1.7, "20": 1.3, "21": 1.4, "24": 1.3,
-      "28": 1.2, "default": 0.9
+      "0": 0.15,
+      "1": 1.1,
+      "2": 1.2,
+      "3": 3.4,
+      "4": 1.3,
+      "5": 1.0,
+      "6": 1.9,
+      "7": 2.6,
+      "8": 1.2,
+      "9": 1.1,
+      "10": 2.0,
+      "11": 1.1,
+      "13": 1.1,
+      "14": 1.8,
+      "16": 1.1,
+      "17": 1.7,
+      "20": 1.3,
+      "21": 1.4,
+      "24": 1.3,
+      "28": 1.2,
+      "default": 0.9
     }
   },
   "defaults": {
     "seasontype": 2
+  },
+  "sources": {
+    "polymarket": {
+      "enabled": true,
+      "endpoint": "https://gamma-api.polymarket.com/events",
+      "query": "tag_slug=nfl&closed=false&limit=200"
+    },
+    "kalshi": {
+      "enabled": true,
+      "endpoint": "https://api.elections.kalshi.com/trade-api/v2/markets",
+      "series_ticker": "KXNFLGAME"
+    }
+  },
+  "consensus": {
+    "model_weight": 0.5
+  },
+  "assets": {
+    "logos": true,
+    "logo_template": "https://a.espncdn.com/i/teamlogos/nfl/500/{abbr}.png"
   }
 }

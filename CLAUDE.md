@@ -79,9 +79,11 @@ volatility squeeze, ORB) with entry/stop/target/position size, and writes
 ### About the NFL dashboard
 
 `nfl/nfl_dashboard.py` reads ESPN's public NFL scoreboard API (scores, clock,
-possession, spread/total/moneyline), models the final margin as a normal
-distribution updated with each refresh, and writes `nfl/output/nfl.json` plus a
-self-contained `nfl.html` dashboard with cover/push/win/total probabilities.
+possession, spread/total/moneyline) plus two prediction markets — Polymarket
+(Gamma API) and Kalshi (`KXNFLGAME` series) — models the final margin as a
+normal distribution updated with each refresh, and writes `nfl/output/nfl.json`
+plus a self-contained `nfl.html` dashboard with cover/push/win/total
+probabilities, market-implied cover probabilities and a model/market consensus.
 
 - Pure standard library; no dependencies. `--demo` builds the sample output
   offline with deterministic synthetic games.
@@ -90,8 +92,15 @@ self-contained `nfl.html` dashboard with cover/push/win/total probabilities.
   Python and JS implementations in sync when changing the model.
 - `python3 nfl/nfl_dashboard.py --demo` regenerates the committed sample output
   — run it after changing the script or the HTML template.
-- Same house rules as the monitor: self-contained HTML (no CDN, hand-rolled SVG),
-  Spanish client-facing text, and the "not betting advice" disclaimer stays.
+- Sources are independent: each is fetched in parallel and a failure degrades to
+  the previous reading rather than breaking the page. Market quotes are matched
+  to games by team pair using the alias table in `TEAM_ALIASES`.
+- Official team colors live in `TEAM_META`; crests come from ESPN's logo CDN with
+  a colored-badge fallback. This is a private dashboard — keep the note that the
+  marks belong to the clubs, and do not add redistribution features.
+- Same house rules as the monitor: no CDN scripts or fonts and hand-rolled SVG
+  charts (team crests are the one allowed remote asset), Spanish client-facing
+  text, and the "not betting advice" disclaimer stays.
 
 ## Development workflow
 
