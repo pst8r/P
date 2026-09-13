@@ -1025,6 +1025,212 @@ def demo_quotes(games: List[dict], cfg: dict, seed: int = 7311) -> List[dict]:
 # Reporte
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Quiniela propia — metodología Yahoo Fantasy Pick'em
+# ---------------------------------------------------------------------------
+#
+# Yahoo Pro Football Pick'em combina dos ajustes:
+#
+#   * Tipo de pronóstico: «directo» (gana el partido) o «contra el spread»
+#     (gana después de aplicar la línea).
+#   * Puntuación: «estándar» (1 punto por acierto) o «confianza» (se reparten
+#     los valores 1..N entre los N partidos de la semana, cada uno una sola vez;
+#     el acierto paga los puntos asignados y el fallo paga cero).
+#
+# El desempate es el total combinado de puntos del partido designado.
+
+def matchup_key(g: dict) -> str:
+    return "%s@%s" % (g["away"]["abbr"], g["home"]["abbr"])
+
+
+def pick_probability(g: dict, side: str, mode: str) -> Optional[float]:
+    """Probabilidad de que el lado elegido acierte, según modelo y mercados."""
+    p = g.get("probs") or {}
+    if mode == "su":
+        home = p.get("consensus_home_win", p.get("p_home_win"))
+        if home is None:
+            return None
+        return float(home) if side == "home" else 1.0 - float(home) - float(p.get("p_tie", 0.0))
+    home_cover = p.get("consensus_home_cover", p.get("p_home_cover"))
+    if home_cover is None:
+        return None
+    if side == "home":
+        return float(home_cover)
+    away = p.get("p_away_cover")
+    return float(away) if away is not None else 1.0 - float(home_cover) - float(p.get("p_push", 0.0))
+
+
+def pick_outcome(g: dict, side: str, mode: str) -> Optional[str]:
+    """Resultado del pronóstico en un partido terminado: acierto, fallo o empate."""
+    if g.get("state") != "post":
+        return None
+    if mode == "su":
+        margin = (g.get("home_score") or 0) - (g.get("away_score") or 0)
+        if margin == 0:
+            return "push"
+        winner = "home" if margin > 0 else "away"
+        return "hit" if winner == side else "miss"
+    result = (g.get("probs") or {}).get("ats_result")
+    if result is None:
+        return None
+    if result == "push":
+        return "push"
+    return "hit" if result == side else "miss"
+
+
+def score_picks(games: List[dict], picks: Optional[dict], cfg: dict) -> Optional[dict]:
+    """Puntaje obtenido, en juego y proyectado de la quiniela del usuario."""
+    if not picks or not picks.get("picks"):
+        return None
+    rules = cfg.get("pickem", {})
+    mode = (picks.get("mode") or rules.get("mode", "ats")).lower()
+    scoring = (picks.get("scoring") or rules.get("scoring", "confidence")).lower()
+    push_points = float(picks.get("push_points", rules.get("push_points", 0)))
+    entries = picks.get("picks") or {}
+
+    by_key = {matchup_key(g): g for g in games}
+    rows: List[dict] = []
+    used: Dict[int, int] = {}
+    earned = live_exp = pending_exp = 0.0
+    hits = misses = pushes = 0
+    max_possible = 0.0
+
+    for key, entry in entries.items():
+        g = by_key.get(key)
+        if not g:
+            rows.append({"matchup": key, "status": "sin_partido",
+                         "team": (entry or {}).get("team", ""), "confidence": 0})
+            continue
+        team = str((entry or {}).get("team") or "").upper()
+        side = "home" if team == g["home"]["abbr"] else ("away" if team == g["away"]["abbr"] else None)
+        confidence = 1.0 if scoring == "standard" else float((entry or {}).get("confidence") or 0)
+        if scoring == "confidence":
+            used[int(confidence)] = used.get(int(confidence), 0) + 1
+        if side is None:
+            rows.append({"matchup": key, "status": "equipo_invalido", "team": team,
+                         "confidence": confidence})
+            continue
+
+        prob = pick_probability(g, side, mode)
+        outcome = pick_outcome(g, side, mode)
+        row = {
+            "matchup": key, "game_id": g.get("id"), "team": team, "side": side,
+            "confidence": confidence, "state": g.get("state"),
+            "line_home": g.get("line_home"),
+            "probability": round(prob, 4) if prob is not None else None,
+            "status": outcome or ("en_juego" if g.get("state") == "in" else "pendiente"),
+        }
+        if outcome == "hit":
+            row["points"] = confidence
+            earned += confidence
+            hits += 1
+            max_possible += confidence
+        elif outcome == "miss":
+            row["points"] = 0.0
+            misses += 1
+        elif outcome == "push":
+            row["points"] = push_points
+            earned += push_points
+            pushes += 1
+            max_possible += push_points
+        else:
+            row["points"] = None
+            expected = confidence * (prob if prob is not None else 0.5)
+            row["expected"] = round(expected, 2)
+            max_possible += confidence
+            if g.get("state") == "in":
+                live_exp += expected
+            else:
+                pending_exp += expected
+        rows.append(row)
+
+    rows.sort(key=lambda r: (-(r.get("confidence") or 0), r.get("matchup") or ""))
+
+    total_games = len(games)
+    issues: List[str] = []
+    if scoring == "confidence":
+        duplicates = sorted(v for v, n in used.items() if n > 1)
+        if duplicates:
+            issues.append("Valores de confianza repetidos: %s" %
+                          ", ".join(str(d) for d in duplicates))
+        missing = [v for v in range(1, total_games + 1) if v not in used]
+        if len(entries) == total_games and missing:
+            issues.append("Valores sin asignar: %s" % ", ".join(str(m) for m in missing))
+        out_of_range = sorted(v for v in used if v < 1 or v > total_games)
+        if out_of_range:
+            issues.append("Fuera del rango 1-%d: %s" %
+                          (total_games, ", ".join(str(v) for v in out_of_range)))
+    if len(entries) < total_games:
+        issues.append("Faltan %d partidos por pronosticar" % (total_games - len(entries)))
+
+    decided = hits + misses
+    tb = picks.get("tiebreaker") or {}
+    tb_game = by_key.get(tb.get("matchup"))
+    tiebreaker = None
+    if tb.get("total") is not None:
+        actual = None
+        if tb_game and tb_game.get("state") == "post":
+            actual = (tb_game.get("home_score") or 0) + (tb_game.get("away_score") or 0)
+        elif tb_game:
+            actual = (tb_game.get("probs") or {}).get("projected_total")
+        tiebreaker = {
+            "matchup": tb.get("matchup"), "prediction": tb.get("total"),
+            "actual": actual, "final": bool(tb_game and tb_game.get("state") == "post"),
+            "difference": round(abs(float(tb["total"]) - float(actual)), 1) if actual is not None else None,
+        }
+
+    return {
+        "mode": mode, "scoring": scoring, "push_points": push_points,
+        "games_in_week": total_games, "picked": len(entries),
+        "earned": round(earned, 2),
+        "live_expected": round(live_exp, 2),
+        "pending_expected": round(pending_exp, 2),
+        "projected": round(earned + live_exp + pending_exp, 2),
+        "max_possible": round(max_possible, 2),
+        "max_week": round(total_games * (total_games + 1) / 2.0, 1) if scoring == "confidence" else float(total_games),
+        "hits": hits, "misses": misses, "pushes": pushes,
+        "accuracy": round(100.0 * hits / decided, 1) if decided else None,
+        "issues": issues,
+        "tiebreaker": tiebreaker,
+        "rows": rows,
+    }
+
+
+def demo_picks(games: List[dict], cfg: dict, seed: int = 4242) -> dict:
+    """Quiniela de ejemplo: favorito del modelo y confianza por probabilidad."""
+    rnd = random.Random(seed)
+    ranked = []
+    for g in games:
+        p = g.get("probs") or {}
+        home_cover = p.get("consensus_home_cover", p.get("p_home_cover"))
+        if home_cover is None:
+            continue
+        side = "home" if float(home_cover) >= 0.5 else "away"
+        prob = float(home_cover) if side == "home" else 1.0 - float(home_cover)
+        if rnd.random() < 0.25:           # algunas corazonadas contra el modelo
+            side = "away" if side == "home" else "home"
+            prob = 1.0 - prob
+        ranked.append((prob, g, side))
+    ranked.sort(key=lambda t: t[0])
+    picks = {}
+    for i, (_, g, side) in enumerate(ranked, start=1):
+        picks[matchup_key(g)] = {"team": g[side]["abbr"], "confidence": i}
+    tb = ranked[-1][1] if ranked else None
+    return {
+        "mode": "ats", "scoring": "confidence",
+        "season": None, "week": None,
+        "tiebreaker": {"matchup": matchup_key(tb), "total": 45} if tb else {},
+        "picks": picks,
+    }
+
+
+def load_picks(path: Optional[str]) -> Optional[dict]:
+    if not path or not os.path.exists(path):
+        return None
+    with open(path, "r", encoding="utf-8") as fh:
+        return json.load(fh)
+
+
 def summarize(games: List[dict]) -> dict:
     finals = [g for g in games if g.get("state") == "post"]
     live = [g for g in games if g.get("state") == "in"]
@@ -1062,7 +1268,8 @@ def summarize(games: List[dict]) -> dict:
 
 def build_report(games: List[dict], cfg: dict, meta: dict, source: str,
                  quotes: Optional[List[dict]] = None,
-                 source_status: Optional[Dict[str, str]] = None) -> dict:
+                 source_status: Optional[Dict[str, str]] = None,
+                 picks: Optional[dict] = None) -> dict:
     if quotes:
         attach_markets(games, quotes)
     for g in games:
@@ -1079,6 +1286,8 @@ def build_report(games: List[dict], cfg: dict, meta: dict, source: str,
         "team_meta": TEAM_META,
         "team_aliases": TEAM_ALIASES,
         "summary": summarize(games),
+        "picks": picks or None,
+        "pickem": score_picks(games, picks, cfg),
         "games": games,
     }
 
@@ -1185,6 +1394,17 @@ button.act.on{border-color:var(--cyan);color:var(--cyan)}
 .mk.cons{border-color:rgba(255,184,0,.4);color:var(--amber)}
 .mk.cons b{color:var(--amber)}
 .stale{color:var(--amber);font-weight:700}
+.pkctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.pkcell{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+button.pk{display:inline-flex;align-items:center;gap:6px;background:transparent;border:1px solid var(--divider);
+  color:var(--mute);border-radius:8px;padding:5px 10px;font:inherit;font-size:12px;cursor:pointer;white-space:nowrap}
+button.pk:hover:not(:disabled){border-color:var(--ice);color:var(--ice)}
+button.pk:disabled{opacity:.55;cursor:not-allowed}
+select.cf:disabled{opacity:.55;cursor:not-allowed}
+button.pk.sel{border-color:var(--cyan);color:var(--white);background:rgba(0,217,255,.10)}
+label.act.file{cursor:pointer;display:inline-flex;align-items:center}
+select.cf{padding:5px 8px;font-size:12px}
+#pk-kpis{margin:4px 0 14px}
 .trow .nm{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .trow .nm small{display:block;color:var(--mute);font-size:11px;font-weight:400}
 .trow .ball{color:var(--amber);font-size:12px;width:14px;text-align:center}
@@ -1295,6 +1515,7 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
   <button data-tab="ats">Spread (ATS)</button>
   <button data-tab="totals">Totales</button>
   <button data-tab="markets">Mercados</button>
+  <button data-tab="picks">Mi quiniela</button>
   <button data-tab="summary">Resumen</button>
   <button data-tab="method">Metodología</button>
 </div>
@@ -1335,6 +1556,55 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
   </div>
 </section>
 
+<section data-panel="picks">
+  <div class="card">
+    <h3>Mi quiniela · metodología Yahoo Pick'em</h3>
+    <div class="hint sub">Elige un equipo por partido y reparte la confianza. El acierto paga los
+      puntos asignados; el fallo, cero. Los puntos se recalculan con cada refresco del marcador.</div>
+    <div class="pkctl">
+      <div class="ctlgroup">
+        <label for="pk-mode">Pronóstico</label>
+        <select id="pk-mode">
+          <option value="ats">Contra el spread</option>
+          <option value="su">Directo (gana el partido)</option>
+        </select>
+      </div>
+      <div class="ctlgroup">
+        <label for="pk-scoring">Puntuación</label>
+        <select id="pk-scoring">
+          <option value="confidence">Confianza (1 a N)</option>
+          <option value="standard">Estándar (1 punto)</option>
+        </select>
+      </div>
+      <button class="act" id="pk-auto">Autollenar pendientes</button>
+      <button class="act" id="pk-clear">Limpiar</button>
+      <button class="act" id="pk-export">Exportar JSON</button>
+      <label class="act file">Importar JSON
+        <input type="file" id="pk-import" accept="application/json" hidden></label>
+      <label class="act file" title="Evita editar un pronóstico cuando el partido ya empezó">
+        <input type="checkbox" id="pk-lock" checked style="margin-right:7px">Bloquear iniciados</label>
+    </div>
+    <div class="kpis" id="pk-kpis"></div>
+    <div id="picks-issues"></div>
+    <div class="tscroll"><table id="picks-table"></table></div>
+    <div class="pkctl" style="margin-top:16px">
+      <div class="ctlgroup">
+        <label for="pk-tb-game">Desempate</label>
+        <select id="pk-tb-game"></select>
+      </div>
+      <div class="ctlgroup">
+        <label for="pk-tb-total">Total combinado</label>
+        <input type="number" id="pk-tb-total" min="0" max="150" step="1">
+      </div>
+      <span class="sub" id="pk-tb-result"></span>
+    </div>
+    <div class="note" style="margin-top:16px"><b>Cómo se proyecta.</b> Los partidos cerrados suman
+      los puntos ya ganados. Los pendientes aportan su valor esperado: confianza × probabilidad de
+      que tu pronóstico acierte, tomada del consenso entre modelo y mercados. La proyección es la
+      suma de ambos, y el máximo alcanzable supone que aciertas todo lo que falta.</div>
+  </div>
+</section>
+
 <section data-panel="summary">
   <div class="grid2">
     <div class="card"><h3>Cobertura de la jornada</h3><div id="ats-record"></div></div>
@@ -1372,6 +1642,23 @@ footer{margin-top:28px;color:var(--mute);font-size:11.5px;border-top:1px solid v
     <p>Cuando el feed trae momios, se convierten a probabilidad implícita y se les retira la
     comisión repartiéndola entre ambos lados. La columna <i>edge</i> es la diferencia entre la
     probabilidad del modelo y esa probabilidad sin comisión: positiva favorece al local.</p>
+    <h3>Quiniela (metodología Yahoo Pick'em)</h3>
+    <p>Yahoo Pro Football Pick'em combina dos ajustes, ambos disponibles en la pestaña
+    <i>Mi quiniela</i>:</p>
+    <ul>
+      <li><b>Tipo de pronóstico</b>: <i>directo</i>, gana el partido sin importar el margen, o
+      <i>contra el spread</i>, gana después de aplicar la línea.</li>
+      <li><b>Puntuación</b>: <i>estándar</i>, un punto por acierto, o <i>confianza</i>, donde se
+      reparten los valores 1 a N entre los N partidos de la semana, cada valor una sola vez. El
+      acierto paga los puntos asignados y el fallo paga cero, así que el máximo semanal con
+      confianza es N × (N + 1) / 2.</li>
+      <li><b>Desempate</b>: el total combinado de puntos del partido designado; se compara contra
+      el marcador real o, mientras el partido no termina, contra el total proyectado.</li>
+      <li><b>Push</b>: un empate contra la línea paga lo que indique <code>pickem.push_points</code>
+      (cero por omisión, el criterio habitual en las quinielas contra el spread).</li>
+    </ul>
+    <p>El tablero valida que no repitas ni dejes huecos en los valores de confianza y avisa
+    cuántos partidos faltan por pronosticar.</p>
     <h3>Mercados de predicción</h3>
     <p>Además de las casas de apuestas, el tablero consulta <b>Polymarket</b> (API Gamma) y
     <b>Kalshi</b> (API pública de mercados). Ambas cotizan al ganador del partido en
@@ -1486,6 +1773,8 @@ var S = {
   summary: BOOT.summary || {},
   source: BOOT.source || "demo",
   quotes: BOOT.quotes || [],
+  picks: BOOT.picks || null,
+  pickem: null,
   quotesAt: BOOT.generated_at || "",
   sourceStatus: { espn: { ok: false, detail: "sin consultar" },
                   polymarket: { ok: false, detail: "sin consultar" },
@@ -1975,6 +2264,207 @@ function attachMarkets(games, quotes) {
   });
 }
 
+/* ------------------------- quiniela: metodología Yahoo Pick'em --------- */
+var PICKEM_RULES = CFG.pickem || {};
+
+function matchupKey(g) { return g.away.abbr + "@" + g.home.abbr; }
+function weekKey() {
+  var m = S.meta || {};
+  return [m.season || "", m.seasontype || "", m.week || ""].join("-");
+}
+function emptyPicks() {
+  return {
+    mode: (PICKEM_RULES.mode || "ats"),
+    scoring: (PICKEM_RULES.scoring || "confidence"),
+    push_points: PICKEM_RULES.push_points === undefined ? 0 : PICKEM_RULES.push_points,
+    picks: {}, tiebreaker: {}
+  };
+}
+function currentPicks() {
+  if (!S.picks) S.picks = emptyPicks();
+  if (!S.picks.picks) S.picks.picks = {};
+  if (!S.picks.tiebreaker) S.picks.tiebreaker = {};
+  return S.picks;
+}
+function pickProbability(g, side, mode) {
+  var p = g.probs || {};
+  if (mode === "su") {
+    var home = p.consensus_home_win !== undefined ? p.consensus_home_win : p.p_home_win;
+    if (home === undefined) return null;
+    return side === "home" ? home : 1 - home - (p.p_tie || 0);
+  }
+  var hc = p.consensus_home_cover !== undefined ? p.consensus_home_cover : p.p_home_cover;
+  if (hc === undefined) return null;
+  if (side === "home") return hc;
+  return p.p_away_cover !== undefined ? p.p_away_cover : 1 - hc - (p.p_push || 0);
+}
+function pickOutcome(g, side, mode) {
+  if (g.state !== "post") return null;
+  if (mode === "su") {
+    var margin = (g.home_score || 0) - (g.away_score || 0);
+    if (margin === 0) return "push";
+    return ((margin > 0 ? "home" : "away") === side) ? "hit" : "miss";
+  }
+  var res = (g.probs || {}).ats_result;
+  if (!res) return null;
+  if (res === "push") return "push";
+  return res === side ? "hit" : "miss";
+}
+function scorePicks() {
+  var picks = currentPicks();
+  var mode = picks.mode || "ats", scoring = picks.scoring || "confidence";
+  var pushPoints = Number(picks.push_points || 0);
+  var byKey = {}; S.games.forEach(function (g) { byKey[matchupKey(g)] = g; });
+  var rows = [], used = {}, earned = 0, liveExp = 0, pendExp = 0;
+  var hits = 0, misses = 0, pushes = 0, maxPossible = 0, assigned = 0;
+
+  S.games.forEach(function (g) {
+    var key = matchupKey(g);
+    var entry = picks.picks[key];
+    var team = entry ? String(entry.team || "").toUpperCase() : "";
+    var side = team === g.home.abbr ? "home" : (team === g.away.abbr ? "away" : null);
+    var confidence = scoring === "standard" ? 1 : Number((entry || {}).confidence || 0);
+    if (side && scoring === "confidence" && confidence > 0) {
+      used[confidence] = (used[confidence] || 0) + 1;
+    }
+    if (side) assigned++;
+    var row = { key: key, game: g, side: side, team: team, confidence: confidence,
+      probability: side ? pickProbability(g, side, mode) : null,
+      outcome: side ? pickOutcome(g, side, mode) : null };
+    if (side) {
+      if (row.outcome === "hit") { row.points = confidence; earned += confidence; hits++; maxPossible += confidence; }
+      else if (row.outcome === "miss") { row.points = 0; misses++; }
+      else if (row.outcome === "push") { row.points = pushPoints; earned += pushPoints; pushes++; maxPossible += pushPoints; }
+      else {
+        var exp = confidence * (row.probability === null ? 0.5 : row.probability);
+        row.expected = exp; maxPossible += confidence;
+        if (g.state === "in") liveExp += exp; else pendExp += exp;
+      }
+    }
+    rows.push(row);
+  });
+
+  var total = S.games.length;
+  var issues = [];
+  if (scoring === "confidence") {
+    var dup = Object.keys(used).filter(function (v) { return used[v] > 1; }).map(Number).sort(function (a, b) { return a - b; });
+    if (dup.length) issues.push("Valores de confianza repetidos: " + dup.join(", "));
+    var missing = [];
+    for (var v = 1; v <= total; v++) if (!used[v]) missing.push(v);
+    if (assigned === total && missing.length) issues.push("Valores sin asignar: " + missing.join(", "));
+    var outRange = Object.keys(used).map(Number).filter(function (v) { return v < 1 || v > total; });
+    if (outRange.length) issues.push("Fuera del rango 1-" + total + ": " + outRange.join(", "));
+  }
+  if (assigned < total) issues.push("Faltan " + (total - assigned) + " partidos por pronosticar");
+
+  var tb = picks.tiebreaker || {}, tbGame = byKey[tb.matchup], tiebreaker = null;
+  if (tb.total !== undefined && tb.total !== null && tb.total !== "") {
+    var actual = null, isFinal = false;
+    if (tbGame) {
+      isFinal = tbGame.state === "post";
+      actual = isFinal ? (tbGame.home_score || 0) + (tbGame.away_score || 0) : (tbGame.probs || {}).projected_total;
+    }
+    tiebreaker = { matchup: tb.matchup, prediction: Number(tb.total), actual: actual, final: isFinal,
+      difference: actual === null || actual === undefined ? null : Math.abs(Number(tb.total) - actual) };
+  }
+
+  var decided = hits + misses;
+  rows.sort(function (a, b) {
+    if ((b.confidence || 0) !== (a.confidence || 0)) return (b.confidence || 0) - (a.confidence || 0);
+    return a.key.localeCompare(b.key);
+  });
+  S.pickem = {
+    mode: mode, scoring: scoring, games_in_week: total, picked: assigned,
+    earned: earned, live_expected: liveExp, pending_expected: pendExp,
+    projected: earned + liveExp + pendExp, max_possible: maxPossible,
+    max_week: scoring === "confidence" ? total * (total + 1) / 2 : total,
+    hits: hits, misses: misses, pushes: pushes,
+    accuracy: decided ? 100 * hits / decided : null,
+    issues: issues, tiebreaker: tiebreaker, rows: rows
+  };
+  return S.pickem;
+}
+function savePicks() {
+  try { localStorage.setItem("nflPicks:" + weekKey(), JSON.stringify(currentPicks())); }
+  catch (e) { /* almacenamiento no disponible */ }
+}
+function loadPicksForWeek() {
+  try {
+    var raw = localStorage.getItem("nflPicks:" + weekKey());
+    if (raw) { S.picks = JSON.parse(raw); return; }
+  } catch (e) { /* se usa la quiniela embebida */ }
+  if (!S.picks) S.picks = BOOT.picks || emptyPicks();
+}
+/* Rellena sólo los partidos que no han empezado: usar la probabilidad de un
+   partido en curso o terminado sería pronosticar con el resultado a la vista.
+   Los valores de confianza ya comprometidos en partidos iniciados se respetan. */
+function autoFillPicks() {
+  var picks = currentPicks();
+  var mode = picks.mode || "ats";
+  var total = S.games.length;
+  var locked = {}, usedValues = {};
+  S.games.forEach(function (g) {
+    if (g.state === "pre") return;
+    var entry = picks.picks[matchupKey(g)];
+    locked[matchupKey(g)] = true;
+    if (entry && entry.confidence) usedValues[Number(entry.confidence)] = true;
+  });
+  var available = [];
+  for (var v = 1; v <= total; v++) if (!usedValues[v]) available.push(v);
+
+  var ranked = [];
+  S.games.forEach(function (g) {
+    if (locked[matchupKey(g)]) return;
+    var ph = pickProbability(g, "home", mode);
+    if (ph === null || ph === undefined) return;
+    var side = ph >= 0.5 ? "home" : "away";
+    ranked.push({ g: g, side: side, prob: side === "home" ? ph : pickProbability(g, "away", mode) });
+  });
+  if (!ranked.length) {
+    $("picks-issues").innerHTML = '<div class="note">No hay partidos pendientes por pronosticar: ' +
+      "el autollenado no toca los que ya empezaron.</div>";
+    return;
+  }
+  ranked.sort(function (a, b) { return a.prob - b.prob; });
+  ranked.forEach(function (r, i) {
+    picks.picks[matchupKey(r.g)] = { team: r.g[r.side].abbr, confidence: available[i] || 0 };
+  });
+  if (!picks.tiebreaker.matchup) {
+    var last = ranked[ranked.length - 1].g;
+    picks.tiebreaker = { matchup: matchupKey(last),
+      total: Math.round((last.probs || {}).projected_total || 45) };
+  }
+  savePicks(); renderAll();
+}
+function clearPicks() {
+  S.picks = emptyPicks();
+  savePicks(); renderAll();
+}
+function exportPicks() {
+  var payload = JSON.parse(JSON.stringify(currentPicks()));
+  var m = S.meta || {};
+  payload.season = m.season || null; payload.seasontype = m.seasontype || null; payload.week = m.week || null;
+  var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "picks.json";
+  document.body.appendChild(a); a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 0);
+}
+function importPicks(file) {
+  var reader = new FileReader();
+  reader.onload = function () {
+    try {
+      var data = JSON.parse(String(reader.result));
+      if (!data || typeof data !== "object" || !data.picks) throw new Error("formato no reconocido");
+      S.picks = data; savePicks(); renderAll();
+    } catch (e) {
+      $("picks-issues").innerHTML = '<div class="note">No se pudo leer el archivo: ' + esc(e.message) + "</div>";
+    }
+  };
+  reader.readAsText(file);
+}
+
 /* ------------------------------------------------------------- formato */
 function $(id) { return document.getElementById(id); }
 function esc(s) {
@@ -2030,7 +2520,7 @@ function wireLogos() {
   Array.prototype.forEach.call(imgs, function (img) {
     if (img.dataset.wired) return;
     img.dataset.wired = "1";
-    img.addEventListener("error", function () {
+    var swap = function () {
       var span = document.createElement("span");
       var bg = img.dataset.color || "#1E2761";
       span.className = img.className + " fallback";
@@ -2038,7 +2528,11 @@ function wireLogos() {
       span.style.color = textOn(bg);
       span.textContent = img.dataset.abbr || "";
       if (img.parentNode) img.parentNode.replaceChild(span, img);
-    }, { once: true });
+    };
+    img.addEventListener("error", swap, { once: true });
+    /* Si la carga ya falló antes de enganchar el manejador (imagen en caché
+       negativa) el evento no vuelve a dispararse: se comprueba al vuelo. */
+    if (img.complete && img.naturalWidth === 0) swap();
   });
 }
 function centsChip(label, p, cls) {
@@ -2085,6 +2579,8 @@ function teamRow(g, side) {
     (g.possession_home === (side === "home"))) ? "●" : "";
   var sub = [t.record || "", side === "home" ? "local" : "visitante", lineLabel(g, side)]
     .filter(function (x) { return x; }).join(" · ");
+  var mine = ((currentPicks().picks || {})[matchupKey(g)] || {}).team === t.abbr;
+  if (mine) sub += " · TU PICK";
   return '<div class="' + cls + '">' + teamCrest(t) +
     '<div class="nm">' + esc(t.name || t.abbr) + "<small>" + esc(sub) + "</small></div>" +
     '<div class="ball">' + ball + "</div>" +
@@ -2420,6 +2916,91 @@ function renderMarkets() {
       when.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }) + ". " : "") +
     "El asterisco marca una cotización conservada de la lectura anterior.";
 }
+function pickStateLabel(row) {
+  if (!row.side) return '<span class="sub">sin pick</span>';
+  if (row.outcome === "hit") return '<span class="pill ok">Acierto</span>';
+  if (row.outcome === "miss") return '<span class="pill no">Fallo</span>';
+  if (row.outcome === "push") return '<span class="pill push">Push</span>';
+  return '<span class="sub">' + esc(statusText(row.game)) + "</span>";
+}
+function renderPickem() {
+  var pk = scorePicks();
+  var picks = currentPicks();
+  var total = S.games.length;
+  $("pk-mode").value = pk.mode;
+  $("pk-scoring").value = pk.scoring;
+
+  $("pk-kpis").innerHTML =
+    kpi("Puntos asegurados", pk.earned.toFixed(0),
+      pk.hits + " aciertos · " + pk.misses + " fallos" + (pk.pushes ? " · " + pk.pushes + " push" : ""), "green") +
+    kpi("En juego ahora", pk.live_expected.toFixed(1),
+      "Valor esperado de los partidos en curso", "") +
+    kpi("Proyección de la semana", pk.projected.toFixed(1),
+      "De " + pk.max_week.toFixed(0) + " posibles · máximo alcanzable " + pk.max_possible.toFixed(0), "amber") +
+    kpi("Efectividad", pk.accuracy === null ? "—" : pk.accuracy.toFixed(0) + " %",
+      pk.picked + " de " + total + " partidos pronosticados", "");
+
+  var confOptions = function (value) {
+    var html = '<option value="0">—</option>';
+    for (var i = 1; i <= total; i++) {
+      html += '<option value="' + i + '"' + (Number(value) === i ? " selected" : "") + ">" + i + "</option>";
+    }
+    return html;
+  };
+  var lockStarted = $("pk-lock").checked;
+  var isLocked = function (g) { return lockStarted && g.state !== "pre"; };
+  var sideButton = function (row, side) {
+    var g = row.game, t = g[side];
+    var sel = row.side === side ? " sel" : "";
+    var label = pk.mode === "su" ? t.abbr : t.abbr + " " + lineLabel(g, side);
+    return '<button class="pk' + sel + '" data-key="' + esc(row.key) + '" data-team="' + esc(t.abbr) + '"' +
+      (isLocked(g) ? " disabled" : "") + ">" + teamCrest(t, "sm") + " " + esc(label) + "</button>";
+  };
+  var rows = pk.rows.map(function (row) {
+    var g = row.game;
+    var points;
+    if (row.points !== undefined && row.points !== null) {
+      points = '<span class="num ' + (row.points > 0 ? "pos" : "neg") + '">' +
+        (row.points > 0 ? "+" : "") + Number(row.points).toFixed(0) + "</span>";
+    } else if (row.expected !== undefined) {
+      points = '<span class="num">' + row.expected.toFixed(1) + ' <span class="sub">esp.</span></span>';
+    } else {
+      points = "—";
+    }
+    return '<tr class="row"><td>' + teamCrest(g.away, "sm") + " " + esc(g.away.abbr) + " @ " +
+      teamCrest(g.home, "sm") + " " + esc(g.home.abbr) +
+      '<div class="sub">' + esc(statusText(g)) +
+      (g.state === "pre" ? "" : " · " + g.away_score + "-" + g.home_score) + "</div></td>" +
+      '<td class="pkcell">' + sideButton(row, "away") + sideButton(row, "home") + "</td>" +
+      '<td><select class="cf" data-key="' + esc(row.key) + '"' +
+      (pk.scoring === "standard" || isLocked(row.game) ? " disabled" : "") + ">" +
+      confOptions(row.confidence) + "</select></td>" +
+      '<td class="num">' + (row.probability === null || row.probability === undefined ? "—" : pct(row.probability, 1)) + "</td>" +
+      "<td>" + points + "</td><td>" + pickStateLabel(row) + "</td></tr>";
+  }).join("");
+  $("picks-table").innerHTML =
+    "<thead><tr><th>Partido</th><th>Mi pronóstico</th><th>Confianza</th>" +
+    "<th>Prob. de acierto</th><th>Puntos</th><th>Resultado</th></tr></thead><tbody>" +
+    (rows || '<tr><td colspan="6" class="empty">Sin partidos en esta jornada.</td></tr>') + "</tbody>";
+  wireLogos();
+
+  $("picks-issues").innerHTML = pk.issues.length
+    ? '<div class="note"><b>Revisa la quiniela.</b> ' + pk.issues.map(esc).join(" · ") + "</div>"
+    : "";
+
+  var tbOptions = S.games.map(function (g) {
+    var k = matchupKey(g);
+    return '<option value="' + esc(k) + '"' + ((picks.tiebreaker || {}).matchup === k ? " selected" : "") +
+      ">" + esc(g.away.abbr + " @ " + g.home.abbr) + "</option>";
+  }).join("");
+  $("pk-tb-game").innerHTML = '<option value="">—</option>' + tbOptions;
+  $("pk-tb-total").value = (picks.tiebreaker || {}).total !== undefined ? picks.tiebreaker.total : "";
+  var tb = pk.tiebreaker;
+  $("pk-tb-result").textContent = !tb ? "Sin desempate definido."
+    : (tb.actual === null || tb.actual === undefined ? "Partido sin proyección disponible."
+      : (tb.final ? "Total real " + tb.actual : "Total proyectado " + Number(tb.actual).toFixed(1)) +
+        " · tu pronóstico " + tb.prediction + " · diferencia " + Number(tb.difference).toFixed(1));
+}
 function renderAll() {
   attachMarkets(S.games, S.quotes);
   S.games.forEach(evaluateGame);
@@ -2430,7 +3011,7 @@ function renderAll() {
   });
   S.summary = summarize(S.games);
   renderStatus(); renderSources(); renderKpis(); renderGames(); renderAts();
-  renderTotals(); renderMarkets(); renderSummary();
+  renderTotals(); renderMarkets(); renderPickem(); renderSummary();
 }
 
 /* ------------------------------------------------------------ refresco */
@@ -2501,6 +3082,7 @@ function refresh() {
       };
       S.online = true; S.error = ""; S.updated = new Date().toISOString();
       S.sourceStatus.espn = { ok: true, detail: games.length + " partidos" };
+      if (weekKey() !== prevWeek) loadPicksForWeek();
       if (S.meta.season) $("season").value = S.meta.season;
       if (S.meta.seasontype) $("stype").value = String(S.meta.seasontype);
       persist();
@@ -2581,6 +3163,46 @@ function bind() {
       renderAts(); renderTotals(); renderMarkets();
     });
   });
+  $("picks-table").addEventListener("click", function (e) {
+    var b = e.target.closest("button.pk"); if (!b) return;
+    var picks = currentPicks(), key = b.dataset.key, team = b.dataset.team;
+    var cur = picks.picks[key] || {};
+    if (cur.team === team) { delete picks.picks[key]; }
+    else { picks.picks[key] = { team: team, confidence: cur.confidence || 0 }; }
+    savePicks(); renderPickem(); renderGames();
+  });
+  $("picks-table").addEventListener("change", function (e) {
+    var sel = e.target.closest("select.cf"); if (!sel) return;
+    var picks = currentPicks(), key = sel.dataset.key;
+    var value = parseInt(sel.value, 10) || 0;
+    if (!picks.picks[key]) picks.picks[key] = { team: "", confidence: value };
+    else picks.picks[key].confidence = value;
+    savePicks(); renderPickem();
+  });
+  $("pk-lock").addEventListener("change", function () { renderPickem(); });
+  ["pk-mode", "pk-scoring"].forEach(function (id) {
+    $(id).addEventListener("change", function () {
+      var picks = currentPicks();
+      if (id === "pk-mode") picks.mode = $(id).value; else picks.scoring = $(id).value;
+      savePicks(); renderPickem(); renderGames();
+    });
+  });
+  ["pk-tb-game", "pk-tb-total"].forEach(function (id) {
+    $(id).addEventListener("change", function () {
+      var picks = currentPicks();
+      picks.tiebreaker = picks.tiebreaker || {};
+      if (id === "pk-tb-game") picks.tiebreaker.matchup = $(id).value;
+      else picks.tiebreaker.total = $(id).value === "" ? null : Number($(id).value);
+      savePicks(); renderPickem();
+    });
+  });
+  $("pk-auto").addEventListener("click", autoFillPicks);
+  $("pk-clear").addEventListener("click", clearPicks);
+  $("pk-export").addEventListener("click", exportPicks);
+  $("pk-import").addEventListener("change", function (e) {
+    if (e.target.files && e.target.files[0]) importPicks(e.target.files[0]);
+    e.target.value = "";
+  });
   $("reload").addEventListener("click", function () { refresh(); });
   $("stype").addEventListener("change", function () { weekOptions(); persist(); refresh(); });
   ["season", "week"].forEach(function (id) {
@@ -2614,6 +3236,7 @@ function init() {
     if ([].slice.call($("every").options).some(function (o) { return o.value === opt; })) $("every").value = opt;
   }
   restore();
+  loadPicksForWeek();
   bind();
   renderAll();
   S.nextIn = parseInt($("every").value, 10) || 0;
@@ -2663,6 +3286,7 @@ DEFAULT_SETTINGS = {
         "kalshi": {"enabled": True, "endpoint": KALSHI_MARKETS, "series_ticker": KALSHI_NFL_SERIES},
     },
     "consensus": {"model_weight": 0.5},
+    "pickem": {"mode": "ats", "scoring": "confidence", "push_points": 0},
     "assets": {"logos": True, "logo_template": LOGO_TEMPLATE},
     "defaults": {"seasontype": 2},
 }
@@ -2693,6 +3317,8 @@ def main(argv=None) -> int:
     ap.add_argument("--demo", action="store_true", help="Datos sintéticos: no requiere red")
     ap.add_argument("--no-markets", action="store_true",
                     help="Omite Polymarket y Kalshi en la instantánea")
+    ap.add_argument("--picks", default=None,
+                    help="Archivo JSON con la quiniela propia (por omisión nfl/picks.json si existe)")
     args = ap.parse_args(argv)
 
     cfg = load_config(args.config)
@@ -2726,7 +3352,13 @@ def main(argv=None) -> int:
             if detail.startswith("error"):
                 print("%s: %s" % (name, detail), file=sys.stderr)
 
-    report = build_report(games, cfg, meta, source, quotes, status)
+    picks_path = args.picks or os.path.join(HERE, "picks.json")
+    picks = load_picks(picks_path)
+    report = build_report(games, cfg, meta, source, quotes, status, picks)
+    if picks is None and source == "demo" and not args.picks:
+        # La instantánea de ejemplo muestra la sección con una quiniela sintética.
+        picks = demo_picks(report["games"], cfg)
+        report = build_report(report["games"], cfg, meta, source, quotes, status, picks)
 
     os.makedirs(args.out_dir, exist_ok=True)
     json_path = os.path.join(args.out_dir, "nfl.json")
@@ -2743,6 +3375,13 @@ def main(argv=None) -> int:
     print("Mercados de predicción: %s · partidos con cotización: %d"
           % (", ".join("%s %s" % (k, v) for k, v in (report["source_status"] or {}).items()) or "sin consultar",
              matched))
+    pk = report.get("pickem")
+    if pk:
+        print("Quiniela (%s · %s): %.1f pts asegurados · proyección %.1f de %.0f posibles · %d aciertos / %d fallos"
+              % (pk["mode"], pk["scoring"], pk["earned"], pk["projected"], pk["max_week"],
+                 pk["hits"], pk["misses"]))
+        for issue in pk.get("issues", []):
+            print("  aviso: %s" % issue, file=sys.stderr)
     print("Instantánea: %s" % json_path)
     print("Dashboard : %s" % html_path)
     return 0

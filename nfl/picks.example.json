@@ -1,0 +1,15 @@
+{
+  "mode": "ats",
+  "scoring": "confidence",
+  "push_points": 0,
+  "season": 2025,
+  "seasontype": 2,
+  "week": 3,
+  "tiebreaker": { "matchup": "BUF@KC", "total": 47 },
+  "picks": {
+    "BUF@KC":  { "team": "KC",  "confidence": 16 },
+    "SF@ARI":  { "team": "SF",  "confidence": 15 },
+    "NYJ@MIA": { "team": "MIA", "confidence": 14 },
+    "DAL@PHI": { "team": "DAL", "confidence": 13 }
+  }
+}
