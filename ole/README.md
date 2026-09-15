@@ -8,7 +8,7 @@ española ni el carácter taurino del nombre.
 ole/
 ├── index.html          # el sitio completo, en un solo archivo
 ├── assets/
-│   ├── logo.png        # logotipo oficial, ya recortado y sin fondo
+│   ├── logo.png        # logotipo oficial en alta resolución (el sitio lo lleva incrustado)
 │   ├── LEEME.txt
 │   └── fotos/          # aquí van las fotos de @ole.restaurante
 └── export/             # el sitio exportado para subirlo a Canva
@@ -84,9 +84,14 @@ capote. La identidad la lleva el logotipo oficial; el toro es solo textura de fo
 ## El logotipo y la paleta
 
 El logotipo es marca registrada, así que el sitio usa el archivo oficial en el
-encabezado, la portada y el pie. Está en `assets/logo.png`, recortado y con el fondo
-gris del original convertido en transparencia, de modo que se apoya sobre cualquier
-color sin recuadro.
+encabezado, la portada y el pie. Lo recorté y convertí el fondo gris del original en
+transparencia, de modo que se apoya sobre cualquier color sin recuadro.
+
+Va **incrustado dentro de `index.html`**, no enlazado: el archivo se abre solo, sin
+carpeta al lado, y siempre muestra la marca correcta. Antes estaba enlazado a
+`assets/logo.png` y, al abrir el HTML suelto, no lo encontraba y caía a un respaldo
+tipográfico provisional. Ese respaldo ya no existe. El original en alta resolución
+sigue en `assets/logo.png` para cuando lo necesites aparte.
 
 La paleta sale del propio logotipo, medida con cuentagotas:
 
