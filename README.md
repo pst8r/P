@@ -12,6 +12,10 @@ Project Mgmt
   la probabilidad de cubrir el spread de cada partido y genera un dashboard HTML autocontenido
   que se refresca solo. Ver [`nfl/README.md`](nfl/README.md).
 
+- `t8/` — **T8 IT Service Desk**: espacio de diseño de una plataforma de mesa de servicio
+  agéntica (ITIL 4 + KCS v6). Actualmente solo documentación de arquitectura, sin código.
+  Ver [`t8/README.md`](t8/README.md).
+
 ```bash
 python3 monitor/stock_monitor.py --demo   # prueba sin red
 python3 monitor/stock_monitor.py          # datos reales (pip install yfinance)
