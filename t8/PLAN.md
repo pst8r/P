@@ -220,9 +220,14 @@ customer-borne.
 *Done when:* T8 fronts an incumbent with no state divergence under **induced**
 conflict.
 
-**Horizon:** Phases 0–5 ≈ 6 months to a design partner running real T0–T2
-automation. Phases 6–10 ≈ 5 further months. Phases 7 and 9 move earlier if a
-deal demands them.
+**Horizon** (sum of the per-phase estimates above, run as sequential gates):
+Phases 0–5 ≈ **31 weeks / ~7 months** to a design partner running real T0–T2
+automation. Phases 6–10 ≈ **19 weeks / ~4.5 months**. Total ≈ **50 weeks**.
+
+The ~6-month figure in `docs/00-architect-response.md` §1.8 assumed some overlap
+between phases; these numbers assume none, because §11 gates each phase on your
+approval of the previous one. Seven months is the number to plan against unless
+you want phases to overlap, which trades the gate for the schedule.
 
 ---
 
