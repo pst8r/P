@@ -7,9 +7,15 @@ española ni el carácter taurino del nombre.
 ```
 ole/
 ├── index.html          # el sitio completo, en un solo archivo
-└── assets/             # logotipo y fotografías (ver LEEME.txt)
-    ├── LEEME.txt
-    └── fotos/
+├── assets/
+│   ├── logo.png        # logotipo oficial, ya recortado y sin fondo
+│   ├── LEEME.txt
+│   └── fotos/          # aquí van las fotos de @ole.restaurante
+└── export/             # el sitio exportado para subirlo a Canva
+    ├── ole-sitio-canva.pdf
+    ├── ole-sitio-completo.png
+    ├── secciones/
+    └── LEEME.txt
 ```
 
 ## Cómo verlo y cómo publicarlo
@@ -22,22 +28,9 @@ Para publicarlo, sube la carpeta `ole/` completa a cualquier hosting estático
 
 ## Lo que falta para publicar
 
-Dos cosas, y ninguna requiere tocar código.
+Solo las fotografías, y no requieren tocar código.
 
-### 1. El logotipo
-
-El logotipo es marca registrada, así que el sitio usa el archivo oficial, no una
-reinterpretación. Deja el archivo en:
-
-```
-ole/assets/logo.png
-```
-
-PNG o SVG con fondo transparente, alto mínimo 200 px. Aparece en tres lugares: el
-encabezado, la portada y el pie. Mientras el archivo no esté, se muestra un respaldo
-tipográfico provisional; en cuanto lo pongas, el logotipo real lo sustituye solo.
-
-### 2. Las fotografías de @ole.restaurante
+### 1. Las fotografías de @ole.restaurante
 
 Van once fotos en `ole/assets/fotos/`, con estos nombres exactos:
 
@@ -85,9 +78,30 @@ Las mismas que el resto del repositorio, por lo que el archivo es autocontenido:
 | Testimonios de plantilla en inglés | Los tres testimonios reales del sitio actual |
 
 Carácter taurino, sin caer en el cliché: silueta de toro bravo como marca de agua de
-la portada, rojo capote y oro del logotipo, mosaico andaluz apenas insinuado, grano de
-albero y un separador en forma de vuelo de capote. La identidad la lleva el logotipo
-oficial; el toro es solo textura de fondo.
+la portada, mosaico andaluz apenas insinuado y un separador en forma de vuelo de
+capote. La identidad la lleva el logotipo oficial; el toro es solo textura de fondo.
+
+## El logotipo y la paleta
+
+El logotipo es marca registrada, así que el sitio usa el archivo oficial en el
+encabezado, la portada y el pie. Está en `assets/logo.png`, recortado y con el fondo
+gris del original convertido en transparencia, de modo que se apoya sobre cualquier
+color sin recuadro.
+
+La paleta sale del propio logotipo, medida con cuentagotas:
+
+| Color | Valor | Dónde |
+| --- | --- | --- |
+| Rojo Olé | `#FA001B` | Acentos, botones y antetítulos |
+| Rojo hondo | `#D10018` | Bloque de testimonios y estados de hover |
+| Oro Olé | `#FDB700` | Subrayados, títulos de la pizarra y filete del pie |
+| Gris Olé | `#EFEFEF` | Fondo dominante del sitio, el mismo del logotipo |
+| Pizarra | `#2A2624` | Solo la carta, para que funcione como pizarrón |
+
+El sitio es claro de arriba abajo. Las letras de "RESTAURANTE" en el logotipo son
+gris oscuro, así que sobre un fondo negro desaparecen: por eso el encabezado, la
+portada y el pie son claros. Los únicos bloques de contraste fuerte son la carta y
+los testimonios.
 
 ## La carta no lleva precios
 
@@ -153,6 +167,20 @@ apertura en agosto de 2025, el horario de miércoles a domingo de 2 a 9 p.m., la
 ubicación en el Centro Comercial de Lomas de Cocoyoc, el correo
 `hola@olerestaurante.com`, el Instagram `@ole.restaurante`, los tres platillos
 destacados, los tres testimonios y la carta completa.
+
+## El archivo para Canva
+
+En `export/` está el sitio exportado para subirlo a Canva, con las instrucciones en
+`export/LEEME.txt`. No se pudo crear directamente en la cuenta: la conexión con Canva
+se cayó a mitad de la sesión y la red de este entorno bloquea el dominio.
+
+Las imágenes se generaron sin las fotografías reales. Si primero dejas las fotos en
+`assets/fotos/` y se vuelve a exportar, salen con las fotos puestas.
+
+Vale la pena decirlo: `index.html` ya funciona solo y no necesita Canva. Al pasar por
+Canva se pierden el formulario de reserva, el alta al Club, las pestañas de la carta
+y el indicador de abierto/cerrado, porque quedan como dibujo. Canva conviene si quien
+vaya a mantener el sitio prefiere editarlo ahí.
 
 ## Si algún día quieres el feed real de Instagram
 

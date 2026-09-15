@@ -1,0 +1,63 @@
+Sitio de Olé listo para llevar a Canva
+======================================
+
+No fue posible crear el archivo directamente en tu cuenta: la conexión con Canva
+se cayó a mitad de la sesión y la política de red de este entorno bloquea el
+dominio. Lo que sigue es el sitio exportado para que lo subas tú en dos minutos.
+
+  ole-sitio-canva.pdf        El sitio completo en UNA sola página de 1366 x 8642 px.
+                             Es la forma en que Canva arma las páginas de sitio web:
+                             una página alta que se recorre hacia abajo.
+
+  ole-sitio-completo.png     Lo mismo, como imagen. Útil para pegarlo de fondo o
+                             para enseñárselo a alguien sin abrir nada.
+
+  secciones/                 Una imagen por bloque, a 1366 px de ancho, para armar
+                             el sitio en Canva sección por sección. Incluye las
+                             cinco pestañas de la carta por separado.
+
+
+CÓMO SUBIRLO A CANVA
+--------------------
+
+Opción A — importar el PDF (lo más rápido)
+
+  1. Entra a canva.com y elige  Crear un diseño  >  Importar archivo.
+  2. Sube  ole-sitio-canva.pdf.
+  3. Canva lo abre como un diseño editable de una página. Renómbralo, por ejemplo,
+     "Ole Restaurante (Website) v2".
+  4. Para publicarlo:  Compartir  >  Sitio web  >  y elige el dominio.
+
+  Ojo: al importar un PDF, Canva convierte el texto en cajas de texto editables y
+  el resto en imágenes. Los botones y el menú quedan como dibujo, no como enlaces:
+  hay que volver a ponerles el vínculo desde el panel de Canva.
+
+Opción B — armarlo por secciones (queda mejor para editar después)
+
+  1. En Canva crea un diseño de tipo  Sitio web.
+  2. Sube las imágenes de  secciones/  desde la pestaña  Cargas.
+  3. Pon cada imagen como fondo de su bloque, en este orden:
+     01 portada · 02 sobre Olé · 03 nuestra comida · 04 la carta ·
+     05 testimonios · 06 redes · 07 Club Olé · 08 contacto · 09 pie.
+  4. Encima de cada bloque coloca los botones y los campos con elementos nativos de
+     Canva, para que los enlaces y el formulario funcionen de verdad.
+
+
+ANTES DE PUBLICAR
+-----------------
+
+Estas imágenes se generaron SIN las fotografías reales, así que muestran los
+marcadores ilustrados. Si primero dejas las fotos en  ole/assets/fotos/  y se
+vuelve a exportar, el PDF y las secciones ya salen con las fotos puestas.
+
+
+UNA ALTERNATIVA A CONSIDERAR
+----------------------------
+
+El sitio de  ole/index.html  ya funciona por sí solo y no necesita Canva: se sube
+tal cual a Netlify, Vercel, Cloudflare Pages o GitHub Pages, gratis, y se apunta
+ahí el dominio olerestaurante.com. Conserva cosas que el export a Canva pierde:
+el formulario de reserva, el alta al Club Olé, las pestañas de la carta, el
+indicador de abierto/cerrado y el ajuste a pantalla de celular.
+
+Canva conviene si quien vaya a mantener el sitio prefiere editarlo ahí.
