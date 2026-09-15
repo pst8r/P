@@ -1,0 +1,30 @@
+Archivos de marca e imagen de Olé Restaurante
+=============================================
+
+Deja aquí los archivos con EXACTAMENTE estos nombres. El sitio los toma solos,
+sin tocar una línea de código. Mientras falte alguno, esa parte del sitio muestra
+el marcador ilustrado que ya trae, así que nunca se ve rota.
+
+  assets/
+  ├── logo.png            Logotipo oficial (marca registrada).
+  │                       PNG o SVG con fondo transparente, alto mínimo 200 px.
+  │                       Se usa en el encabezado, en el hero y en el pie.
+  └── fotos/
+      ├── hero.jpg        Foto de fondo de la portada. Horizontal, mínimo 2000 px
+      │                   de ancho. Va oscurecida detrás del logotipo, así que
+      │                   funciona mejor una toma de ambiente que un primer plano.
+      ├── salon.jpg       El salón o la barra. Vertical (proporción 4:5).
+      ├── pinchos.jpg     Platillo destacado. Horizontal (4:3).
+      ├── arroz-meloso.jpg  Platillo destacado. Horizontal (4:3).
+      ├── merluza.jpg     Platillo destacado. Horizontal (4:3).
+      ├── ig-1.jpg        Muro de redes. Cuadradas (1:1), de @ole.restaurante.
+      ├── ig-2.jpg        Los pies de foto que ya trae el sitio son, en orden:
+      ├── ig-3.jpg          1 arroz meloso · 2 barra de pinchos · 3 tintos
+      ├── ig-4.jpg          4 jamón al corte · 5 el salón · 6 sidra escanciada
+      ├── ig-5.jpg        Si subes otras fotos, ajusta los pies de foto y los
+      └── ig-6.jpg        enlaces de cada tarjeta en la sección "redes".
+
+Peso: comprime las fotos antes de subirlas. Menos de 300 KB cada una y menos de
+600 KB la del hero. El sitio no usa CDN, así que el peso se nota directo.
+
+Si cambias el nombre de algún archivo, busca "assets/" dentro de index.html.

@@ -6,16 +6,62 @@ española ni el carácter taurino del nombre.
 
 ```
 ole/
-└── index.html     # el sitio completo, en un solo archivo
+├── index.html          # el sitio completo, en un solo archivo
+└── assets/             # logotipo y fotografías (ver LEEME.txt)
+    ├── LEEME.txt
+    └── fotos/
 ```
 
 ## Cómo verlo y cómo publicarlo
 
 Abre `ole/index.html` con doble clic. No necesita servidor, ni build, ni conexión.
 
-Para publicarlo, sube ese único archivo a cualquier hosting estático (Netlify, Vercel,
-Cloudflare Pages, GitHub Pages) y apunta ahí el dominio `olerestaurante.com`. También
-puede convivir con Canva mientras se decide: es un archivo independiente.
+Para publicarlo, sube la carpeta `ole/` completa a cualquier hosting estático
+(Netlify, Vercel, Cloudflare Pages, GitHub Pages) y apunta ahí el dominio
+`olerestaurante.com`. También puede convivir con Canva mientras se decide.
+
+## Lo que falta para publicar
+
+Dos cosas, y ninguna requiere tocar código.
+
+### 1. El logotipo
+
+El logotipo es marca registrada, así que el sitio usa el archivo oficial, no una
+reinterpretación. Deja el archivo en:
+
+```
+ole/assets/logo.png
+```
+
+PNG o SVG con fondo transparente, alto mínimo 200 px. Aparece en tres lugares: el
+encabezado, la portada y el pie. Mientras el archivo no esté, se muestra un respaldo
+tipográfico provisional; en cuanto lo pongas, el logotipo real lo sustituye solo.
+
+### 2. Las fotografías de @ole.restaurante
+
+Van once fotos en `ole/assets/fotos/`, con estos nombres exactos:
+
+| Archivo | Dónde va | Formato |
+| --- | --- | --- |
+| `hero.jpg` | Fondo de la portada | Horizontal, mínimo 2000 px de ancho |
+| `salon.jpg` | Sección "Sobre Olé" | Vertical, 4:5 |
+| `pinchos.jpg` | Platillo destacado | Horizontal, 4:3 |
+| `arroz-meloso.jpg` | Platillo destacado | Horizontal, 4:3 |
+| `merluza.jpg` | Platillo destacado | Horizontal, 4:3 |
+| `ig-1.jpg` … `ig-6.jpg` | Muro de redes | Cuadradas, 1:1 |
+
+Los pies de foto del muro ya están escritos y, en orden, son: arroz meloso, barra de
+pinchos, tintos, jamón al corte, el salón y sidra escanciada. Si subes otras fotos,
+ajusta esos pies y los enlaces de cada tarjeta en la sección `redes`.
+
+**No fue posible descargar las fotos automáticamente.** La política de red de este
+entorno bloquea `instagram.com` y su CDN, igual que bloquea `olerestaurante.com`.
+Hay que bajarlas a mano desde la cuenta y comprimirlas: menos de 300 KB cada una,
+menos de 600 KB la de la portada. El sitio no usa CDN, así que el peso se nota directo.
+
+Mientras falten los archivos, cada hueco muestra el marcador ilustrado que ya trae el
+sitio, así que nunca se ve roto. La consola del navegador sí reporta un 404 por cada
+archivo ausente; desaparecen en cuanto los subas.
 
 ## Reglas de la casa
 
@@ -32,15 +78,22 @@ Las mismas que el resto del repositorio, por lo que el archivo es autocontenido:
 | Del sitio actual | En el nuevo sitio |
 | --- | --- |
 | Página larga de bloques sueltos | Recorrido con navegación fija, siete secciones y anclas |
-| Carta como imagen de pizarrón | Carta en HTML con pestañas, buscable, legible en móvil y accesible |
+| Carta como imagen de pizarrón | Carta en HTML con pestañas, legible en móvil y accesible |
 | Solo un botón "Contáctanos" a Instagram | Sección de redes, muro de contenido y alta al Club Olé |
 | Sin formulario de reserva | Formulario de reserva con validación y armado de correo o WhatsApp |
 | Horario y ubicación como texto | Horario con el día de hoy resaltado e indicador de abierto/cerrado en vivo |
 | Testimonios de plantilla en inglés | Los tres testimonios reales del sitio actual |
 
-Carácter taurino, sin caer en el cliché: silueta de toro bravo como marca y como
-fondo del hero, rojo capote y oro de la marca, mosaico andaluz apenas insinuado,
-grano de albero y un separador en forma de vuelo de capote.
+Carácter taurino, sin caer en el cliché: silueta de toro bravo como marca de agua de
+la portada, rojo capote y oro del logotipo, mosaico andaluz apenas insinuado, grano de
+albero y un separador en forma de vuelo de capote. La identidad la lleva el logotipo
+oficial; el toro es solo textura de fondo.
+
+## La carta no lleva precios
+
+Por decisión del cliente, la carta muestra platillos y descripciones, sin importes.
+El texto de la sección remite al mesero para precios y para el fuera de carta. Los
+importes están en el historial de git por si algún día se quieren recuperar.
 
 ## Configuración
 
@@ -60,10 +113,10 @@ const OLE = {
 ```
 
 Lo que dejes vacío **se oculta solo**: no quedan botones muertos ni enlaces rotos.
-En cuanto pongas el WhatsApp aparecen el botón de la barra del hero, el de alta al
+En cuanto pongas el WhatsApp aparecen el botón de la barra de portada, el de alta al
 Club y el de enviar la reserva por WhatsApp.
 
-## Qué debes reemplazar
+## Qué más falta por confirmar
 
 Busca cada `data-edit` dentro del archivo.
 
@@ -73,29 +126,21 @@ Busca cada `data-edit` dentro del archivo.
 | `redes` | Facebook y TikTok | El sitio viejo listaba "Facebook" y "Twitter" como texto, sin enlace |
 | `muro` | URL de cada publicación | Hoy las seis tarjetas llevan al perfil de Instagram |
 | `mapa` | Dirección exacta y enlace de Google Maps | El sitio actual solo dice "Centro Comercial, Lomas de Cocoyoc" |
-| `foto` | Fotografías reales | Hay siete marcadores ilustrados en SVG en su lugar |
-| `logo` | Logotipo oficial | La marca del encabezado es una interpretación del logo, no el archivo original |
 | `carta` | Dos renglones de la pizarra | Ver abajo |
-
-### Fotografías
-
-Es el cambio que más va a levantar el sitio. Los marcadores están en `.marco-foto`,
-`.plato__img` y `.post svg.arte`. Sustituye cada `<svg>` por un `<img src="..." alt="...">`
-y quedará igual de encuadrado, porque el contenedor ya fija la proporción.
 
 ### Dudas de transcripción de la carta
 
 La carta se transcribió desde la imagen del pizarrón del diseño de Canva. Dos renglones
 no se leen con claridad y conviene cotejarlos contra la carta impresa:
 
-1. **"Tartar de fuet bellotero" ($240).** En la imagen se alcanza a leer algo como
-   "luel"; se interpretó como *fuet*, por la descripción que lo acompaña.
-2. **Un digestivo de $140** entre el pacharán y el orujo. No se descifra el nombre,
-   así que **no se incluyó** en lugar de inventarlo.
+1. **"Tartar de fuet bellotero".** En la imagen se alcanza a leer algo como "luel";
+   se interpretó como *fuet*, por la descripción que lo acompaña.
+2. **Un digestivo** entre el pacharán y el orujo. No se descifra el nombre, así que
+   **no se incluyó** en lugar de inventarlo.
 
-También conviene confirmar "Fruta con mineral" ($70), en la sección sin alcohol.
+También conviene confirmar "Fruta con mineral", en la sección sin alcohol.
 
-Todo lo demás (platillos, descripciones y precios) sale tal cual del pizarrón vigente.
+Todo lo demás sale tal cual del pizarrón vigente.
 
 ## De dónde salió el contenido
 
@@ -107,7 +152,7 @@ Datos confirmados y usados tal cual: nombre, el lema *"De Madrid a Cocoyoc"*, la
 apertura en agosto de 2025, el horario de miércoles a domingo de 2 a 9 p.m., la
 ubicación en el Centro Comercial de Lomas de Cocoyoc, el correo
 `hola@olerestaurante.com`, el Instagram `@ole.restaurante`, los tres platillos
-destacados, los tres testimonios y la carta completa con precios.
+destacados, los tres testimonios y la carta completa.
 
 ## Si algún día quieres el feed real de Instagram
 
@@ -115,8 +160,3 @@ El muro de redes son tarjetas enlazadas, a propósito: el `embed` oficial de Ins
 exige cargar un script de Meta, lo que rompería la regla de "sin CDN" y metería rastreo
 de terceros en el sitio. Si se decide aceptarlo, se cambia el bloque `.muro` por el
 `blockquote` que Instagram entrega y se añade su script. Queda a criterio del cliente.
-
-## Aviso
-
-Los precios están en pesos mexicanos y se indican como sujetos a cambio. Antes de
-publicar, confirma que la carta del sitio coincida con la del restaurante.

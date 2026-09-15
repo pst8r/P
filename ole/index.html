@@ -17,14 +17,23 @@
   hosting estático (Netlify, Vercel, Cloudflare Pages, GitHub Pages).
 
   Contenido tomado del sitio actual en Canva ("Ole Restaurante (Website)").
-  Lo que falta por confirmar está marcado con data-edit y listado en
-  ole/README.md, sección "Qué debes reemplazar":
 
+  FALTAN DOS ARCHIVOS, y ninguno requiere tocar código (ver assets/LEEME.txt):
+    assets/logo.png        Logotipo oficial. Es marca registrada, así que el sitio
+                           usa el archivo real; mientras no esté, se muestra un
+                           respaldo tipográfico provisional.
+    assets/fotos/*.jpg     Once fotografías de @ole.restaurante. Mientras falten,
+                           cada hueco muestra su marcador ilustrado en SVG.
+
+  La carta va sin precios, por decisión del cliente.
+
+  Lo que falta por confirmar está marcado con data-edit y listado en
+  ole/README.md:
     data-edit="telefono"  Teléfono y WhatsApp  — NO se encontró en el sitio actual
     data-edit="redes"     Facebook, TikTok y enlaces de publicaciones
     data-edit="mapa"      Enlace exacto de Google Maps y dirección completa
-    data-edit="foto"      Fotografías reales (hoy hay marcadores ilustrados)
     data-edit="carta"     Revisar ortografía de algunos platillos transcritos
+    data-edit="logo"      Dónde se monta el logotipo oficial
 
   La configuración editable vive en el objeto OLE de la última etiqueta
   <script> de este archivo.
@@ -166,6 +175,13 @@ a{color:inherit}
 .nav.fija{background:rgba(20,18,17,.94);backdrop-filter:blur(14px);box-shadow:0 1px 0 var(--linea-inv)}
 .marca{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--texto-inv);margin-inline-end:auto}
 .marca svg{height:42px;width:auto;flex:none}
+/* Logotipo oficial (marca registrada). El respaldo solo aparece si falta el archivo. */
+.marca__logo{height:46px;width:auto;flex:none}
+.pie .marca__logo{height:54px}
+.hero__logo{width:min(400px,76vw);height:auto;margin:.1em 0 0}
+/* Fotografías reales: se montan sobre el marcador ilustrado */
+.foto-real{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit}
+.hero__foto{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-4}
 
 .menu{display:flex;align-items:center;gap:2px}
 .menu a{text-decoration:none;color:var(--texto-inv-suave);font-size:.82rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.55em .8em;border-radius:999px;transition:color .2s ease}
@@ -202,27 +218,32 @@ a{color:inherit}
    =========================================================================== */
 .hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;background:var(--negro);color:var(--texto-inv);overflow:hidden;isolation:isolate;padding-top:calc(var(--nav-h) + env(safe-area-inset-top,0px))}
 .hero__fondo{position:absolute;inset:0;z-index:-3}
+/* Semitransparente a propósito: si hay fotografía de portada, se ve a través.
+   Si no la hay, debajo queda el negro del propio .hero. */
 .hero__fondo::before{
   content:"";position:absolute;inset:0;
   background:
-    radial-gradient(118% 76% at 80% 12%,rgba(240,179,35,.26),transparent 58%),
-    radial-gradient(96% 64% at 4% 94%,rgba(208,28,36,.40),transparent 64%),
-    linear-gradient(174deg,#211C19 0%,#141211 54%,#0D0B0A 100%);
+    radial-gradient(118% 76% at 80% 12%,rgba(240,179,35,.22),transparent 58%),
+    radial-gradient(96% 64% at 4% 94%,rgba(208,28,36,.38),transparent 64%),
+    linear-gradient(174deg,rgba(33,28,25,.82) 0%,rgba(20,18,17,.78) 50%,rgba(13,11,10,.93) 100%);
 }
 .hero__fondo::after{content:"";position:absolute;inset:0;background-image:var(--grano);opacity:.15;mix-blend-mode:overlay}
 .hero__azulejo{position:absolute;inset:0;z-index:-2;background-image:var(--azulejo);background-size:72px 72px;opacity:.07}
 .hero__toro{position:absolute;right:3%;bottom:17%;width:min(470px,62vw);z-index:-1;opacity:.15;color:var(--rojo);pointer-events:none}
 @media (max-width:780px){.hero__toro{right:-6%;bottom:26%;width:62vw;opacity:.11}}
+.hero.con-foto .hero__toro{opacity:.07}
+.hero.con-foto .hero__azulejo{opacity:.04}
 .hero__marco{position:absolute;inset:clamp(13px,2.3vw,28px);z-index:-1;border:1px solid rgba(240,179,35,.22);pointer-events:none}
 .hero__marco::before{content:"";position:absolute;inset:9px;border:1px solid rgba(240,179,35,.10)}
 
 .hero__cuerpo{padding-block:clamp(42px,9vh,88px) clamp(26px,5vh,46px)}
-.hero h1{
-  font-size:clamp(4.4rem,18vw,11.5rem);line-height:.82;letter-spacing:-.04em;margin:.14em 0 0;
+.hero h1{margin:.14em 0 0}
+.hero__wordmark{
+  display:block;font-size:clamp(4.4rem,18vw,11.5rem);line-height:.82;letter-spacing:-.04em;
   background:linear-gradient(166deg,#FFF8EC 6%,var(--albero) 44%,var(--oro) 98%);
   -webkit-background-clip:text;background-clip:text;color:transparent;
 }
-.hero h1 .ac{color:var(--rojo);-webkit-text-fill-color:var(--rojo)}
+.hero__wordmark .ac{color:var(--rojo);-webkit-text-fill-color:var(--rojo)}
 .hero__lema{font-family:var(--display);font-style:italic;font-size:clamp(1.3rem,3.6vw,2.15rem);color:var(--albero);margin-top:.3em;line-height:1.22}
 .hero__texto{margin-top:1.1em;max-width:48ch;color:var(--texto-inv-suave);font-size:1.04rem}
 .hero__acciones{display:flex;flex-wrap:wrap;gap:12px;margin-top:2em}
@@ -280,7 +301,6 @@ a{color:inherit}
 .plato__k{font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;color:var(--rojo);font-weight:800}
 .plato__n{font-size:1.32rem}
 .plato__d{font-size:.91rem;color:var(--texto-suave);flex:1}
-.plato__p{font-family:var(--display);font-size:1.05rem;color:var(--texto);border-top:1px dashed var(--linea);padding-top:12px;margin-top:6px}
 
 /* ===========================================================================
    9. La carta
@@ -315,19 +335,17 @@ a{color:inherit}
 .items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px clamp(24px,4vw,56px)}
 @media (max-width:860px){.items{grid-template-columns:1fr}}
 .items--1{grid-template-columns:1fr}
-.item{padding:9px 0;border-bottom:1px dotted rgba(233,216,180,.18)}
-.item__l{display:flex;align-items:baseline;gap:8px}
-.item__n{font-size:.98rem;font-weight:600;color:var(--texto-inv)}
-.item__pt{flex:1;border-bottom:1px dotted rgba(233,216,180,.32);transform:translateY(-4px);min-width:14px}
-.item__p{font-family:var(--display);font-size:1rem;color:var(--oro);white-space:nowrap;font-variant-numeric:tabular-nums}
-.item__d{font-size:.82rem;color:var(--texto-inv-suave);margin-top:1px;max-width:62ch}
+.item{padding:9px 0;border-bottom:1px dotted rgba(233,216,180,.16);padding-left:16px;position:relative}
+.item::before{content:"";position:absolute;left:0;top:18px;width:6px;height:6px;border-radius:50%;background:var(--rojo)}
+.item__n{display:block;font-size:.99rem;font-weight:600;color:var(--texto-inv)}
+.item__d{display:block;font-size:.83rem;color:var(--texto-inv-suave);margin-top:2px;max-width:62ch}
 .nota{margin-top:18px;font-size:.82rem;color:var(--texto-inv-suave);font-style:italic}
 .nota--pie{text-align:center;margin-top:clamp(24px,3.4vw,36px)}
 
-.barra-precios{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(18px,3vw,40px)}
-@media (max-width:900px){.barra-precios{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:560px){.barra-precios{grid-template-columns:1fr}}
-.barra-precios .items{grid-template-columns:1fr}
+.bebidas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(18px,3vw,40px)}
+@media (max-width:900px){.bebidas{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.bebidas{grid-template-columns:1fr}}
+.bebidas .items{grid-template-columns:1fr}
 
 /* ===========================================================================
    10. Testimonios
@@ -480,6 +498,15 @@ a{color:inherit}
 </style>
 </head>
 <body>
+<script>
+/* Si el archivo del logotipo aún no está, se muestra el respaldo tipográfico
+   que va inmediatamente después de la imagen. */
+function oleLogo(img) {
+  img.hidden = true;
+  const respaldo = img.nextElementSibling;
+  if (respaldo) respaldo.hidden = false;
+}
+</script>
 
 <!-- ======================= Iconos reutilizables ======================= -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -523,12 +550,14 @@ a{color:inherit}
 <!-- ============================ Navegación ============================ -->
 <header class="nav" id="nav">
   <div class="nav__barra">
-    <a class="marca" href="#inicio" aria-label="Olé Restaurante, inicio">
-      <!-- data-edit="logo": sustituir por el logotipo oficial (ver README) -->
-      <svg viewBox="0 0 600 440" aria-hidden="true" style="color:var(--rojo)"><use href="#i-toro" fill="currentColor"/></svg>
-      <span style="line-height:1">
-        <span style="font-family:var(--display);font-size:1.5rem;letter-spacing:.04em">Ol<span style="color:var(--oro)">é</span></span>
-        <span style="display:block;font-size:.53rem;letter-spacing:.3em;text-transform:uppercase;color:var(--oro);margin-top:2px">Restaurante</span>
+    <a class="marca" href="#inicio" aria-label="Olé Restaurante, inicio" data-edit="logo">
+      <img class="marca__logo" src="assets/logo.png" alt="Olé Restaurante" onerror="oleLogo(this)">
+      <span class="marca__respaldo" hidden style="display:flex;align-items:center;gap:11px">
+        <svg viewBox="0 0 600 440" aria-hidden="true" style="color:var(--rojo);height:42px"><use href="#i-toro" fill="currentColor"/></svg>
+        <span style="line-height:1">
+          <span style="font-family:var(--display);font-size:1.5rem;letter-spacing:.04em">Ol<span style="color:var(--oro)">é</span></span>
+          <span style="display:block;font-size:.53rem;letter-spacing:.3em;text-transform:uppercase;color:var(--oro);margin-top:2px">Restaurante</span>
+        </span>
       </span>
     </a>
 
@@ -549,6 +578,7 @@ a{color:inherit}
 <!-- =============================== Hero =============================== -->
 <main id="inicio">
 <section class="hero">
+  <img class="hero__foto" src="assets/fotos/hero.jpg" alt="" onerror="this.remove()" onload="this.closest('.hero').classList.add('con-foto')">
   <div class="hero__fondo"></div>
   <div class="hero__azulejo"></div>
   <div class="hero__marco"></div>
@@ -556,7 +586,10 @@ a{color:inherit}
 
   <div class="env hero__cuerpo">
     <p class="eyebrow">Lomas de Cocoyoc · Morelos</p>
-    <h1>Ol<span class="ac">é</span></h1>
+    <h1>
+      <img class="hero__logo" src="assets/logo.png" alt="Olé Restaurante" onerror="oleLogo(this)">
+      <span class="hero__wordmark" hidden>Ol<span class="ac">é</span></span>
+    </h1>
     <p class="hero__lema">De Madrid a Cocoyoc.</p>
     <p class="hero__texto">Pinchos de barra, arroces melosos con arroz de Valencia con denominación de origen y los clásicos que huelen a taberna española. Una casa con duende, a dos pasos de casa.</p>
     <div class="hero__acciones">
@@ -651,7 +684,8 @@ a{color:inherit}
         <!-- suelo -->
         <rect y="430" width="400" height="70" fill="rgba(0,0,0,.35)"/>
       </svg>
-      <figcaption class="marco-foto__cinta">La barra de Olé · sustituir por fotografía real</figcaption>
+          <img class="foto-real" src="assets/fotos/salon.jpg" alt="El salón de Olé Restaurante" loading="lazy" onerror="this.remove()">
+      <figcaption class="marco-foto__cinta">La barra de Olé</figcaption>
     </figure>
   </div>
 </section>
@@ -685,12 +719,12 @@ a{color:inherit}
               <path d="M258 132V98" stroke="#8A6B3E" stroke-width="4" stroke-linecap="round"/>
             </g>
           </svg>
+          <img class="foto-real" src="assets/fotos/pinchos.jpg" alt="Pinchos de la barra de Olé" loading="lazy" onerror="this.remove()">
         </div>
         <div class="plato__cuerpo">
           <span class="plato__k">De la barra</span>
           <h3 class="plato__n">Pinchos</h3>
           <p class="plato__d">Chistorra San Sebastián, sardina ahumada, jamón Gran Reserva, boquerón o anchoa. La forma española de empezar.</p>
-          <p class="plato__p">Desde $70</p>
         </div>
       </article>
 
@@ -716,12 +750,12 @@ a{color:inherit}
             <rect x="52" y="150" width="34" height="14" rx="7" fill="#4A403A"/>
             <rect x="314" y="150" width="34" height="14" rx="7" fill="#4A403A"/>
           </svg>
+          <img class="foto-real" src="assets/fotos/arroz-meloso.jpg" alt="Arroz meloso recién salido del fuego" loading="lazy" onerror="this.remove()">
         </div>
         <div class="plato__cuerpo">
           <span class="plato__k">Del fuego lento</span>
           <h3 class="plato__n">Arroz meloso</h3>
           <p class="plato__d">Con chistorra Micalet, jamón Gran Reserva, calamar o gambas. Arroz de Valencia con denominación de origen.</p>
-          <p class="plato__p">Desde $250</p>
         </div>
       </article>
 
@@ -746,12 +780,12 @@ a{color:inherit}
               <circle cx="176" cy="126" r="5"/><circle cx="238" cy="140" r="5"/><circle cx="206" cy="210" r="5"/>
             </g>
           </svg>
+          <img class="foto-real" src="assets/fotos/merluza.jpg" alt="Merluza vasca Bilbao en salsa verde" loading="lazy" onerror="this.remove()">
         </div>
         <div class="plato__cuerpo">
           <span class="plato__k">Del Cantábrico</span>
           <h3 class="plato__n">Merluza vasca Bilbao</h3>
           <p class="plato__d">Troncho de merluza cocinado con ajo, perejil, almejas y vino blanco. Salsa verde de manual.</p>
-          <p class="plato__p">$320</p>
         </div>
       </article>
     </div>
@@ -768,7 +802,7 @@ a{color:inherit}
     <div class="centro rev">
       <p class="eyebrow" style="justify-content:center">La carta</p>
       <h2 class="titulo">La cocina española, <em>de Madrid a Cocoyoc</em></h2>
-      <p class="bajada">Barra de pinchos, cazuelas de siempre y arroces al fuego. Precios en pesos mexicanos.</p>
+      <p class="bajada">Barra de pinchos, cazuelas de siempre y arroces al fuego. Pregunta a tu mesero por los precios y por el fuera de carta del día.</p>
     </div>
 
     <div class="tabs rev" role="tablist" aria-label="Secciones de la carta">
@@ -780,224 +814,210 @@ a{color:inherit}
     </div>
 
     <div class="pizarra rev">
-      <!-- ---------------------------- Tapas ---------------------------- -->
       <div class="panel" id="p-tapas" role="tabpanel" aria-labelledby="t-tapas" tabindex="0">
         <div class="pizarra__cab"><h3>Tapas y pinchos</h3></div>
-
         <div class="grupo">
           <p class="grupo__t">Pinchos de barra</p>
-          <ul class="items">
-            <li class="item"><span class="item__l"><span class="item__n">Pincho de chistorra San Sebastián</span><i class="item__pt"></i><span class="item__p">$70</span></span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Pincho de sardina ahumada</span><i class="item__pt"></i><span class="item__p">$70</span></span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Pincho de jamón Gran Reserva</span><i class="item__pt"></i><span class="item__p">$80</span></span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Pincho de boquerón o anchoa</span><i class="item__pt"></i><span class="item__p">$80</span></span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Gilda de boquerón y anchoa</span><i class="item__pt"></i><span class="item__p">$90</span></span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Ajos rostizados</span><i class="item__pt"></i><span class="item__p">$90</span></span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Orden de pan lumaca</span><i class="item__pt"></i><span class="item__p">$90</span></span></li>
-          </ul>
+        <ul class="items">
+          <li class="item"><span class="item__n">Pincho de chistorra San Sebastián</span></li>
+          <li class="item"><span class="item__n">Pincho de sardina ahumada</span></li>
+          <li class="item"><span class="item__n">Pincho de jamón Gran Reserva</span></li>
+          <li class="item"><span class="item__n">Pincho de boquerón o anchoa</span></li>
+          <li class="item"><span class="item__n">Gilda de boquerón y anchoa</span></li>
+          <li class="item"><span class="item__n">Ajos rostizados</span></li>
+          <li class="item"><span class="item__n">Orden de pan lumaca</span></li>
+        </ul>
         </div>
-
         <div class="grupo">
           <p class="grupo__t">Para compartir</p>
-          <ul class="items">
-            <li class="item"><span class="item__l"><span class="item__n">Tomate aliñado</span><i class="item__pt"></i><span class="item__p">$140</span></span><span class="item__d">Rebanadas de jitomate con aceite de oliva y toque balsámico</span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Patatas bravas San Miguel</span><i class="item__pt"></i><span class="item__p">$150</span></span><span class="item__d">Crujientes patatas bañadas en salsa de pimentón</span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Aceitunas Gordal de Andalucía · 10 pzas</span><i class="item__pt"></i><span class="item__p">$110</span></span><span class="item__d">Aceitunas de gran tamaño, sin hueso y de sabor suave</span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Croquetas de jamón Gran Reserva · 5 pzas</span><i class="item__pt"></i><span class="item__p">$190</span></span><span class="item__d">Cremosas por dentro y crujientes por fuera</span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Tartar de fuet bellotero</span><i class="item__pt"></i><span class="item__p">$240</span></span><span class="item__d">Finos trozos de fuet aliñado con alcaparra, guindilla, aceitunas y piparra</span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Pimientos del Padrón cuchilleros · 150 g</span><i class="item__pt"></i><span class="item__p">$190</span></span><span class="item__d">Pequeños pimientos verdes típicos de Galicia</span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Tortilla española clásica o con chistorra</span><i class="item__pt"></i><span class="item__p">$230 / $250</span></span><span class="item__d">Elaborada con huevo, papa y cebolla, o con chistorra y morrón</span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Huevos rotos Lucio con jamón Gran Reserva</span><i class="item__pt"></i><span class="item__p">$290</span></span><span class="item__d">Tres huevos fritos servidos sobre una cama de patatas y jamón</span></li>
-          </ul>
+        <ul class="items">
+          <li class="item"><span class="item__n">Tomate aliñado</span><span class="item__d">Rebanadas de jitomate con aceite de oliva y toque balsámico</span></li>
+          <li class="item"><span class="item__n">Patatas bravas San Miguel</span><span class="item__d">Crujientes patatas bañadas en salsa de pimentón</span></li>
+          <li class="item"><span class="item__n">Aceitunas Gordal de Andalucía</span><span class="item__d">Diez piezas de gran tamaño, sin hueso y de sabor suave</span></li>
+          <li class="item"><span class="item__n">Croquetas de jamón Gran Reserva</span><span class="item__d">Cinco piezas, cremosas por dentro y crujientes por fuera</span></li>
+          <li class="item"><span class="item__n">Tartar de fuet bellotero</span><span class="item__d">Finos trozos de fuet aliñado con alcaparra, guindilla, aceitunas y piparra</span></li>
+          <li class="item"><span class="item__n">Pimientos del Padrón cuchilleros</span><span class="item__d">Pequeños pimientos verdes típicos de Galicia</span></li>
+          <li class="item"><span class="item__n">Tortilla española clásica o con chistorra</span><span class="item__d">Elaborada con huevo, papa y cebolla, o con chistorra y morrón</span></li>
+          <li class="item"><span class="item__n">Huevos rotos Lucio con jamón Gran Reserva</span><span class="item__d">Tres huevos fritos servidos sobre una cama de patatas y jamón</span></li>
+        </ul>
         </div>
-
         <div class="grupo">
           <p class="grupo__t">Raciones y conservas</p>
-          <ul class="items">
-            <li class="item"><span class="item__l"><span class="item__n">Ración de queso manchego curado · 90 g</span><i class="item__pt"></i><span class="item__p">$200</span></span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Ración de jamón Gran Reserva · 90 g</span><i class="item__pt"></i><span class="item__p">$590</span></span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Piquillos rellenos de bacalao o merluza</span><i class="item__pt"></i><span class="item__p">$280</span></span><span class="item__d">Pimientos rojos rellenos de pescado en salsa cremosa de pimiento</span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Boquerones al vinagre · 90 g</span><i class="item__pt"></i><span class="item__p">$280</span></span></li>
-            <li class="item"><span class="item__l"><span class="item__n">Anchoas del Cantábrico · 90 g</span><i class="item__pt"></i><span class="item__p">$280</span></span></li>
-          </ul>
+        <ul class="items">
+          <li class="item"><span class="item__n">Ración de queso manchego curado</span></li>
+          <li class="item"><span class="item__n">Ración de jamón Gran Reserva</span></li>
+          <li class="item"><span class="item__n">Piquillos rellenos de bacalao o merluza</span><span class="item__d">Pimientos rojos rellenos de pescado en salsa cremosa de pimiento</span></li>
+          <li class="item"><span class="item__n">Boquerones al vinagre</span></li>
+          <li class="item"><span class="item__n">Anchoas del Cantábrico</span></li>
+        </ul>
         </div>
       </div>
 
-      <!-- ---------------------------- Cocina ---------------------------- -->
       <div class="panel" id="p-cocina" role="tabpanel" aria-labelledby="t-cocina" tabindex="0" hidden>
         <div class="pizarra__cab"><h3>Cocina</h3></div>
         <ul class="items">
-          <li class="item"><span class="item__l"><span class="item__n">Sopa de ajo castellana</span><i class="item__pt"></i><span class="item__p">$220</span></span><span class="item__d">Clásica sopa castellana con ajo, pan y pimentón</span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Chorizo a la sidra Mingo</span><i class="item__pt"></i><span class="item__p">$240</span></span><span class="item__d">Chorizo cocinado lentamente en sidra asturiana natural</span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Fabada asturiana Pravia</span><i class="item__pt"></i><span class="item__p">$250</span></span><span class="item__d">Elaborada con fabes mantecosas, chorizo, morcilla y tocino</span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Gambas al ajillo</span><i class="item__pt"></i><span class="item__p">$300</span></span><span class="item__d">Camarones salteados en aceite de oliva con ajo y toque de guindilla</span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Chipirones al vino blanco Nerú</span><i class="item__pt"></i><span class="item__p">$310</span></span><span class="item__d">Calamares a la plancha en salsa de ajo, perejil y vino</span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Merluza vasca Bilbao</span><i class="item__pt"></i><span class="item__p">$320</span></span><span class="item__d">Troncho de merluza cocinado con ajo, perejil, almejas y vino blanco</span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Rabo de toro Las Ventas</span><i class="item__pt"></i><span class="item__p">$330</span></span><span class="item__d">Estofado tradicional cocinado a fuego lento en vino tinto y verduras</span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Pulpo a la gallega</span><i class="item__pt"></i><span class="item__p">$400</span></span><span class="item__d">Servido sobre una cama de patatas con pimentón y aceite de oliva</span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Solomillo de res a la Pedro Ximénez</span><i class="item__pt"></i><span class="item__p">$410</span></span><span class="item__d">Filete de res rebanado al término, en reducción de jerez y papas crujientes</span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Lomo de bacalao de Islandia Galayos</span><i class="item__pt"></i><span class="item__p">$500</span></span><span class="item__d">Sobre cama de patatas y piquillos confitados, gratinado con alioli</span></li>
+          <li class="item"><span class="item__n">Sopa de ajo castellana</span><span class="item__d">Clásica sopa castellana con ajo, pan y pimentón</span></li>
+          <li class="item"><span class="item__n">Chorizo a la sidra Mingo</span><span class="item__d">Chorizo cocinado lentamente en sidra asturiana natural</span></li>
+          <li class="item"><span class="item__n">Fabada asturiana Pravia</span><span class="item__d">Elaborada con fabes mantecosas, chorizo, morcilla y tocino</span></li>
+          <li class="item"><span class="item__n">Gambas al ajillo</span><span class="item__d">Camarones salteados en aceite de oliva con ajo y toque de guindilla</span></li>
+          <li class="item"><span class="item__n">Chipirones al vino blanco Nerú</span><span class="item__d">Calamares a la plancha en salsa de ajo, perejil y vino</span></li>
+          <li class="item"><span class="item__n">Merluza vasca Bilbao</span><span class="item__d">Troncho de merluza cocinado con ajo, perejil, almejas y vino blanco</span></li>
+          <li class="item"><span class="item__n">Rabo de toro Las Ventas</span><span class="item__d">Estofado tradicional cocinado a fuego lento en vino tinto y verduras</span></li>
+          <li class="item"><span class="item__n">Pulpo a la gallega</span><span class="item__d">Servido sobre una cama de patatas con pimentón y aceite de oliva</span></li>
+          <li class="item"><span class="item__n">Solomillo de res a la Pedro Ximénez</span><span class="item__d">Filete de res rebanado al término, en reducción de jerez y papas crujientes</span></li>
+          <li class="item"><span class="item__n">Lomo de bacalao de Islandia Galayos</span><span class="item__d">Sobre cama de patatas y piquillos confitados, gratinado con alioli</span></li>
         </ul>
         <p class="nota">Pregunta por el fuera de carta del día.</p>
       </div>
 
-      <!-- ---------------------------- Arroces --------------------------- -->
       <div class="panel" id="p-arroces" role="tabpanel" aria-labelledby="t-arroces" tabindex="0" hidden>
         <div class="pizarra__cab"><h3>Arroces melosos</h3></div>
         <ul class="items">
-          <li class="item"><span class="item__l"><span class="item__n">Arroz meloso con chistorra Micalet</span><i class="item__pt"></i><span class="item__p">$250</span></span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Arroz meloso con jamón Gran Reserva</span><i class="item__pt"></i><span class="item__p">$270</span></span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Arroz meloso al vermut con solomillo de cerdo</span><i class="item__pt"></i><span class="item__p">$280</span></span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Arroz meloso negro con calamar</span><i class="item__pt"></i><span class="item__p">$290</span></span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Arroz meloso almejado</span><i class="item__pt"></i><span class="item__p">$290</span></span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Arroz meloso con gambas, calamar y almeja</span><i class="item__pt"></i><span class="item__p">$290</span></span></li>
+          <li class="item"><span class="item__n">Arroz meloso con chistorra Micalet</span></li>
+          <li class="item"><span class="item__n">Arroz meloso con jamón Gran Reserva</span></li>
+          <li class="item"><span class="item__n">Arroz meloso al vermut con solomillo de cerdo</span></li>
+          <li class="item"><span class="item__n">Arroz meloso negro con calamar</span></li>
+          <li class="item"><span class="item__n">Arroz meloso almejado</span></li>
+          <li class="item"><span class="item__n">Arroz meloso con gambas, calamar y almeja</span></li>
         </ul>
         <p class="nota">Nuestro arroz es de Valencia con denominación de origen.</p>
       </div>
 
-      <!-- ---------------------------- Postres --------------------------- -->
       <div class="panel" id="p-postres" role="tabpanel" aria-labelledby="t-postres" tabindex="0" hidden>
         <div class="pizarra__cab"><h3>Postres</h3></div>
-        <ul class="items items--1" style="max-width:640px;margin-inline:auto">
-          <li class="item"><span class="item__l"><span class="item__n">Tarta vasca La Viña</span><i class="item__pt"></i><span class="item__p">$190</span></span></li>
-          <li class="item"><span class="item__l"><span class="item__n">Crema catalana</span><i class="item__pt"></i><span class="item__p">$160</span></span></li>
+        <ul class="items items--1" style="max-width:620px;margin-inline:auto">
+          <li class="item"><span class="item__n">Tarta vasca La Viña</span></li>
+          <li class="item"><span class="item__n">Crema catalana</span></li>
         </ul>
       </div>
 
-      <!-- ---------------------------- Bebidas --------------------------- -->
       <div class="panel" id="p-bebidas" role="tabpanel" aria-labelledby="t-bebidas" tabindex="0" hidden>
         <div class="pizarra__cab"><h3>Bebidas</h3></div>
-        <div class="barra-precios">
+        <div class="bebidas">
           <div>
             <div class="grupo" style="margin-top:0">
               <p class="grupo__t">Coctelería</p>
-              <ul class="items">
-                <li class="item"><span class="item__l"><span class="item__n">Sangría natural</span><i class="item__pt"></i><span class="item__p">$100</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Tinto de verano</span><i class="item__pt"></i><span class="item__p">$100</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Sangría con vodka</span><i class="item__pt"></i><span class="item__p">$120</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Mojito Olé</span><i class="item__pt"></i><span class="item__p">$120</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Jarra de tinto de verano</span><i class="item__pt"></i><span class="item__p">$400</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Jarra de clericot</span><i class="item__pt"></i><span class="item__p">$400</span></span></li>
-              </ul>
+        <ul class="items">
+          <li class="item"><span class="item__n">Sangría natural</span></li>
+          <li class="item"><span class="item__n">Sangría con vodka</span></li>
+          <li class="item"><span class="item__n">Tinto de verano</span></li>
+          <li class="item"><span class="item__n">Mojito Olé</span></li>
+          <li class="item"><span class="item__n">Jarras</span><span class="item__d">Tinto de verano y clericot, para la mesa</span></li>
+        </ul>
             </div>
             <div class="grupo">
               <p class="grupo__t">Aperitivo</p>
-              <ul class="items">
-                <li class="item"><span class="item__l"><span class="item__n">Copa de tinto de la casa</span><i class="item__pt"></i><span class="item__p">$100</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Tío Pepe</span><i class="item__pt"></i><span class="item__p">$150</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Copa Sangre de Toro</span><i class="item__pt"></i><span class="item__p">$150</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Pedro Ximénez</span><i class="item__pt"></i><span class="item__p">$180</span></span></li>
-              </ul>
+        <ul class="items">
+          <li class="item"><span class="item__n">Tinto de la casa</span></li>
+          <li class="item"><span class="item__n">Tío Pepe</span></li>
+          <li class="item"><span class="item__n">Sangre de Toro</span></li>
+          <li class="item"><span class="item__n">Pedro Ximénez</span></li>
+        </ul>
             </div>
             <div class="grupo">
               <p class="grupo__t">Vermut</p>
-              <ul class="items">
-                <li class="item"><span class="item__l"><span class="item__n">Cinzano</span><i class="item__pt"></i><span class="item__p">$110</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Martini</span><i class="item__pt"></i><span class="item__p">$120</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Miró</span><i class="item__pt"></i><span class="item__p">$140</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Williams &amp; Humbert</span><i class="item__pt"></i><span class="item__p">$140</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Verdejo 61</span><i class="item__pt"></i><span class="item__p">$150</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Yzaguirre</span><i class="item__pt"></i><span class="item__p">$160</span></span></li>
-              </ul>
+        <ul class="items">
+          <li class="item"><span class="item__n">Cinzano</span></li>
+          <li class="item"><span class="item__n">Martini</span></li>
+          <li class="item"><span class="item__n">Miró</span></li>
+          <li class="item"><span class="item__n">Williams &amp; Humbert</span></li>
+          <li class="item"><span class="item__n">Verdejo 61</span></li>
+          <li class="item"><span class="item__n">Yzaguirre</span></li>
+        </ul>
             </div>
           </div>
-
           <div>
             <div class="grupo" style="margin-top:0">
               <p class="grupo__t">Cerveza española</p>
-              <ul class="items">
-                <li class="item"><span class="item__l"><span class="item__n">Estrella Galicia</span><i class="item__pt"></i><span class="item__p">$100</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Mahou Premium Madrid</span><i class="item__pt"></i><span class="item__p">$100</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">1906 Reserva Especial</span><i class="item__pt"></i><span class="item__p">$100</span></span></li>
-              </ul>
+        <ul class="items">
+          <li class="item"><span class="item__n">Estrella Galicia</span></li>
+          <li class="item"><span class="item__n">Mahou Premium Madrid</span></li>
+          <li class="item"><span class="item__n">1906 Reserva Especial</span></li>
+        </ul>
             </div>
             <div class="grupo">
               <p class="grupo__t">Cerveza nacional</p>
-              <ul class="items">
-                <li class="item"><span class="item__l"><span class="item__n">Sola</span><i class="item__pt"></i><span class="item__p">$70</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Michelada</span><i class="item__pt"></i><span class="item__p">$80</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Clamato</span><i class="item__pt"></i><span class="item__p">$90</span></span></li>
-              </ul>
-              <p class="nota" style="margin-top:10px">Corona · Victoria · Modelo</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Corona, Victoria y Modelo</span><span class="item__d">Sola, michelada o clamato</span></li>
+        </ul>
             </div>
             <div class="grupo">
               <p class="grupo__t">Sidra asturiana</p>
-              <ul class="items">
-                <li class="item"><span class="item__l"><span class="item__n">Sidra Mayador · 250 ml</span><i class="item__pt"></i><span class="item__p">$130</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Sidra Mayador · 750 ml</span><i class="item__pt"></i><span class="item__p">$370</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Sidra Mayador seca</span><i class="item__pt"></i><span class="item__p">$380</span></span></li>
-              </ul>
+        <ul class="items">
+          <li class="item"><span class="item__n">Sidra Mayador</span><span class="item__d">En 250 ml y 750 ml</span></li>
+          <li class="item"><span class="item__n">Sidra Mayador seca</span></li>
+        </ul>
             </div>
             <div class="grupo">
               <p class="grupo__t">Sin alcohol</p>
-              <ul class="items">
-                <li class="item"><span class="item__l"><span class="item__n">Botella de agua</span><i class="item__pt"></i><span class="item__p">$30</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Refresco</span><i class="item__pt"></i><span class="item__p">$40</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Tehuacán</span><i class="item__pt"></i><span class="item__p">$50</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Topo Chico</span><i class="item__pt"></i><span class="item__p">$50</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Naranjada o limonada</span><i class="item__pt"></i><span class="item__p">$60</span></span><span class="item__d">Jarra $250</span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Fruta con mineral</span><i class="item__pt"></i><span class="item__p">$70</span></span></li>
-              </ul>
+        <ul class="items">
+          <li class="item"><span class="item__n">Agua natural y mineral</span></li>
+          <li class="item"><span class="item__n">Refresco</span></li>
+          <li class="item"><span class="item__n">Tehuacán</span></li>
+          <li class="item"><span class="item__n">Topo Chico</span></li>
+          <li class="item"><span class="item__n">Naranjada o limonada</span><span class="item__d">También en jarra</span></li>
+          <li class="item"><span class="item__n">Fruta con mineral</span></li>
+        </ul>
             </div>
           </div>
-
           <div>
             <div class="grupo" style="margin-top:0">
               <p class="grupo__t">Spritz y licores</p>
-              <ul class="items">
-                <li class="item"><span class="item__l"><span class="item__n">Licor 43</span><i class="item__pt"></i><span class="item__p">$100</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Chinchón dulce o seco</span><i class="item__pt"></i><span class="item__p">$100</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Sambuca negro</span><i class="item__pt"></i><span class="item__p">$120</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Baileys</span><i class="item__pt"></i><span class="item__p">$120</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Amaretto</span><i class="item__pt"></i><span class="item__p">$130</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Aperol</span><i class="item__pt"></i><span class="item__p">$140</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Limoncello</span><i class="item__pt"></i><span class="item__p">$150</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">St. Germain</span><i class="item__pt"></i><span class="item__p">$200</span></span></li>
-              </ul>
+        <ul class="items">
+          <li class="item"><span class="item__n">Aperol</span></li>
+          <li class="item"><span class="item__n">St. Germain</span></li>
+          <li class="item"><span class="item__n">Limoncello</span></li>
+          <li class="item"><span class="item__n">Licor 43</span></li>
+          <li class="item"><span class="item__n">Chinchón dulce o seco</span></li>
+          <li class="item"><span class="item__n">Sambuca negro</span></li>
+          <li class="item"><span class="item__n">Baileys</span></li>
+          <li class="item"><span class="item__n">Amaretto</span></li>
+        </ul>
             </div>
             <div class="grupo">
-              <p class="grupo__t">Digestivo y brandy</p>
-              <ul class="items">
-                <li class="item"><span class="item__l"><span class="item__n">Terry Centenario</span><i class="item__pt"></i><span class="item__p">$120</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Torres X</span><i class="item__pt"></i><span class="item__p">$130</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Magno</span><i class="item__pt"></i><span class="item__p">$140</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Pacharán</span><i class="item__pt"></i><span class="item__p">$140</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Orujo de hierbas</span><i class="item__pt"></i><span class="item__p">$150</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Orujo Las Cadenas</span><i class="item__pt"></i><span class="item__p">$150</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Carajillo</span><i class="item__pt"></i><span class="item__p">$150</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Duque de Alba</span><i class="item__pt"></i><span class="item__p">$170</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Cardenal de Mendoza</span><i class="item__pt"></i><span class="item__p">$200</span></span></li>
-              </ul>
-              <!-- data-edit="carta": en la pizarra original hay un digestivo más cuyo
-                   nombre no se lee con claridad. Ver README, "Qué debes reemplazar". -->
+              <p class="grupo__t">Brandy y digestivo</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Terry Centenario</span></li>
+          <li class="item"><span class="item__n">Torres X</span></li>
+          <li class="item"><span class="item__n">Magno</span></li>
+          <li class="item"><span class="item__n">Duque de Alba</span></li>
+          <li class="item"><span class="item__n">Cardenal de Mendoza</span></li>
+          <li class="item"><span class="item__n">Pacharán</span></li>
+          <li class="item"><span class="item__n">Orujo de hierbas</span></li>
+          <li class="item"><span class="item__n">Orujo Las Cadenas</span></li>
+          <li class="item"><span class="item__n">Carajillo</span></li>
+        </ul>
             </div>
             <div class="grupo">
               <p class="grupo__t">Destilados</p>
-              <ul class="items">
-                <li class="item"><span class="item__l"><span class="item__n">Bacardí blanco</span><i class="item__pt"></i><span class="item__p">$100</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Matusalem clásico o platino</span><i class="item__pt"></i><span class="item__p">$110</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Appleton Estate o platino</span><i class="item__pt"></i><span class="item__p">$110</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Havana 7 años · Zacapa 23</span><i class="item__pt"></i><span class="item__p">$150</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">JW Etiqueta Roja</span><i class="item__pt"></i><span class="item__p">$120</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">JW Etiqueta Negra · Chivas 12</span><i class="item__pt"></i><span class="item__p">$140</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Buchanan's</span><i class="item__pt"></i><span class="item__p">$150</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Macallan 12 años</span><i class="item__pt"></i><span class="item__p">$210</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Absolut Azul</span><i class="item__pt"></i><span class="item__p">$120</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Stolichnaya · Beefeater</span><i class="item__pt"></i><span class="item__p">$130</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Grey Goose · Tanqueray</span><i class="item__pt"></i><span class="item__p">$150 / $140</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">José Cuervo Tradicional o Plata</span><i class="item__pt"></i><span class="item__p">$120</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Don Julio Plata</span><i class="item__pt"></i><span class="item__p">$130</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">Don Julio Reposado · 70 · Dobel</span><i class="item__pt"></i><span class="item__p">$150</span></span></li>
-                <li class="item"><span class="item__l"><span class="item__n">400 Conejos · Ojo de Tigre</span><i class="item__pt"></i><span class="item__p">$150</span></span></li>
-              </ul>
+        <ul class="items">
+          <li class="item"><span class="item__n">Bacardí blanco</span></li>
+          <li class="item"><span class="item__n">Matusalem clásico y platino</span></li>
+          <li class="item"><span class="item__n">Appleton Estate y platino</span></li>
+          <li class="item"><span class="item__n">Havana 7 años</span></li>
+          <li class="item"><span class="item__n">Zacapa 23</span></li>
+          <li class="item"><span class="item__n">JW Etiqueta Roja</span></li>
+          <li class="item"><span class="item__n">JW Etiqueta Negra</span></li>
+          <li class="item"><span class="item__n">Chivas Regal 12 años</span></li>
+          <li class="item"><span class="item__n">Buchanan's</span></li>
+          <li class="item"><span class="item__n">Macallan 12 años</span></li>
+          <li class="item"><span class="item__n">Absolut Azul</span></li>
+          <li class="item"><span class="item__n">Stolichnaya</span></li>
+          <li class="item"><span class="item__n">Grey Goose</span></li>
+          <li class="item"><span class="item__n">Beefeater</span></li>
+          <li class="item"><span class="item__n">Tanqueray</span></li>
+          <li class="item"><span class="item__n">José Cuervo Tradicional y Plata</span></li>
+          <li class="item"><span class="item__n">Don Julio Plata, Reposado y 70</span></li>
+          <li class="item"><span class="item__n">Maestro Dobel</span></li>
+          <li class="item"><span class="item__n">400 Conejos</span></li>
+          <li class="item"><span class="item__n">Ojo de Tigre</span></li>
+        </ul>
             </div>
           </div>
         </div>
         <p class="nota nota--pie">Tintos españoles de Ribera del Duero, Rioja y Toro. Pregunta a tu mesero por la selección del día.</p>
       </div>
     </div>
-
-    <p class="nota nota--pie">Precios en pesos mexicanos. Sujetos a cambio sin previo aviso.</p>
   </div>
 </section>
 
@@ -1059,6 +1079,7 @@ a{color:inherit}
           <g fill="#D01C24"><ellipse cx="125" cy="118" rx="17" ry="8" transform="rotate(-20 125 118)"/><ellipse cx="180" cy="158" rx="17" ry="8" transform="rotate(14 180 158)"/></g>
           <g fill="#6E7A50"><circle cx="168" cy="112" r="9"/><circle cx="122" cy="166" r="9"/></g>
         </svg>
+        <img class="foto-real" src="assets/fotos/ig-1.jpg" alt="El arroz meloso saliendo del fuego" loading="lazy" onerror="this.remove()">
         <span class="post__badge"><svg width="15" height="15"><use href="#i-ig"/></svg></span>
         <span class="post__velo"><span class="post__ver">Ver en Instagram</span><span class="post__txt">El arroz meloso saliendo del fuego</span></span>
       </a>
@@ -1070,6 +1091,7 @@ a{color:inherit}
           <g fill="#6E7A50"><circle cx="91" cy="118" r="12"/><circle cx="209" cy="138" r="12"/></g>
           <g stroke="#8A6B3E" stroke-width="3.4" stroke-linecap="round"><path d="M91 118V88"/><path d="M209 138v-30"/></g>
         </svg>
+        <img class="foto-real" src="assets/fotos/ig-2.jpg" alt="La barra de pinchos de Olé" loading="lazy" onerror="this.remove()">
         <span class="post__badge"><svg width="15" height="15"><use href="#i-ig"/></svg></span>
         <span class="post__velo"><span class="post__ver">Ver en Instagram</span><span class="post__txt">Barra de pinchos, de 2 a 9</span></span>
       </a>
@@ -1084,6 +1106,7 @@ a{color:inherit}
             <ellipse cx="0" cy="72" rx="34" ry="7" fill="#E9D8B4"/>
           </g>
         </svg>
+        <img class="foto-real" src="assets/fotos/ig-3.jpg" alt="Tintos españoles de Ribera, Rioja y Toro" loading="lazy" onerror="this.remove()">
         <span class="post__badge"><svg width="15" height="15"><use href="#i-ig"/></svg></span>
         <span class="post__velo"><span class="post__ver">Ver en Instagram</span><span class="post__txt">Tintos de Ribera, Rioja y Toro</span></span>
       </a>
@@ -1094,6 +1117,7 @@ a{color:inherit}
           <g fill="#C0454B" opacity=".9"><path d="M84 160c26-16 62-16 88 0-26 12-62 12-88 0Z"/><path d="M134 142c26-16 62-16 88 0-26 12-62 12-88 0Z"/></g>
           <g fill="#8A6B3E" opacity=".6"><circle cx="120" cy="170" r="4"/><circle cx="178" cy="164" r="4"/></g>
         </svg>
+        <img class="foto-real" src="assets/fotos/ig-4.jpg" alt="Jamón Gran Reserva cortado al momento" loading="lazy" onerror="this.remove()">
         <span class="post__badge"><svg width="15" height="15"><use href="#i-ig"/></svg></span>
         <span class="post__velo"><span class="post__ver">Ver en Instagram</span><span class="post__txt">Jamón Gran Reserva al corte</span></span>
       </a>
@@ -1104,6 +1128,7 @@ a{color:inherit}
           <defs><pattern id="p-az" width="50" height="50" patternUnits="userSpaceOnUse"><g fill="none" stroke="#D01C24" stroke-width="1.2" opacity=".6"><path d="M25 3 47 25 25 47 3 25z"/><circle cx="25" cy="25" r="4"/></g></pattern></defs>
           <g transform="translate(150 150)" fill="#F0B323" opacity=".85"><use href="#i-toro" x="-95" y="-70" width="190" height="139"/></g>
         </svg>
+        <img class="foto-real" src="assets/fotos/ig-5.jpg" alt="El salón de Olé Restaurante" loading="lazy" onerror="this.remove()">
         <span class="post__badge"><svg width="15" height="15"><use href="#i-ig"/></svg></span>
         <span class="post__velo"><span class="post__ver">Ver en Instagram</span><span class="post__txt">De Madrid a Cocoyoc</span></span>
       </a>
@@ -1117,6 +1142,7 @@ a{color:inherit}
             <text x="0" y="24" text-anchor="middle" font-family="Georgia,serif" font-size="26" fill="#7C0F15">Olé</text>
           </g>
         </svg>
+        <img class="foto-real" src="assets/fotos/ig-6.jpg" alt="Sidra asturiana natural, escanciada" loading="lazy" onerror="this.remove()">
         <span class="post__badge"><svg width="15" height="15"><use href="#i-ig"/></svg></span>
         <span class="post__velo"><span class="post__ver">Ver en Instagram</span><span class="post__txt">Sidra asturiana natural, escanciada</span></span>
       </a>
@@ -1342,11 +1368,14 @@ a{color:inherit}
   <div class="env">
     <div class="pie__grid">
       <div>
-        <a class="marca" href="#inicio" style="margin:0 0 14px">
-          <svg viewBox="0 0 600 440" aria-hidden="true" style="color:var(--rojo);height:44px"><use href="#i-toro" fill="currentColor"/></svg>
-          <span style="line-height:1">
-            <span style="font-family:var(--display);font-size:1.6rem;letter-spacing:.04em;color:var(--texto-inv)">Ol<span style="color:var(--oro)">é</span></span>
-            <span style="display:block;font-size:.54rem;letter-spacing:.3em;text-transform:uppercase;color:var(--oro);margin-top:2px">Restaurante</span>
+        <a class="marca" href="#inicio" style="margin:0 0 14px" data-edit="logo">
+          <img class="marca__logo" src="assets/logo.png" alt="Olé Restaurante" onerror="oleLogo(this)">
+          <span class="marca__respaldo" hidden style="display:flex;align-items:center;gap:11px">
+            <svg viewBox="0 0 600 440" aria-hidden="true" style="color:var(--rojo);height:44px"><use href="#i-toro" fill="currentColor"/></svg>
+            <span style="line-height:1">
+              <span style="font-family:var(--display);font-size:1.6rem;letter-spacing:.04em;color:var(--texto-inv)">Ol<span style="color:var(--oro)">é</span></span>
+              <span style="display:block;font-size:.54rem;letter-spacing:.3em;text-transform:uppercase;color:var(--oro);margin-top:2px">Restaurante</span>
+            </span>
           </span>
         </a>
         <p style="max-width:34ch">La cocina española, de Madrid a Cocoyoc. Tapas, pinchos y arroces desde agosto de 2025.</p>
