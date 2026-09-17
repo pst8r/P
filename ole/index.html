@@ -1,0 +1,1755 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Olé Restaurante · De Madrid a Cocoyoc</title>
+<meta name="description" content="Olé Restaurante: cocina española en Lomas de Cocoyoc. Pinchos, tapas, arroces melosos de Valencia y clásicos de Madrid. Miércoles a domingo, 2 a 9 p.m.">
+<meta name="theme-color" content="#EFEFEF">
+<meta name="author" content="Olé Restaurante">
+
+<!--
+  ===========================================================================
+  OLÉ RESTAURANTE — sitio web (rediseño)
+  ===========================================================================
+  Archivo único y autocontenido: sin CDN, sin fuentes remotas, sin analítica
+  y sin cookies. Se abre con doble clic o se sube tal cual a cualquier
+  hosting estático (Netlify, Vercel, Cloudflare Pages, GitHub Pages).
+
+  Contenido tomado del sitio actual en Canva ("Ole Restaurante (Website)").
+
+  Paleta tomada del logotipo oficial con cuentagotas: rojo #FA001B, oro #FDB700
+  y gris #EFEFEF. El sitio es claro porque las letras de "RESTAURANTE" del
+  logotipo son gris oscuro y desaparecen sobre fondo negro. Los únicos bloques
+  de contraste fuerte son la carta y los testimonios.
+
+  El logotipo va INCRUSTADO en este archivo, así que el HTML se abre solo, sin
+  carpeta al lado, y siempre muestra la marca correcta. El original suelto, en
+  alta resolución y con fondo transparente, está en assets/logo.png.
+
+  FALTAN LAS FOTOGRAFÍAS, y no requieren tocar código (ver assets/LEEME.txt):
+    assets/fotos/*.jpg     Once fotografías de @ole.restaurante. Mientras falten,
+                           cada hueco muestra su marcador ilustrado en SVG.
+
+  La carta va sin precios, por decisión del cliente.
+
+  Lo que falta por confirmar está marcado con data-edit y listado en
+  ole/README.md:
+    data-edit="telefono"  Teléfono y WhatsApp  — NO se encontró en el sitio actual
+    data-edit="redes"     Facebook, TikTok y enlaces de publicaciones
+    data-edit="mapa"      Enlace exacto de Google Maps y dirección completa
+    data-edit="carta"     Revisar ortografía de algunos platillos transcritos
+    data-edit="logo"      Dónde se monta el logotipo oficial
+
+  La configuración editable vive en el objeto OLE de la última etiqueta
+  <script> de este archivo.
+  ===========================================================================
+-->
+
+<meta property="og:type" content="restaurant.restaurant">
+<meta property="og:locale" content="es_MX">
+<meta property="og:site_name" content="Olé Restaurante">
+<meta property="og:title" content="Olé Restaurante · De Madrid a Cocoyoc">
+<meta property="og:description" content="Cocina española en Lomas de Cocoyoc. Pinchos, tapas, arroces melosos y clásicos de Madrid.">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAMAAAD04JH5AAAAwFBMVEXUGzKvFCOWDiHEDCDGlQx+YQ2UbgvWnghALwi9kBIAAAD6ABoSEhL7uAH4CSQsGBf+wgIyJwnsEywFBAVKOAm1hw2JZw5xVg/UFytKJCmuGivMmAqVGigyJCZGFx1FHSGwIjNbRQtlJCtmHSakew5UGyJ4JC2LJC+pgBBmTQyZIzArDBI5HSFZISh0GCJ8XgybdRC2FinSDiNXFR3NCh3EGi/aoQvrrAhURA3YDSTFIjbkqguJHSi4JTc+MA1GDROTxAhBAAAAQHRSTlPcnHKypUViwBKaAP0B/PwL/gv2KxiNUTfNGpKwbwwaF5AkLzVzJElXei1qCxAlSURppNEqzq/E5h3mr9ZUqRAbqs6DJwAAA+xJREFUeNrt2ely2jAQAGDSppeswxKWbwc73JCEIyXkbN//rSoJ2bHTdiZQq/4jzcA4wKBP0np3mfRAx6NnARZgARZgARZgARZgARZgARZgARZgAeKRZbCTkWX2CCzAACAaDDoFXDPMBl0CJo7j3HYJINjBV10DiAV0CRh0DbjoEBDl3R7BJfsoE5EAZN0AXpxUbEAoEtEOmgdA+sl/mwPx8DC/47xA0wD/Cbn87Q04WYJH5zBS04CRi1z/D2GANeCYODxtBwQgeLMB0RUYlwDnp3kAKhoxkTPGcpj+L0AgAFRelIXvcXtBxjiGoQZcGAVEcYA04OUQbhMm436KybMG3JoEQPbhHqG9utWGjKhXbuQfY7wc6iAcGwJAAuVClx5Cd4dXNjvVhynNNV6ONcDMEcBpr9cbRjgFApDo4GcLANJQXS8wvDQJgI/4VuQ6vIUSUOYh0ouznYqECH8AuUlArtLL1JkAAXBHVQKIGd5dR9GUnYErbBAQ4Rv17EwVoJYIh/hBZIEH8fY4jc0BNkzV3DiOAbhH7qqWBBmBy+XhmIDKRXjQPoAwJ89DloKpiLgCoXm9BLx+6DaTp4Cj9gGXeLd9iMXWPvdUJryvHwGpOkJzgEXZ6Dw/QFkLvLrt4vVqbAoQl8tcMAWg9U54WCnhjakYCLFuc1JxMWoACI7LD30HsSEAZNtyK0QQcndf77o2endkKlL18Jifh+8F4I/lKs8AuENPdcC1o7YgCzEZYEMdUQUQtRCQfRMgMnAeZZeh6AVzxxggLBPiBPxA6EvtPc+DZw4WS9+ATOdiE4BDyRXFeADmblkMAQ1GiawLJN3EY1GvzDWloQ4seTf4GkD9BLm1/hTmBrviWFZBkWpkz89VO1CcI9EayuFV9cogYOIwkQqznjzeO9EQBYmeHSG3apDj7fa7GPJGab8YYYctFswRRZeqWcvZ0T6hfwscSAmELQFEyZGbe6Ob8nL2xPd+327qFYHvf1oF87lHKWyrIxpuzlKif5gdZucB/W3qYD3jIz8oKGn5CGojUfMnq+bs5N6fcb4OPHrctx0PUCHAvcZLhc/5bNU4jb5+tA8QIcDrq/R8ufA/rtsMIDl/XT0pRpy/OYv++yc/CUCrflikYf65qAd5X+9732gM6LUHM+57tWX3q2fTQSgzzLwxOwAnTPwPAG/N1/W1H7vp/wYgwTc+h81b7fTZjwZ4s+QzbWXnTwIESbKCR+aZ9gDQvzsvQPvjnQC6fmpm3/8LoLM9pwB0BfjBq+Tf7wBAuZt8bTHqjwSQmfvFMzX3ewBeMgdmh/3vuQVYgAVYgAVYgAVYgAVYgAVYgAVYgAX8Ag1erlolhzllAAAAAElFTkSuQmCC">
+
+<style>
+/* ===========================================================================
+   1. Tokens de marca
+   Rojo, oro y gris tomados del logotipo oficial con un cuentagotas:
+   #FA001B, #FDB700 y #EFEFEF. Paleta clara, con la pizarra de la carta y el
+   bloque de testimonios como únicos contrastes fuertes.
+   =========================================================================== */
+:root{
+  --rojo:#FA001B;
+  --rojo-hondo:#D10018;
+  --rojo-prof:#A20013;
+  --oro:#FDB700;
+  --oro-hondo:#E2A200;
+  --oro-suave:#FFE2A0;
+
+  --blanco:#FFFFFF;
+  --gris:#EFEFEF;
+  --gris-2:#E4E4E4;
+  --gris-3:#D6D6D6;
+  --pizarra:#2A2624;
+  --pizarra-2:#221E1C;
+  --tinta:#1E1B19;
+
+  --texto:#2B2A29;
+  --texto-suave:#6B6866;
+  --texto-tenue:#8C8885;
+  --texto-inv:#F6F3EE;
+  --texto-inv-suave:#BEB5A8;
+  --linea:rgba(43,42,41,.14);
+  --linea-fuerte:rgba(43,42,41,.22);
+  --linea-inv:rgba(246,243,238,.18);
+
+  --display:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+
+  --ancho:1180px;
+  --nav-h:88px;
+  --r:16px;
+  --r-sm:11px;
+  --sombra:0 14px 34px -22px rgba(43,42,41,.42);
+  --sombra-alta:0 30px 64px -30px rgba(43,42,41,.44);
+
+  --azulejo:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23FA001B' stroke-width='1.1' opacity='.55'%3E%3Cpath d='M36 3 69 36 36 69 3 36z'/%3E%3Cpath d='M36 18 54 36 36 54 18 36z'/%3E%3Ccircle cx='36' cy='36' r='4.6'/%3E%3Cpath d='M0 0h72v72H0z'/%3E%3C/g%3E%3C/svg%3E");
+  --grano:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='.4'/%3E%3C/svg%3E");
+}
+
+/* ===========================================================================
+   2. Base
+   =========================================================================== */
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--nav-h) + 14px)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  margin:0;font-family:var(--sans);font-size:16px;line-height:1.65;
+  color:var(--texto);background:var(--blanco);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+img{max-width:100%;display:block}
+[hidden]{display:none!important}
+h1,h2,h3,h4{font-family:var(--display);font-weight:600;line-height:1.1;margin:0;letter-spacing:-.012em}
+p{margin:0}
+ul{margin:0;padding:0;list-style:none}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2.5px solid var(--rojo);outline-offset:3px;border-radius:5px}
+::selection{background:var(--rojo);color:#fff}
+
+.env{width:100%;max-width:var(--ancho);margin-inline:auto;padding-inline:clamp(18px,5vw,40px)}
+.seccion{padding-block:clamp(60px,8.5vw,112px);background:var(--blanco)}
+.gris{background:var(--gris)}
+.oscura{background:var(--pizarra-2);color:var(--texto-inv)}
+.roja{background:var(--rojo-hondo);color:#fff}
+.centro{text-align:center}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ===========================================================================
+   3. Tipografía de sección
+   =========================================================================== */
+.eyebrow{
+  font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;font-weight:800;
+  color:var(--rojo);display:inline-flex;align-items:center;gap:.7em;
+}
+.eyebrow::before{content:"";width:28px;height:3px;background:var(--oro);display:block;flex:none;border-radius:2px}
+.oscura .eyebrow{color:var(--oro)}
+.oscura .eyebrow::before{background:var(--rojo)}
+.roja .eyebrow{color:#fff}
+.roja .eyebrow::before{background:var(--oro)}
+
+.titulo{font-size:clamp(2.05rem,5.2vw,3.5rem);margin-top:.4em}
+.titulo em{font-style:italic;color:var(--rojo)}
+.oscura .titulo em{color:var(--oro)}
+.roja .titulo,.roja .titulo em{color:#fff}
+.roja .titulo em{color:var(--oro)}
+.bajada{margin-top:1.05em;max-width:56ch;color:var(--texto-suave);font-size:1.03rem}
+.oscura .bajada{color:var(--texto-inv-suave)}
+.roja .bajada{color:rgba(255,255,255,.92)}
+.centro .bajada{margin-inline:auto}
+
+/* ===========================================================================
+   4. Botones
+   =========================================================================== */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.6em;
+  padding:.92em 1.7em;border-radius:999px;border:1.6px solid transparent;
+  font-size:.9rem;font-weight:700;letter-spacing:.045em;text-decoration:none;
+  cursor:pointer;background:none;text-align:center;color:var(--texto);
+  transition:transform .18s ease,background-color .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+.btn:hover{transform:translateY(-2px)}
+.btn:active{transform:translateY(0)}
+.btn svg{flex:none}
+.btn--rojo{background:var(--rojo);color:#fff;box-shadow:0 14px 26px -16px rgba(250,0,27,.85)}
+.btn--rojo:hover{background:var(--rojo-hondo);color:#fff}
+.btn--oro{background:var(--oro);color:var(--tinta)}
+.btn--oro:hover{background:var(--oro-hondo)}
+.btn--negro{background:var(--tinta);color:var(--texto-inv)}
+.btn--negro:hover{background:var(--pizarra)}
+.btn--blanco{background:#fff;color:var(--rojo)}
+.btn--blanco:hover{background:var(--gris)}
+.btn--linea{border-color:var(--linea-fuerte);color:var(--texto)}
+.btn--linea:hover{background:var(--tinta);border-color:var(--tinta);color:var(--texto-inv)}
+.oscura .btn--linea{border-color:var(--linea-inv);color:var(--texto-inv)}
+.oscura .btn--linea:hover{background:var(--texto-inv);border-color:var(--texto-inv);color:var(--tinta)}
+
+/* ===========================================================================
+   5. Navegación — clara, para que el logotipo se lea siempre
+   =========================================================================== */
+.nav{position:fixed;inset-block-start:0;inset-inline:0;z-index:70;padding-top:env(safe-area-inset-top,0px);transition:background-color .3s ease,box-shadow .3s ease}
+.nav__barra{height:var(--nav-h);display:flex;align-items:center;gap:18px;width:100%;max-width:var(--ancho);margin-inline:auto;padding-inline:clamp(18px,5vw,40px)}
+.nav.fija{background:rgba(255,255,255,.94);backdrop-filter:blur(14px);box-shadow:0 1px 0 var(--linea),0 10px 30px -22px rgba(43,42,41,.5)}
+.marca{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--texto);margin-inline-end:auto}
+/* Logotipo oficial (marca registrada), incrustado en el archivo para que el HTML
+   funcione solo, sin depender de la carpeta assets/. El original suelto, en alta
+   resolución y con fondo transparente, sigue en assets/logo.png. */
+.logo-ole{
+  display:block;aspect-ratio:1278/688;
+  background-image:url("data:image/png;base64,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");
+  background-size:contain;background-repeat:no-repeat;background-position:left center;
+}
+.marca__logo{height:62px;flex:none}
+.pie .marca__logo{height:70px}
+
+.menu{display:flex;align-items:center;gap:2px}
+.menu a{text-decoration:none;color:var(--texto-suave);font-size:.82rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.55em .8em;border-radius:999px;transition:color .2s ease}
+.menu a:hover{color:var(--texto)}
+.menu a.activo{color:var(--rojo)}
+.menu a.btn--rojo{color:#fff}
+.menu a.btn--rojo:hover{color:#fff}
+.nav__cta{margin-inline-start:10px;padding:.7em 1.3em;font-size:.8rem}
+
+.hamb{display:none;width:44px;height:44px;border:1px solid var(--linea-fuerte);border-radius:13px;background:rgba(255,255,255,.7);cursor:pointer;align-items:center;justify-content:center}
+.hamb span{display:block;width:19px;height:2px;background:var(--texto);position:relative;transition:background .2s}
+.hamb span::before,.hamb span::after{content:"";position:absolute;left:0;width:19px;height:2px;background:var(--texto);transition:transform .25s ease}
+.hamb span::before{top:-6px}.hamb span::after{top:6px}
+.hamb[aria-expanded="true"] span{background:transparent}
+.hamb[aria-expanded="true"] span::before{transform:translateY(6px) rotate(45deg)}
+.hamb[aria-expanded="true"] span::after{transform:translateY(-6px) rotate(-45deg)}
+
+@media (max-width:940px){
+  .hamb{display:flex}
+  .nav__cta{display:none}
+  .marca__logo{height:50px}
+  .menu{
+    position:absolute;inset-inline:12px;top:calc(var(--nav-h) + env(safe-area-inset-top,0px) + 6px);
+    flex-direction:column;align-items:stretch;gap:2px;
+    background:rgba(255,255,255,.98);backdrop-filter:blur(16px);
+    border:1px solid var(--linea);border-radius:20px;padding:12px;box-shadow:var(--sombra-alta);
+    opacity:0;visibility:hidden;transform:translateY(-10px);
+    transition:opacity .22s ease,transform .22s ease,visibility .22s;
+  }
+  .menu.abierto{opacity:1;visibility:visible;transform:none}
+  .menu a{padding:.85em 1em;font-size:.95rem;text-align:left;letter-spacing:.05em}
+  .menu .btn{margin-top:8px}
+}
+
+/* ===========================================================================
+   6. Portada
+   =========================================================================== */
+.hero{
+  position:relative;background:var(--gris);overflow:hidden;isolation:isolate;
+  padding-top:calc(var(--nav-h) + env(safe-area-inset-top,0px));
+}
+.hero__fondo{position:absolute;inset:0;z-index:-3}
+.hero__fondo::before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(70% 58% at 88% 6%,rgba(253,183,0,.30),transparent 62%),
+    radial-gradient(64% 54% at 2% 96%,rgba(250,0,27,.13),transparent 66%),
+    linear-gradient(180deg,#F6F6F6 0%,var(--gris) 56%,var(--gris-2) 100%);
+}
+.hero__azulejo{position:absolute;inset:0;z-index:-2;background-image:var(--azulejo);background-size:96px 96px;opacity:.035}
+.hero__toro{position:absolute;left:-5%;bottom:-6%;width:min(330px,40vw);z-index:-1;opacity:.05;color:var(--rojo);pointer-events:none}
+.hero__marco{position:absolute;inset:clamp(13px,2.3vw,26px);z-index:-1;border:1px solid rgba(253,183,0,.42);pointer-events:none}
+.hero__marco::before{content:"";position:absolute;inset:9px;border:1px solid rgba(250,0,27,.09)}
+
+.hero__cuerpo{
+  display:grid;grid-template-columns:1.02fr .98fr;gap:clamp(28px,5vw,64px);align-items:center;
+  padding-block:clamp(38px,7vw,78px) clamp(34px,6vw,70px);
+}
+.hero h1{margin:.1em 0 0}
+.hero__logo{width:min(430px,82%)}
+.hero__lema{font-family:var(--display);font-style:italic;font-size:clamp(1.3rem,3.3vw,2.05rem);color:var(--texto);margin-top:.5em;line-height:1.22}
+.hero__texto{margin-top:1em;max-width:46ch;color:var(--texto-suave);font-size:1.03rem}
+.hero__acciones{display:flex;flex-wrap:wrap;gap:12px;margin-top:1.9em}
+
+/* Panel de fotografía de la portada */
+.hero__panel{
+  position:relative;border-radius:var(--r);overflow:hidden;aspect-ratio:4/3.3;
+  background:var(--pizarra);box-shadow:var(--sombra-alta);
+}
+.hero__panel::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);border-radius:var(--r);pointer-events:none}
+.hero__foto{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+/* Fotografías reales: se montan encima del marcador ilustrado que va debajo */
+.foto-real{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;border-radius:inherit;z-index:1}
+.hero__panel svg{width:100%;height:100%;display:block}
+
+.hero__tira{border-top:1px solid var(--linea);background:rgba(255,255,255,.62);backdrop-filter:blur(6px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tira{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--linea)}
+.tira__c{background:var(--gris);padding:17px clamp(14px,2.3vw,26px);display:flex;flex-direction:column;gap:2px}
+.tira__k{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--rojo);font-weight:800}
+.tira__v{font-size:.93rem;font-weight:700;color:var(--texto)}
+.tira__v small{display:block;font-weight:400;font-size:.77rem;color:var(--texto-suave);letter-spacing:0}
+.tira__v a{color:inherit;text-decoration:none;border-bottom:2px solid var(--oro)}
+@media (max-width:940px){
+  .hero__cuerpo{grid-template-columns:1fr;padding-block:36px 40px}
+  .hero__panel{aspect-ratio:16/10}
+  .hero__logo{width:min(360px,74%)}
+}
+@media (max-width:760px){
+  .tira{grid-template-columns:repeat(2,1fr)}
+  .hero__toro{left:-14%;bottom:-3%;top:auto;width:52vw;opacity:.04}
+}
+
+/* Separador: vuelo de capote */
+.capote{display:block;width:100%;height:clamp(38px,5.5vw,70px)}
+.capote--flip{transform:scaleY(-1)}
+
+/* ===========================================================================
+   7. Sobre Olé
+   =========================================================================== */
+.sobre{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(30px,5vw,68px);align-items:center}
+@media (max-width:900px){.sobre{grid-template-columns:1fr}}
+.sobre__sellos{display:flex;flex-wrap:wrap;gap:10px;margin-top:2em}
+.sello{display:inline-flex;align-items:center;gap:.5em;border:1.5px solid var(--linea);border-radius:999px;padding:.5em 1em;font-size:.79rem;font-weight:700;background:var(--gris);color:var(--texto-suave)}
+.gris .sello{background:var(--blanco)}
+.sello svg{color:var(--rojo)}
+
+.marco-foto{position:relative;border-radius:var(--r);overflow:hidden;background:var(--pizarra);box-shadow:var(--sombra-alta);aspect-ratio:4/5}
+.marco-foto::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);border-radius:var(--r);pointer-events:none}
+.marco-foto svg{width:100%;height:100%;display:block}
+.marco-foto__cinta{
+  position:absolute;left:0;bottom:0;right:0;padding:16px 20px;
+  background:linear-gradient(transparent,rgba(20,18,16,.86));
+  color:var(--texto-inv);font-size:.8rem;letter-spacing:.04em;z-index:2;
+}
+
+/* ===========================================================================
+   8. Platillos destacados
+   =========================================================================== */
+.platos{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2.4vw,28px);margin-top:clamp(32px,5vw,52px)}
+@media (max-width:820px){.platos{grid-template-columns:1fr}}
+.plato{
+  background:var(--blanco);border-radius:var(--r);overflow:hidden;
+  box-shadow:var(--sombra);border:1px solid var(--linea);
+  display:flex;flex-direction:column;transition:transform .28s ease,box-shadow .28s ease;
+}
+.plato:hover{transform:translateY(-6px);box-shadow:var(--sombra-alta)}
+.plato__img{aspect-ratio:4/3;background:var(--pizarra);position:relative}
+.plato__img svg{width:100%;height:100%;display:block}
+.plato__cuerpo{padding:20px 22px 24px;display:flex;flex-direction:column;gap:7px;flex:1}
+.plato__k{font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;color:var(--rojo);font-weight:800}
+.plato__n{font-size:1.32rem}
+.plato__d{font-size:.91rem;color:var(--texto-suave);flex:1}
+
+/* ===========================================================================
+   9. La carta — pizarra
+   =========================================================================== */
+.tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:clamp(26px,4vw,40px)}
+.tab{
+  border:1.5px solid var(--linea-inv);background:rgba(246,243,238,.06);color:var(--texto-inv-suave);
+  border-radius:999px;padding:.64em 1.3em;font-size:.83rem;font-weight:700;letter-spacing:.05em;
+  cursor:pointer;transition:all .2s ease;
+}
+.tab:hover{color:var(--texto-inv);border-color:var(--oro)}
+.tab[aria-selected="true"]{background:var(--rojo);border-color:var(--rojo);color:#fff;box-shadow:0 12px 24px -16px rgba(250,0,27,.9)}
+
+.pizarra{
+  margin-top:clamp(26px,4vw,42px);
+  background:radial-gradient(90% 60% at 50% 0%,rgba(253,183,0,.08),transparent 70%),linear-gradient(180deg,#332E2B,var(--pizarra));
+  border:2px solid rgba(253,183,0,.38);border-radius:var(--r);
+  padding:clamp(22px,4vw,44px);position:relative;overflow:hidden;
+}
+.pizarra::before{content:"";position:absolute;inset:0;background-image:var(--grano);opacity:.08;pointer-events:none}
+.pizarra__cab{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:clamp(20px,3vw,32px)}
+.pizarra__cab h3{font-family:var(--display);font-style:italic;font-size:clamp(1.6rem,4vw,2.4rem);color:var(--oro)}
+.pizarra__cab::before,.pizarra__cab::after{content:"";height:1px;flex:1;max-width:120px;background:linear-gradient(90deg,transparent,rgba(253,183,0,.65))}
+.pizarra__cab::after{background:linear-gradient(270deg,transparent,rgba(253,183,0,.65))}
+
+.grupo + .grupo{margin-top:clamp(24px,3.4vw,38px)}
+.grupo__t{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--oro);font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:.7em}
+.grupo__t::after{content:"";height:1px;flex:1;background:var(--linea-inv)}
+
+.items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px clamp(24px,4vw,56px)}
+@media (max-width:860px){.items{grid-template-columns:1fr}}
+.items--1{grid-template-columns:1fr}
+.item{padding:9px 0 9px 16px;border-bottom:1px dotted rgba(246,243,238,.16);position:relative}
+.item::before{content:"";position:absolute;left:0;top:18px;width:6px;height:6px;border-radius:50%;background:var(--rojo)}
+.item__n{display:block;font-size:.99rem;font-weight:600;color:var(--texto-inv)}
+.item__d{display:block;font-size:.83rem;color:var(--texto-inv-suave);margin-top:2px;max-width:62ch}
+.nota{margin-top:18px;font-size:.82rem;color:var(--texto-inv-suave);font-style:italic}
+.nota--pie{text-align:center;margin-top:clamp(22px,3.2vw,34px)}
+
+.bebidas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(18px,3vw,40px)}
+@media (max-width:900px){.bebidas{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.bebidas{grid-template-columns:1fr}}
+.bebidas .items{grid-template-columns:1fr}
+
+/* ===========================================================================
+   10. Testimonios
+   =========================================================================== */
+.testis{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2.4vw,28px);margin-top:clamp(32px,5vw,52px)}
+@media (max-width:860px){.testis{grid-template-columns:1fr}}
+.testi{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.26);border-radius:var(--r);padding:26px 24px;display:flex;flex-direction:column;gap:10px}
+.testi__est{display:flex;gap:3px;color:var(--oro)}
+.testi__t{font-size:1.24rem;color:#fff}
+.testi__c{font-size:.92rem;color:rgba(255,255,255,.9);flex:1}
+
+/* ===========================================================================
+   11. Redes sociales
+   =========================================================================== */
+.redes-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:2em}
+.red{
+  display:inline-flex;align-items:center;gap:.7em;text-decoration:none;
+  border:1.5px solid var(--linea);border-radius:999px;padding:.72em 1.3em;
+  font-size:.88rem;font-weight:700;color:var(--texto);background:var(--gris);
+  transition:all .2s ease;
+}
+.gris .red{background:var(--blanco)}
+.red:hover{transform:translateY(-2px);border-color:var(--rojo);background:#fff;box-shadow:var(--sombra)}
+.red svg{flex:none}
+.red small{color:var(--texto-suave);font-weight:500}
+.red--ig:hover{border-color:#E1306C}
+.red--fb:hover{border-color:#1877F2}
+.red--tt:hover{border-color:#111}
+.red--wa:hover{border-color:#25D366}
+
+.muro{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.8vw,20px);margin-top:clamp(30px,4.5vw,48px)}
+@media (max-width:860px){.muro{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:480px){.muro{grid-template-columns:1fr}}
+.post{
+  position:relative;display:block;text-decoration:none;border-radius:var(--r-sm);overflow:hidden;
+  aspect-ratio:1/1;background:var(--pizarra);border:1px solid var(--linea);
+  box-shadow:var(--sombra);transition:transform .28s ease,box-shadow .28s ease;
+}
+.post:hover{transform:translateY(-5px);box-shadow:var(--sombra-alta)}
+.post svg.arte{width:100%;height:100%;display:block}
+.post__velo{position:absolute;inset:0;background:linear-gradient(transparent 42%,rgba(20,18,16,.9));display:flex;flex-direction:column;justify-content:flex-end;padding:16px;gap:6px;z-index:2}
+.post__badge{position:absolute;top:12px;right:12px;width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.92);backdrop-filter:blur(4px);display:grid;place-items:center;color:var(--texto);z-index:3}
+.post__txt{font-size:.85rem;color:var(--texto-inv);line-height:1.4}
+.post__ver{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--oro);font-weight:800}
+
+/* ===========================================================================
+   12. Club Olé
+   =========================================================================== */
+.club{display:grid;grid-template-columns:.95fr 1.05fr;gap:clamp(28px,4.5vw,64px);align-items:start}
+@media (max-width:920px){.club{grid-template-columns:1fr}}
+.ventajas{margin-top:2em;display:flex;flex-direction:column;gap:16px}
+.ventaja{display:flex;gap:14px;align-items:flex-start}
+.ventaja__ico{width:40px;height:40px;border-radius:12px;background:var(--oro-suave);border:1px solid rgba(253,183,0,.7);display:grid;place-items:center;color:var(--oro-hondo);flex:none}
+.ventaja h4{font-size:1.06rem;color:var(--texto)}
+.ventaja p{font-size:.88rem;color:var(--texto-suave);margin-top:2px}
+
+.tarjeta{background:var(--blanco);border-radius:var(--r);padding:clamp(24px,3.5vw,38px);box-shadow:var(--sombra-alta);border:1px solid var(--linea);color:var(--texto)}
+.tarjeta--gris{background:var(--gris)}
+.tarjeta h3{font-size:1.5rem}
+.tarjeta__sub{font-size:.9rem;color:var(--texto-suave);margin-top:6px}
+
+.campos{display:grid;gap:14px;margin-top:22px}
+.fila{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:520px){.fila{grid-template-columns:1fr}}
+.campo{display:flex;flex-direction:column;gap:6px}
+.campo > label{font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--texto-suave)}
+.campo input,.campo select,.campo textarea{
+  border:1.5px solid var(--linea-fuerte);border-radius:11px;padding:.8em .95em;background:var(--blanco);
+  font-size:.95rem;transition:border-color .2s ease,box-shadow .2s ease;width:100%;
+}
+.campo input:focus,.campo select:focus,.campo textarea:focus{border-color:var(--rojo);box-shadow:0 0 0 3px rgba(250,0,27,.12);outline:none}
+.campo textarea{resize:vertical;min-height:88px}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{position:relative;display:inline-flex}
+.chip input{position:absolute;inset:0;opacity:0;pointer-events:none}
+.chip span{display:inline-block;border:1.5px solid var(--linea-fuerte);border-radius:999px;padding:.46em 1em;font-size:.83rem;font-weight:600;cursor:pointer;transition:all .18s ease;background:var(--blanco)}
+.chip input:checked + span{background:var(--rojo);border-color:var(--rojo);color:#fff}
+.chip input:focus-visible + span{outline:2.5px solid var(--oro);outline-offset:2px}
+
+.acepto{display:flex;gap:10px;align-items:flex-start;font-size:.82rem;color:var(--texto-suave)}
+.acepto input{margin-top:3px;width:17px;height:17px;accent-color:var(--rojo);flex:none}
+.form-acciones{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;align-items:center}
+.aviso{font-size:.8rem;padding:.75em 1em;border-radius:11px;margin-top:14px;display:none}
+.aviso.ok{display:block;background:#E7F2E3;border:1px solid #9CC391;color:#3F6135}
+.aviso.err{display:block;background:#FDE8EA;border:1px solid #F3A7AF;color:var(--rojo-prof)}
+
+.alta-redes{margin-top:22px;padding-top:20px;border-top:1px dashed var(--linea-fuerte)}
+.alta-redes__t{font-size:.73rem;letter-spacing:.12em;text-transform:uppercase;font-weight:800;color:var(--texto-suave)}
+.alta-redes__b{display:flex;flex-wrap:wrap;gap:9px;margin-top:11px}
+.mini{display:inline-flex;align-items:center;gap:.5em;text-decoration:none;border:1.5px solid var(--linea-fuerte);border-radius:999px;padding:.55em 1.05em;font-size:.82rem;font-weight:700;background:var(--blanco);transition:all .2s ease}
+.mini:hover{transform:translateY(-2px);border-color:var(--rojo)}
+
+/* ===========================================================================
+   13. Contacto
+   =========================================================================== */
+.contacto{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,4.5vw,64px);align-items:start}
+@media (max-width:920px){.contacto{grid-template-columns:1fr}}
+.datos{display:flex;flex-direction:column;gap:2px;margin-top:2em}
+.dato{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--linea)}
+.dato__ico{width:42px;height:42px;border-radius:13px;background:#FDE8EA;border:1px solid rgba(250,0,27,.32);display:grid;place-items:center;color:var(--rojo);flex:none}
+.dato__k{display:block;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--rojo);font-weight:800}
+.dato__v{display:block;font-size:1.02rem;color:var(--texto);margin-top:2px;font-weight:600}
+.dato__v a{text-decoration:none;border-bottom:2px solid var(--oro)}
+.dato__v a:hover{color:var(--rojo)}
+.dato__x{display:block;font-size:.83rem;color:var(--texto-suave);margin-top:3px;font-weight:400}
+
+.horario{display:grid;gap:5px;margin-top:6px}
+.horario li{display:flex;justify-content:space-between;gap:16px;font-size:.92rem;color:var(--texto-suave);padding:3px 0}
+.horario li.hoy{color:var(--rojo);font-weight:700}
+.horario li.hoy b{color:var(--rojo)}
+.horario li b{font-weight:600;color:var(--texto)}
+.abierto{display:inline-flex;align-items:center;gap:.5em;font-size:.76rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:.4em .9em;border-radius:999px;margin-top:12px}
+.abierto.si{background:#E7F2E3;color:#3F6135;border:1px solid #9CC391}
+.abierto.no{background:#FDE8EA;color:var(--rojo-prof);border:1px solid #F3A7AF}
+.punto{width:7px;height:7px;border-radius:50%;background:currentColor}
+
+/* ===========================================================================
+   14. Pie
+   =========================================================================== */
+.pie{background:var(--gris-2);color:var(--texto-suave);padding-block:clamp(42px,5.5vw,62px) 0;font-size:.88rem;border-top:3px solid var(--oro)}
+.pie__grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:clamp(24px,4vw,56px)}
+@media (max-width:820px){.pie__grid{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.pie__grid{grid-template-columns:1fr}}
+.pie h4{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--rojo);font-family:var(--sans);font-weight:800;margin-bottom:14px}
+.pie a{text-decoration:none}
+.pie a:hover{color:var(--rojo)}
+.pie__enlaces{display:flex;flex-direction:column;gap:9px}
+.pie__base{margin-top:clamp(30px,4.5vw,46px);border-top:1px solid var(--linea);padding-block:22px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;font-size:.79rem;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+
+/* ===========================================================================
+   15. Animación de entrada y botón flotante
+   =========================================================================== */
+.rev{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.22,.8,.3,1),transform .7s cubic-bezier(.22,.8,.3,1)}
+.rev.visto{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  .rev{opacity:1;transform:none;transition:none}
+  .btn:hover,.plato:hover,.post:hover,.red:hover,.mini:hover{transform:none}
+}
+.flotante{
+  position:fixed;left:16px;right:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:65;
+  display:none;box-shadow:var(--sombra-alta);
+  opacity:0;visibility:hidden;transform:translateY(14px);
+  transition:opacity .28s ease,transform .28s ease,visibility .28s;
+}
+.flotante.ver{opacity:1;visibility:visible;transform:none}
+@media (max-width:640px){
+  .flotante{display:flex}
+  .pie__base{padding-bottom:calc(86px + env(safe-area-inset-bottom,0px))}
+}
+</style>
+</head>
+<body>
+
+<!-- ======================= Iconos reutilizables ======================= -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-ig" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" d="M7 2.8h10A4.2 4.2 0 0 1 21.2 7v10A4.2 4.2 0 0 1 17 21.2H7A4.2 4.2 0 0 1 2.8 17V7A4.2 4.2 0 0 1 7 2.8Z"/><circle cx="12" cy="12" r="4.1" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="17.4" cy="6.6" r="1.25" fill="currentColor"/></symbol>
+    <symbol id="i-fb" viewBox="0 0 24 24"><path fill="currentColor" d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.5V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.7l-.4 2.9h-2.3v7A10 10 0 0 0 22 12Z"/></symbol>
+    <symbol id="i-tt" viewBox="0 0 24 24"><path fill="currentColor" d="M16.6 2h-3.1v13.3a2.7 2.7 0 1 1-2-2.6V9.5a5.9 5.9 0 1 0 5.1 5.8V8.9a7 7 0 0 0 4.1 1.3V7.1a4.1 4.1 0 0 1-4.1-4.1V2Z"/></symbol>
+    <symbol id="i-wa" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3.1.8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.2-.3.3-.5v-.4l-.7-1.7c-.2-.4-.4-.4-.5-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.6 4c1.9.8 2.3.6 2.7.6a2.5 2.5 0 0 0 1.7-1.2 2 2 0 0 0 .1-1.2c0-.1-.2-.2-.4-.3Z"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="2.6" y="4.6" width="18.8" height="14.8" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="m3.4 7 7.4 5.4a2 2 0 0 0 2.4 0L20.6 7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 22s7.2-6.4 7.2-12A7.2 7.2 0 0 0 4.8 10c0 5.6 7.2 12 7.2 12Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="12" cy="9.8" r="2.7" fill="none" stroke="currentColor" stroke-width="1.9"/></symbol>
+    <symbol id="i-reloj" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M12 6.6V12l3.7 2.4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-tel" viewBox="0 0 24 24"><path d="M6.3 3h3l1.6 4-2 1.4a12 12 0 0 0 6.7 6.7l1.4-2 4 1.6v3a2 2 0 0 1-2.2 2A17.5 17.5 0 0 1 4.3 5.2 2 2 0 0 1 6.3 3Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+    <symbol id="i-estrella" viewBox="0 0 24 24"><path fill="currentColor" d="m12 2.6 2.9 5.9 6.5.9-4.7 4.6 1.1 6.5-5.8-3-5.8 3 1.1-6.5L2.6 9.4l6.5-.9Z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m4.5 12.5 5 5 10-11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-flecha" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-copa" viewBox="0 0 24 24"><path d="M6 3h12l-1 6a5 5 0 0 1-10 0Zm6 11v7m-4 0h8" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-regalo" viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M3 13h18M12 9v12M12 9c-1.6-3.8-6.8-4-6.8-1.2 0 1 1 1.2 2 1.2Zm0 0c1.6-3.8 6.8-4 6.8-1.2 0 1-1 1.2-2 1.2Z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M3 10h18M8 3v4m8-4v4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></symbol>
+    <symbol id="i-fuego" viewBox="0 0 24 24"><path d="M12 22c4 0 7-2.9 7-6.8 0-4.6-4.3-6.3-3.3-11.2C13 5.5 10.4 8 10.4 10.7c0 1.6.8 2.4.8 3.4 0 1-.8 1.8-1.7 1.8-1.2 0-2-1.2-2-2.8-1.2 1.2-2.5 2.6-2.5 5.1C5 19.1 8 22 12 22Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <!-- Toro bravo: cuernos, orejas, testuz y hocico -->
+    <symbol id="i-toro" viewBox="0 0 600 440">
+      <!-- cuerno izquierdo -->
+      <path d="M214 176c-56 4-108-8-142-32C36 118 20 78 16 34c26 34 50 72 88 90 34 16 74 20 112 18z"/>
+      <!-- cuerno derecho -->
+      <path d="M386 176c56 4 108-8 142-32 36-26 52-66 56-110-26 34-50 72-88 90-34 16-74 20-112 18z"/>
+      <!-- oreja izquierda -->
+      <path d="M196 206c-34-4-62 6-78 26 22 18 52 24 80 14z"/>
+      <!-- oreja derecha -->
+      <path d="M404 206c34-4 62 6 78 26-22 18-52 24-80 14z"/>
+      <!-- testuz y hocico -->
+      <path d="M300 424c-64 0-106-42-115-104-5-34-1-64 11-88 14-28 48-44 104-44s90 16 104 44c12 24 16 54 11 88-9 62-51 104-115 104z"/>
+    </symbol>
+    <symbol id="i-toro-detalle" viewBox="0 0 600 440">
+      <ellipse cx="300" cy="352" rx="58" ry="42" opacity=".45"/>
+      <ellipse cx="277" cy="344" rx="9" ry="13" opacity=".9"/>
+      <ellipse cx="323" cy="344" rx="9" ry="13" opacity=".9"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- ============================ Navegación ============================ -->
+<header class="nav" id="nav">
+  <div class="nav__barra">
+    <a class="marca" href="#inicio" aria-label="Olé Restaurante, inicio" data-edit="logo">
+      <span class="marca__logo logo-ole"><span class="sr">Olé Restaurante</span></span>
+    </a>
+
+    <nav class="menu" id="menu" aria-label="Principal">
+      <a href="#sobre">Sobre Olé</a>
+      <a href="#comida">Nuestra comida</a>
+      <a href="#carta">La carta</a>
+      <a href="#redes">Redes</a>
+      <a href="#club">Club Olé</a>
+      <a href="#contacto">Contacto</a>
+      <a class="btn btn--rojo nav__cta" href="#reservar">Reservar mesa</a>
+    </nav>
+
+    <button class="hamb" id="hamb" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu"><span></span></button>
+  </div>
+</header>
+
+<!-- =============================== Hero =============================== -->
+<main id="inicio">
+<section class="hero">
+  <div class="hero__fondo"></div>
+  <div class="hero__azulejo"></div>
+  <div class="hero__marco"></div>
+  <svg class="hero__toro" viewBox="0 0 600 440" aria-hidden="true"><use href="#i-toro" fill="currentColor"/></svg>
+
+  <div class="env hero__cuerpo">
+    <div>
+      <p class="eyebrow">Lomas de Cocoyoc · Morelos</p>
+      <h1><span class="hero__logo logo-ole"><span class="sr">Olé Restaurante</span></span></h1>
+      <p class="hero__lema">De Madrid a Cocoyoc.</p>
+      <p class="hero__texto">Pinchos de barra, arroces melosos con arroz de Valencia con denominación de origen y los clásicos que huelen a taberna española. Una casa con duende, a dos pasos de casa.</p>
+      <div class="hero__acciones">
+        <a class="btn btn--rojo" href="#carta"><span>Ver la carta</span><svg width="17" height="17"><use href="#i-flecha"/></svg></a>
+        <a class="btn btn--linea" href="#reservar"><span>Reservar mesa</span></a>
+      </div>
+    </div>
+
+    <!-- data-edit="foto": la fotografía de portada se monta sobre esta ilustración -->
+    <figure class="hero__panel" style="margin:0" data-edit="foto">
+      <svg viewBox="0 0 640 528" role="img" aria-label="Ilustración de una mesa de Olé con paella, copas de tinto y pinchos">
+        <defs>
+          <linearGradient id="g-mesa" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3E332C"/><stop offset="1" stop-color="#211C19"/>
+          </linearGradient>
+          <linearGradient id="g-tinto" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#FA001B"/><stop offset="1" stop-color="#A20013"/>
+          </linearGradient>
+        </defs>
+        <rect width="640" height="528" fill="url(#g-mesa)"/>
+        <g fill="none" stroke="rgba(253,183,0,.20)" stroke-width="2">
+          <path d="M70 300v-64a54 54 0 0 1 108 0v64"/>
+          <path d="M462 300v-64a54 54 0 0 1 108 0v64"/>
+        </g>
+        <!-- paellera -->
+        <g transform="translate(320 300)">
+          <circle r="126" fill="#4A403A"/><circle r="112" fill="#C98A2E"/><circle r="104" fill="#E0A63C"/>
+          <g fill="#FA001B" opacity=".92">
+            <ellipse cx="-42" cy="-32" rx="22" ry="10" transform="rotate(-18 -42 -32)"/>
+            <ellipse cx="44" cy="24" rx="22" ry="10" transform="rotate(12 44 24)"/>
+            <ellipse cx="14" cy="-58" rx="18" ry="9" transform="rotate(30 14 -58)"/>
+          </g>
+          <g fill="#6E7A50">
+            <circle cx="-54" cy="40" r="11"/><circle cx="58" cy="-42" r="11"/><circle cx="0" cy="62" r="11"/>
+          </g>
+          <g fill="#8A6B3E" opacity=".5">
+            <circle cx="-20" cy="10" r="3.4"/><circle cx="24" cy="-8" r="3.4"/><circle cx="-70" cy="-10" r="3.4"/><circle cx="70" cy="20" r="3.4"/>
+          </g>
+          <rect x="-160" y="-8" width="38" height="16" rx="8" fill="#4A403A"/>
+          <rect x="122" y="-8" width="38" height="16" rx="8" fill="#4A403A"/>
+        </g>
+        <!-- copas de tinto -->
+        <g transform="translate(112 236)">
+          <path d="M-36 0h72l-9 47a27 27 0 0 1-54 0Z" fill="url(#g-tinto)"/>
+          <path d="M-36 0h72l-3 17h-66Z" fill="rgba(255,255,255,.16)"/>
+          <rect x="-3.5" y="74" width="7" height="56" fill="#E9D8B4" opacity=".85"/>
+          <ellipse cy="132" rx="28" ry="6" fill="#E9D8B4" opacity=".85"/>
+        </g>
+        <g transform="translate(540 268)">
+          <path d="M-30 0h60l-8 40a23 23 0 0 1-44 0Z" fill="url(#g-tinto)"/>
+          <path d="M-30 0h60l-2 14h-56Z" fill="rgba(255,255,255,.14)"/>
+          <rect x="-3" y="63" width="6" height="46" fill="#E9D8B4" opacity=".8"/>
+          <ellipse cy="111" rx="23" ry="5" fill="#E9D8B4" opacity=".8"/>
+        </g>
+        <!-- pinchos -->
+        <g transform="translate(320 470)">
+          <ellipse cy="14" rx="118" ry="22" fill="#F2EFEA" opacity=".94"/>
+          <g fill="#E9D8B4"><rect x="-84" y="-10" width="60" height="18" rx="5"/><rect x="24" y="-14" width="60" height="18" rx="5"/></g>
+          <g fill="#C0454B"><rect x="-80" y="-18" width="52" height="9" rx="4.5"/><rect x="28" y="-22" width="52" height="9" rx="4.5"/></g>
+          <g fill="#6E7A50"><circle cx="-54" cy="-32" r="9"/><circle cx="54" cy="-36" r="9"/></g>
+          <g stroke="#8A6B3E" stroke-width="2.6" stroke-linecap="round"><path d="M-54-32v-22"/><path d="M54-36v-22"/></g>
+        </g>
+      </svg>
+      <img class="hero__foto" src="assets/fotos/hero.jpg" alt="Una mesa en Olé Restaurante" onerror="this.remove()">
+    </figure>
+  </div>
+
+  <div class="hero__tira">
+    <div class="env" style="padding-inline:0">
+      <ul class="tira">
+        <li class="tira__c"><span class="tira__k">Horario</span><span class="tira__v">Mié a Dom<small>2:00 p.m. – 9:00 p.m.</small></span></li>
+        <li class="tira__c"><span class="tira__k">Dónde</span><span class="tira__v">Centro Comercial<small>Lomas de Cocoyoc</small></span></li>
+        <li class="tira__c"><span class="tira__k">Cocina</span><span class="tira__v">Española<small>Tapas, pinchos y arroces</small></span></li>
+        <li class="tira__c"><span class="tira__k">Reservas</span><span class="tira__v" id="tira-reservas"><a href="mailto:hola@olerestaurante.com" >hola@olerestaurante.com</a><small>Te respondemos el mismo día</small></span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<svg class="capote" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true" style="color:var(--gris-2)">
+  <path fill="currentColor" d="M0 0h1440v34c-180 40-330 12-520-6S560 4 380 26 120 74 0 56Z"/>
+</svg>
+
+<!-- ============================= Sobre Olé ============================= -->
+<section class="seccion" id="sobre">
+  <div class="env sobre">
+    <div class="rev">
+      <p class="eyebrow">Sobre Olé</p>
+      <h2 class="titulo">Una taberna española <em>con acento morelense</em></h2>
+      <p class="bajada">Abrimos en agosto de 2025 con una idea sencilla: traer a Cocoyoc la mesa larga, la barra de pinchos y el ritmo de una taberna de Madrid. Ven a disfrutar de una nueva experiencia y de sabores inolvidables que te harán regresar por más.</p>
+      <p class="bajada">Trabajamos con producto que respeta su origen: jamón Gran Reserva cortado al momento, anchoas del Cantábrico, pimientos del Padrón, arroz de Valencia con denominación de origen y tintos españoles de Ribera del Duero, Rioja y Toro.</p>
+      <ul class="sobre__sellos">
+        <li class="sello"><svg width="15" height="15"><use href="#i-check"/></svg>Arroz de Valencia D.O.</li>
+        <li class="sello"><svg width="15" height="15"><use href="#i-check"/></svg>Jamón Gran Reserva</li>
+        <li class="sello"><svg width="15" height="15"><use href="#i-check"/></svg>Anchoas del Cantábrico</li>
+        <li class="sello"><svg width="15" height="15"><use href="#i-check"/></svg>Sidra asturiana natural</li>
+      </ul>
+    </div>
+
+    <!-- data-edit="foto": sustituir este marcador por una fotografía real del salón -->
+    <figure class="marco-foto rev" style="margin:0" data-edit="foto">
+      <svg viewBox="0 0 400 500" role="img" aria-label="Ilustración de una barra de pinchos y copas de vino tinto">
+        <defs>
+          <linearGradient id="g-salon" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3A2A22"/><stop offset="1" stop-color="#17120F"/>
+          </linearGradient>
+          <linearGradient id="g-vino" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#D01C24"/><stop offset="1" stop-color="#7C0F15"/>
+          </linearGradient>
+        </defs>
+        <rect width="400" height="500" fill="url(#g-salon)"/>
+        <g opacity=".22" fill="none" stroke="#F0B323" stroke-width="1">
+          <path d="M0 60h400M0 120h400M0 180h400"/>
+        </g>
+        <!-- arcos de taberna -->
+        <g fill="none" stroke="rgba(240,179,35,.28)" stroke-width="2">
+          <path d="M52 250v-58a48 48 0 0 1 96 0v58"/>
+          <path d="M252 250v-58a48 48 0 0 1 96 0v58"/>
+        </g>
+        <!-- copas -->
+        <g transform="translate(112 246)">
+          <path d="M-34 0h68l-8 44a26 26 0 0 1-52 0Z" fill="url(#g-vino)"/>
+          <path d="M-34 0h68l-3 16h-62Z" fill="rgba(255,255,255,.14)"/>
+          <rect x="-3" y="70" width="6" height="52" fill="#E9D8B4" opacity=".8"/>
+          <ellipse cx="0" cy="124" rx="26" ry="6" fill="#E9D8B4" opacity=".8"/>
+        </g>
+        <g transform="translate(196 262)">
+          <path d="M-30 0h60l-7 39a23 23 0 0 1-46 0Z" fill="url(#g-vino)"/>
+          <path d="M-30 0h60l-2 14h-56Z" fill="rgba(255,255,255,.12)"/>
+          <rect x="-3" y="62" width="6" height="46" fill="#E9D8B4" opacity=".75"/>
+          <ellipse cx="0" cy="110" rx="23" ry="5" fill="#E9D8B4" opacity=".75"/>
+        </g>
+        <!-- plato de pinchos -->
+        <g transform="translate(288 330)">
+          <ellipse cx="0" cy="40" rx="86" ry="22" fill="#F2EFEA" opacity=".92"/>
+          <g fill="#E9D8B4">
+            <rect x="-62" y="16" width="52" height="16" rx="4"/>
+            <rect x="-6" y="12" width="52" height="16" rx="4"/>
+          </g>
+          <g fill="#C0454B">
+            <rect x="-58" y="10" width="44" height="8" rx="4"/>
+            <rect x="-2" y="6" width="44" height="8" rx="4"/>
+          </g>
+          <g fill="#6E7A50">
+            <circle cx="-36" cy="0" r="8"/><circle cx="20" cy="-4" r="8"/>
+          </g>
+          <g stroke="#8A6B3E" stroke-width="2.4" stroke-linecap="round">
+            <path d="M-36 0v-22"/><path d="M20-4v-22"/>
+          </g>
+        </g>
+        <!-- suelo -->
+        <rect y="430" width="400" height="70" fill="rgba(0,0,0,.35)"/>
+      </svg>
+          <img class="foto-real" src="assets/fotos/salon.jpg" alt="El salón de Olé Restaurante" loading="lazy" onerror="this.remove()">
+      <figcaption class="marco-foto__cinta">La barra de Olé</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ========================== Nuestra comida ========================== -->
+<section class="seccion gris" id="comida">
+  <div class="env">
+    <div class="centro rev">
+      <p class="eyebrow" style="justify-content:center">Nuestra comida</p>
+      <h2 class="titulo">Nuestros platillos <em>más pedidos</em></h2>
+      <p class="bajada">Tres formas de entender la mesa española: la barra, el arroz y el mar del norte.</p>
+    </div>
+
+    <div class="platos">
+      <!-- data-edit="foto" -->
+      <article class="plato rev">
+        <div class="plato__img" data-edit="foto">
+          <svg viewBox="0 0 400 300" role="img" aria-label="Ilustración de pinchos sobre pan con aceituna">
+            <rect width="400" height="300" fill="#2B2623"/>
+            <ellipse cx="200" cy="215" rx="150" ry="42" fill="#F2EFEA"/>
+            <g>
+              <rect x="86" y="150" width="104" height="30" rx="8" fill="#E9D8B4"/>
+              <rect x="94" y="140" width="88" height="14" rx="7" fill="#C0454B"/>
+              <circle cx="138" cy="120" r="14" fill="#6E7A50"/><circle cx="138" cy="120" r="5" fill="#D01C24"/>
+              <path d="M138 120v-34" stroke="#8A6B3E" stroke-width="4" stroke-linecap="round"/>
+            </g>
+            <g>
+              <rect x="206" y="162" width="104" height="30" rx="8" fill="#E9D8B4"/>
+              <rect x="214" y="152" width="88" height="14" rx="7" fill="#C0454B"/>
+              <circle cx="258" cy="132" r="14" fill="#6E7A50"/><circle cx="258" cy="132" r="5" fill="#D01C24"/>
+              <path d="M258 132V98" stroke="#8A6B3E" stroke-width="4" stroke-linecap="round"/>
+            </g>
+          </svg>
+          <img class="foto-real" src="assets/fotos/pinchos.jpg" alt="Pinchos de la barra de Olé" loading="lazy" onerror="this.remove()">
+        </div>
+        <div class="plato__cuerpo">
+          <span class="plato__k">De la barra</span>
+          <h3 class="plato__n">Pinchos</h3>
+          <p class="plato__d">Chistorra San Sebastián, sardina ahumada, jamón Gran Reserva, boquerón o anchoa. La forma española de empezar.</p>
+        </div>
+      </article>
+
+      <article class="plato rev">
+        <div class="plato__img" data-edit="foto">
+          <svg viewBox="0 0 400 300" role="img" aria-label="Ilustración de una paellera con arroz meloso">
+            <rect width="400" height="300" fill="#2B2623"/>
+            <circle cx="200" cy="160" r="112" fill="#4A403A"/>
+            <circle cx="200" cy="160" r="98" fill="#C98A2E"/>
+            <circle cx="200" cy="160" r="92" fill="#E0A63C"/>
+            <g fill="#D01C24">
+              <ellipse cx="162" cy="130" rx="20" ry="9" transform="rotate(-18 162 130)"/>
+              <ellipse cx="238" cy="182" rx="20" ry="9" transform="rotate(12 238 182)"/>
+              <ellipse cx="212" cy="112" rx="16" ry="8" transform="rotate(30 212 112)"/>
+            </g>
+            <g fill="#6E7A50">
+              <path d="M148 196c14-10 30-8 38 4-14 8-30 6-38-4Z"/>
+              <path d="M242 128c14-10 30-8 38 4-14 8-30 6-38-4Z"/>
+            </g>
+            <g fill="#8A6B3E" opacity=".55">
+              <circle cx="180" cy="168" r="3"/><circle cx="216" cy="150" r="3"/><circle cx="196" cy="196" r="3"/><circle cx="238" cy="146" r="3"/><circle cx="160" cy="160" r="3"/>
+            </g>
+            <rect x="52" y="150" width="34" height="14" rx="7" fill="#4A403A"/>
+            <rect x="314" y="150" width="34" height="14" rx="7" fill="#4A403A"/>
+          </svg>
+          <img class="foto-real" src="assets/fotos/arroz-meloso.jpg" alt="Arroz meloso recién salido del fuego" loading="lazy" onerror="this.remove()">
+        </div>
+        <div class="plato__cuerpo">
+          <span class="plato__k">Del fuego lento</span>
+          <h3 class="plato__n">Arroz meloso</h3>
+          <p class="plato__d">Con chistorra Micalet, jamón Gran Reserva, calamar o gambas. Arroz de Valencia con denominación de origen.</p>
+        </div>
+      </article>
+
+      <article class="plato rev">
+        <div class="plato__img" data-edit="foto">
+          <svg viewBox="0 0 400 300" role="img" aria-label="Ilustración de merluza en salsa verde con almejas">
+            <rect width="400" height="300" fill="#2B2623"/>
+            <ellipse cx="200" cy="170" rx="140" ry="76" fill="#F2EFEA"/>
+            <ellipse cx="200" cy="172" rx="112" ry="56" fill="#6E7A50" opacity=".8"/>
+            <g fill="#FFFDFA">
+              <rect x="148" y="140" width="52" height="52" rx="16"/>
+              <rect x="206" y="152" width="46" height="46" rx="15"/>
+            </g>
+            <g fill="#3E4A2E" opacity=".7">
+              <path d="M150 190c12-6 30-6 44 0"/><path d="M208 198c10-5 26-5 36 0"/>
+            </g>
+            <g fill="#7A6A52">
+              <path d="M128 196a16 16 0 0 1 32 0 44 44 0 0 1-32 0Z"/>
+              <path d="M254 186a15 15 0 0 1 30 0 42 42 0 0 1-30 0Z"/>
+            </g>
+            <g fill="#3E4A2E">
+              <circle cx="176" cy="126" r="5"/><circle cx="238" cy="140" r="5"/><circle cx="206" cy="210" r="5"/>
+            </g>
+          </svg>
+          <img class="foto-real" src="assets/fotos/merluza.jpg" alt="Merluza vasca Bilbao en salsa verde" loading="lazy" onerror="this.remove()">
+        </div>
+        <div class="plato__cuerpo">
+          <span class="plato__k">Del Cantábrico</span>
+          <h3 class="plato__n">Merluza vasca Bilbao</h3>
+          <p class="plato__d">Troncho de merluza cocinado con ajo, perejil, almejas y vino blanco. Salsa verde de manual.</p>
+        </div>
+      </article>
+    </div>
+
+    <div class="centro" style="margin-top:clamp(28px,4vw,44px)">
+      <a class="btn btn--negro" href="#carta"><span>Ver la carta completa</span><svg width="17" height="17"><use href="#i-flecha"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== La carta ============================== -->
+<section class="seccion oscura" id="carta" data-edit="carta">
+  <div class="env">
+    <div class="centro rev">
+      <p class="eyebrow" style="justify-content:center">La carta</p>
+      <h2 class="titulo">La cocina española, <em>de Madrid a Cocoyoc</em></h2>
+      <p class="bajada">Barra de pinchos, cazuelas de siempre y arroces al fuego. Pregunta a tu mesero por los precios y por el fuera de carta del día.</p>
+    </div>
+
+    <div class="tabs rev" role="tablist" aria-label="Secciones de la carta">
+      <button class="tab" role="tab" id="t-tapas"   aria-controls="p-tapas"   aria-selected="true">Tapas y pinchos</button>
+      <button class="tab" role="tab" id="t-cocina"  aria-controls="p-cocina"  aria-selected="false">Cocina</button>
+      <button class="tab" role="tab" id="t-arroces" aria-controls="p-arroces" aria-selected="false">Arroces</button>
+      <button class="tab" role="tab" id="t-postres" aria-controls="p-postres" aria-selected="false">Postres</button>
+      <button class="tab" role="tab" id="t-bebidas" aria-controls="p-bebidas" aria-selected="false">Bebidas</button>
+    </div>
+
+    <div class="pizarra rev">
+      <div class="panel" id="p-tapas" role="tabpanel" aria-labelledby="t-tapas" tabindex="0">
+        <div class="pizarra__cab"><h3>Tapas y pinchos</h3></div>
+        <div class="grupo">
+          <p class="grupo__t">Pinchos de barra</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Pincho de chistorra San Sebastián</span></li>
+          <li class="item"><span class="item__n">Pincho de sardina ahumada</span></li>
+          <li class="item"><span class="item__n">Pincho de jamón Gran Reserva</span></li>
+          <li class="item"><span class="item__n">Pincho de boquerón o anchoa</span></li>
+          <li class="item"><span class="item__n">Gilda de boquerón y anchoa</span></li>
+          <li class="item"><span class="item__n">Ajos rostizados</span></li>
+          <li class="item"><span class="item__n">Orden de pan lumaca</span></li>
+        </ul>
+        </div>
+        <div class="grupo">
+          <p class="grupo__t">Para compartir</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Tomate aliñado</span><span class="item__d">Rebanadas de jitomate con aceite de oliva y toque balsámico</span></li>
+          <li class="item"><span class="item__n">Patatas bravas San Miguel</span><span class="item__d">Crujientes patatas bañadas en salsa de pimentón</span></li>
+          <li class="item"><span class="item__n">Aceitunas Gordal de Andalucía</span><span class="item__d">Diez piezas de gran tamaño, sin hueso y de sabor suave</span></li>
+          <li class="item"><span class="item__n">Croquetas de jamón Gran Reserva</span><span class="item__d">Cinco piezas, cremosas por dentro y crujientes por fuera</span></li>
+          <li class="item"><span class="item__n">Tartar de fuet bellotero</span><span class="item__d">Finos trozos de fuet aliñado con alcaparra, guindilla, aceitunas y piparra</span></li>
+          <li class="item"><span class="item__n">Pimientos del Padrón cuchilleros</span><span class="item__d">Pequeños pimientos verdes típicos de Galicia</span></li>
+          <li class="item"><span class="item__n">Tortilla española clásica o con chistorra</span><span class="item__d">Elaborada con huevo, papa y cebolla, o con chistorra y morrón</span></li>
+          <li class="item"><span class="item__n">Huevos rotos Lucio con jamón Gran Reserva</span><span class="item__d">Tres huevos fritos servidos sobre una cama de patatas y jamón</span></li>
+        </ul>
+        </div>
+        <div class="grupo">
+          <p class="grupo__t">Raciones y conservas</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Ración de queso manchego curado</span></li>
+          <li class="item"><span class="item__n">Ración de jamón Gran Reserva</span></li>
+          <li class="item"><span class="item__n">Piquillos rellenos de bacalao o merluza</span><span class="item__d">Pimientos rojos rellenos de pescado en salsa cremosa de pimiento</span></li>
+          <li class="item"><span class="item__n">Boquerones al vinagre</span></li>
+          <li class="item"><span class="item__n">Anchoas del Cantábrico</span></li>
+        </ul>
+        </div>
+      </div>
+
+      <div class="panel" id="p-cocina" role="tabpanel" aria-labelledby="t-cocina" tabindex="0" hidden>
+        <div class="pizarra__cab"><h3>Cocina</h3></div>
+        <ul class="items">
+          <li class="item"><span class="item__n">Sopa de ajo castellana</span><span class="item__d">Clásica sopa castellana con ajo, pan y pimentón</span></li>
+          <li class="item"><span class="item__n">Chorizo a la sidra Mingo</span><span class="item__d">Chorizo cocinado lentamente en sidra asturiana natural</span></li>
+          <li class="item"><span class="item__n">Fabada asturiana Pravia</span><span class="item__d">Elaborada con fabes mantecosas, chorizo, morcilla y tocino</span></li>
+          <li class="item"><span class="item__n">Gambas al ajillo</span><span class="item__d">Camarones salteados en aceite de oliva con ajo y toque de guindilla</span></li>
+          <li class="item"><span class="item__n">Chipirones al vino blanco Nerú</span><span class="item__d">Calamares a la plancha en salsa de ajo, perejil y vino</span></li>
+          <li class="item"><span class="item__n">Merluza vasca Bilbao</span><span class="item__d">Troncho de merluza cocinado con ajo, perejil, almejas y vino blanco</span></li>
+          <li class="item"><span class="item__n">Rabo de toro Las Ventas</span><span class="item__d">Estofado tradicional cocinado a fuego lento en vino tinto y verduras</span></li>
+          <li class="item"><span class="item__n">Pulpo a la gallega</span><span class="item__d">Servido sobre una cama de patatas con pimentón y aceite de oliva</span></li>
+          <li class="item"><span class="item__n">Solomillo de res a la Pedro Ximénez</span><span class="item__d">Filete de res rebanado al término, en reducción de jerez y papas crujientes</span></li>
+          <li class="item"><span class="item__n">Lomo de bacalao de Islandia Galayos</span><span class="item__d">Sobre cama de patatas y piquillos confitados, gratinado con alioli</span></li>
+        </ul>
+        <p class="nota">Pregunta por el fuera de carta del día.</p>
+      </div>
+
+      <div class="panel" id="p-arroces" role="tabpanel" aria-labelledby="t-arroces" tabindex="0" hidden>
+        <div class="pizarra__cab"><h3>Arroces melosos</h3></div>
+        <ul class="items">
+          <li class="item"><span class="item__n">Arroz meloso con chistorra Micalet</span></li>
+          <li class="item"><span class="item__n">Arroz meloso con jamón Gran Reserva</span></li>
+          <li class="item"><span class="item__n">Arroz meloso al vermut con solomillo de cerdo</span></li>
+          <li class="item"><span class="item__n">Arroz meloso negro con calamar</span></li>
+          <li class="item"><span class="item__n">Arroz meloso almejado</span></li>
+          <li class="item"><span class="item__n">Arroz meloso con gambas, calamar y almeja</span></li>
+        </ul>
+        <p class="nota">Nuestro arroz es de Valencia con denominación de origen.</p>
+      </div>
+
+      <div class="panel" id="p-postres" role="tabpanel" aria-labelledby="t-postres" tabindex="0" hidden>
+        <div class="pizarra__cab"><h3>Postres</h3></div>
+        <ul class="items items--1" style="max-width:620px;margin-inline:auto">
+          <li class="item"><span class="item__n">Tarta vasca La Viña</span></li>
+          <li class="item"><span class="item__n">Crema catalana</span></li>
+        </ul>
+      </div>
+
+      <div class="panel" id="p-bebidas" role="tabpanel" aria-labelledby="t-bebidas" tabindex="0" hidden>
+        <div class="pizarra__cab"><h3>Bebidas</h3></div>
+        <div class="bebidas">
+          <div>
+            <div class="grupo" style="margin-top:0">
+              <p class="grupo__t">Coctelería</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Sangría natural</span></li>
+          <li class="item"><span class="item__n">Sangría con vodka</span></li>
+          <li class="item"><span class="item__n">Tinto de verano</span></li>
+          <li class="item"><span class="item__n">Mojito Olé</span></li>
+          <li class="item"><span class="item__n">Jarras</span><span class="item__d">Tinto de verano y clericot, para la mesa</span></li>
+        </ul>
+            </div>
+            <div class="grupo">
+              <p class="grupo__t">Aperitivo</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Tinto de la casa</span></li>
+          <li class="item"><span class="item__n">Tío Pepe</span></li>
+          <li class="item"><span class="item__n">Sangre de Toro</span></li>
+          <li class="item"><span class="item__n">Pedro Ximénez</span></li>
+        </ul>
+            </div>
+            <div class="grupo">
+              <p class="grupo__t">Vermut</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Cinzano</span></li>
+          <li class="item"><span class="item__n">Martini</span></li>
+          <li class="item"><span class="item__n">Miró</span></li>
+          <li class="item"><span class="item__n">Williams &amp; Humbert</span></li>
+          <li class="item"><span class="item__n">Verdejo 61</span></li>
+          <li class="item"><span class="item__n">Yzaguirre</span></li>
+        </ul>
+            </div>
+          </div>
+          <div>
+            <div class="grupo" style="margin-top:0">
+              <p class="grupo__t">Cerveza española</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Estrella Galicia</span></li>
+          <li class="item"><span class="item__n">Mahou Premium Madrid</span></li>
+          <li class="item"><span class="item__n">1906 Reserva Especial</span></li>
+        </ul>
+            </div>
+            <div class="grupo">
+              <p class="grupo__t">Cerveza nacional</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Corona, Victoria y Modelo</span><span class="item__d">Sola, michelada o clamato</span></li>
+        </ul>
+            </div>
+            <div class="grupo">
+              <p class="grupo__t">Sidra asturiana</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Sidra Mayador</span><span class="item__d">En 250 ml y 750 ml</span></li>
+          <li class="item"><span class="item__n">Sidra Mayador seca</span></li>
+        </ul>
+            </div>
+            <div class="grupo">
+              <p class="grupo__t">Sin alcohol</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Agua natural y mineral</span></li>
+          <li class="item"><span class="item__n">Refresco</span></li>
+          <li class="item"><span class="item__n">Tehuacán</span></li>
+          <li class="item"><span class="item__n">Topo Chico</span></li>
+          <li class="item"><span class="item__n">Naranjada o limonada</span><span class="item__d">También en jarra</span></li>
+          <li class="item"><span class="item__n">Fruta con mineral</span></li>
+        </ul>
+            </div>
+          </div>
+          <div>
+            <div class="grupo" style="margin-top:0">
+              <p class="grupo__t">Spritz y licores</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Aperol</span></li>
+          <li class="item"><span class="item__n">St. Germain</span></li>
+          <li class="item"><span class="item__n">Limoncello</span></li>
+          <li class="item"><span class="item__n">Licor 43</span></li>
+          <li class="item"><span class="item__n">Chinchón dulce o seco</span></li>
+          <li class="item"><span class="item__n">Sambuca negro</span></li>
+          <li class="item"><span class="item__n">Baileys</span></li>
+          <li class="item"><span class="item__n">Amaretto</span></li>
+        </ul>
+            </div>
+            <div class="grupo">
+              <p class="grupo__t">Brandy y digestivo</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Terry Centenario</span></li>
+          <li class="item"><span class="item__n">Torres X</span></li>
+          <li class="item"><span class="item__n">Magno</span></li>
+          <li class="item"><span class="item__n">Duque de Alba</span></li>
+          <li class="item"><span class="item__n">Cardenal de Mendoza</span></li>
+          <li class="item"><span class="item__n">Pacharán</span></li>
+          <li class="item"><span class="item__n">Orujo de hierbas</span></li>
+          <li class="item"><span class="item__n">Orujo Las Cadenas</span></li>
+          <li class="item"><span class="item__n">Carajillo</span></li>
+        </ul>
+            </div>
+            <div class="grupo">
+              <p class="grupo__t">Destilados</p>
+        <ul class="items">
+          <li class="item"><span class="item__n">Bacardí blanco</span></li>
+          <li class="item"><span class="item__n">Matusalem clásico y platino</span></li>
+          <li class="item"><span class="item__n">Appleton Estate y platino</span></li>
+          <li class="item"><span class="item__n">Havana 7 años</span></li>
+          <li class="item"><span class="item__n">Zacapa 23</span></li>
+          <li class="item"><span class="item__n">JW Etiqueta Roja</span></li>
+          <li class="item"><span class="item__n">JW Etiqueta Negra</span></li>
+          <li class="item"><span class="item__n">Chivas Regal 12 años</span></li>
+          <li class="item"><span class="item__n">Buchanan's</span></li>
+          <li class="item"><span class="item__n">Macallan 12 años</span></li>
+          <li class="item"><span class="item__n">Absolut Azul</span></li>
+          <li class="item"><span class="item__n">Stolichnaya</span></li>
+          <li class="item"><span class="item__n">Grey Goose</span></li>
+          <li class="item"><span class="item__n">Beefeater</span></li>
+          <li class="item"><span class="item__n">Tanqueray</span></li>
+          <li class="item"><span class="item__n">José Cuervo Tradicional y Plata</span></li>
+          <li class="item"><span class="item__n">Don Julio Plata, Reposado y 70</span></li>
+          <li class="item"><span class="item__n">Maestro Dobel</span></li>
+          <li class="item"><span class="item__n">400 Conejos</span></li>
+          <li class="item"><span class="item__n">Ojo de Tigre</span></li>
+        </ul>
+            </div>
+          </div>
+        </div>
+        <p class="nota nota--pie">Tintos españoles de Ribera del Duero, Rioja y Toro. Pregunta a tu mesero por la selección del día.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================== Testimonios =========================== -->
+<section class="seccion roja">
+  <div class="env">
+    <div class="centro rev">
+      <p class="eyebrow" style="justify-content:center">Testimonios</p>
+      <h2 class="titulo" style="color:#fff">Qué dicen <em>nuestros clientes</em></h2>
+    </div>
+    <div class="testis">
+      <article class="testi rev">
+        <span class="testi__est" aria-label="5 de 5 estrellas">
+          <svg width="16" height="16"><use href="#i-estrella"/></svg><svg width="16" height="16"><use href="#i-estrella"/></svg><svg width="16" height="16"><use href="#i-estrella"/></svg><svg width="16" height="16"><use href="#i-estrella"/></svg><svg width="16" height="16"><use href="#i-estrella"/></svg>
+        </span>
+        <h3 class="testi__t">¡Excelente presentación!</h3>
+        <p class="testi__c">«La presentación no tiene comparación y el sabor es fabuloso.»</p>
+      </article>
+      <article class="testi rev">
+        <span class="testi__est" aria-label="5 de 5 estrellas">
+          <svg width="16" height="16"><use href="#i-estrella"/></svg><svg width="16" height="16"><use href="#i-estrella"/></svg><svg width="16" height="16"><use href="#i-estrella"/></svg><svg width="16" height="16"><use href="#i-estrella"/></svg><svg width="16" height="16"><use href="#i-estrella"/></svg>
+        </span>
+        <h3 class="testi__t">¡Delicioso!</h3>
+        <p class="testi__c">«Todos los platillos son deliciosos y el sabor te transporta directo a España.»</p>
+      </article>
+      <article class="testi rev">
+        <span class="testi__est" aria-label="5 de 5 estrellas">
+          <svg width="16" height="16"><use href="#i-estrella"/></svg><svg width="16" height="16"><use href="#i-estrella"/></svg><svg width="16" height="16"><use href="#i-estrella"/></svg><svg width="16" height="16"><use href="#i-estrella"/></svg><svg width="16" height="16"><use href="#i-estrella"/></svg>
+        </span>
+        <h3 class="testi__t">Sabor y textura</h3>
+        <p class="testi__c">«La textura y fusión de sabores de cada ingrediente denota la calidad de los productos utilizados para su elaboración.»</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== Redes ============================== -->
+<section class="seccion" id="redes" data-edit="redes">
+  <div class="env">
+    <div class="rev" style="max-width:62ch">
+      <p class="eyebrow">Síguenos</p>
+      <h2 class="titulo">Lo que pasa en Olé, <em>pasa primero en redes</em></h2>
+      <p class="bajada">El fuera de carta del día, las noches de sidra y las mesas que se llenan: lo contamos ahí antes que en ningún lado. Síguenos y entra directo al contenido.</p>
+      <div class="redes-cta">
+        <a class="red red--ig" id="r-ig" href="https://www.instagram.com/ole.restaurante" target="_blank" rel="noopener noreferrer"><svg width="19" height="19"><use href="#i-ig"/></svg>Instagram<small>@ole.restaurante</small></a>
+        <a class="red red--fb" id="r-fb" href="#" target="_blank" rel="noopener noreferrer" hidden><svg width="19" height="19"><use href="#i-fb"/></svg>Facebook</a>
+        <a class="red red--tt" id="r-tt" href="#" target="_blank" rel="noopener noreferrer" hidden><svg width="19" height="19"><use href="#i-tt"/></svg>TikTok</a>
+        <a class="red red--wa" id="r-wa" href="#" target="_blank" rel="noopener noreferrer" hidden><svg width="19" height="19"><use href="#i-wa"/></svg>WhatsApp</a>
+        <a class="red" href="mailto:hola@olerestaurante.com"><svg width="19" height="19"><use href="#i-mail"/></svg>hola@olerestaurante.com</a>
+      </div>
+    </div>
+
+    <!-- data-edit="muro": cambia cada href por la URL de la publicación real -->
+    <div class="muro" data-edit="muro">
+      <a class="post rev" href="https://www.instagram.com/ole.restaurante" target="_blank" rel="noopener noreferrer">
+        <svg class="arte" viewBox="0 0 300 300" aria-hidden="true">
+          <rect width="300" height="300" fill="#2B2623"/>
+          <circle cx="150" cy="140" r="86" fill="#E0A63C"/><circle cx="150" cy="140" r="74" fill="#C98A2E"/>
+          <g fill="#D01C24"><ellipse cx="125" cy="118" rx="17" ry="8" transform="rotate(-20 125 118)"/><ellipse cx="180" cy="158" rx="17" ry="8" transform="rotate(14 180 158)"/></g>
+          <g fill="#6E7A50"><circle cx="168" cy="112" r="9"/><circle cx="122" cy="166" r="9"/></g>
+        </svg>
+        <img class="foto-real" src="assets/fotos/ig-1.jpg" alt="El arroz meloso saliendo del fuego" loading="lazy" onerror="this.remove()">
+        <span class="post__badge"><svg width="15" height="15"><use href="#i-ig"/></svg></span>
+        <span class="post__velo"><span class="post__ver">Ver en Instagram</span><span class="post__txt">El arroz meloso saliendo del fuego</span></span>
+      </a>
+      <a class="post rev" href="https://www.instagram.com/ole.restaurante" target="_blank" rel="noopener noreferrer">
+        <svg class="arte" viewBox="0 0 300 300" aria-hidden="true">
+          <rect width="300" height="300" fill="#1F1B19"/>
+          <g fill="#E9D8B4"><rect x="46" y="150" width="90" height="26" rx="7"/><rect x="164" y="170" width="90" height="26" rx="7"/></g>
+          <g fill="#C0454B"><rect x="54" y="141" width="74" height="12" rx="6"/><rect x="172" y="161" width="74" height="12" rx="6"/></g>
+          <g fill="#6E7A50"><circle cx="91" cy="118" r="12"/><circle cx="209" cy="138" r="12"/></g>
+          <g stroke="#8A6B3E" stroke-width="3.4" stroke-linecap="round"><path d="M91 118V88"/><path d="M209 138v-30"/></g>
+        </svg>
+        <img class="foto-real" src="assets/fotos/ig-2.jpg" alt="La barra de pinchos de Olé" loading="lazy" onerror="this.remove()">
+        <span class="post__badge"><svg width="15" height="15"><use href="#i-ig"/></svg></span>
+        <span class="post__velo"><span class="post__ver">Ver en Instagram</span><span class="post__txt">Barra de pinchos, de 2 a 9</span></span>
+      </a>
+      <a class="post rev" href="https://www.instagram.com/ole.restaurante" target="_blank" rel="noopener noreferrer">
+        <svg class="arte" viewBox="0 0 300 300" aria-hidden="true">
+          <rect width="300" height="300" fill="#7C0F15"/>
+          <g fill="#F0B323" opacity=".9"><path d="M150 54c26 0 47 21 47 47 0 34-47 92-47 92s-47-58-47-92c0-26 21-47 47-47z" opacity=".18"/></g>
+          <g transform="translate(150 150)">
+            <path d="M-46 -52h92l-11 60a35 35 0 0 1-70 0Z" fill="#D01C24"/>
+            <path d="M-46 -52h92l-3 18h-86Z" fill="rgba(255,255,255,.2)"/>
+            <rect x="-4" y="12" width="8" height="58" fill="#E9D8B4"/>
+            <ellipse cx="0" cy="72" rx="34" ry="7" fill="#E9D8B4"/>
+          </g>
+        </svg>
+        <img class="foto-real" src="assets/fotos/ig-3.jpg" alt="Tintos españoles de Ribera, Rioja y Toro" loading="lazy" onerror="this.remove()">
+        <span class="post__badge"><svg width="15" height="15"><use href="#i-ig"/></svg></span>
+        <span class="post__velo"><span class="post__ver">Ver en Instagram</span><span class="post__txt">Tintos de Ribera, Rioja y Toro</span></span>
+      </a>
+      <a class="post rev" href="https://www.instagram.com/ole.restaurante" target="_blank" rel="noopener noreferrer">
+        <svg class="arte" viewBox="0 0 300 300" aria-hidden="true">
+          <rect width="300" height="300" fill="#2B2623"/>
+          <ellipse cx="150" cy="176" rx="104" ry="30" fill="#F2EFEA"/>
+          <g fill="#C0454B" opacity=".9"><path d="M84 160c26-16 62-16 88 0-26 12-62 12-88 0Z"/><path d="M134 142c26-16 62-16 88 0-26 12-62 12-88 0Z"/></g>
+          <g fill="#8A6B3E" opacity=".6"><circle cx="120" cy="170" r="4"/><circle cx="178" cy="164" r="4"/></g>
+        </svg>
+        <img class="foto-real" src="assets/fotos/ig-4.jpg" alt="Jamón Gran Reserva cortado al momento" loading="lazy" onerror="this.remove()">
+        <span class="post__badge"><svg width="15" height="15"><use href="#i-ig"/></svg></span>
+        <span class="post__velo"><span class="post__ver">Ver en Instagram</span><span class="post__txt">Jamón Gran Reserva al corte</span></span>
+      </a>
+      <a class="post rev" href="https://www.instagram.com/ole.restaurante" target="_blank" rel="noopener noreferrer">
+        <svg class="arte" viewBox="0 0 300 300" aria-hidden="true">
+          <rect width="300" height="300" fill="#1F1B19"/>
+          <g opacity=".5"><rect width="300" height="300" fill="url(#p-az)"/></g>
+          <defs><pattern id="p-az" width="50" height="50" patternUnits="userSpaceOnUse"><g fill="none" stroke="#D01C24" stroke-width="1.2" opacity=".6"><path d="M25 3 47 25 25 47 3 25z"/><circle cx="25" cy="25" r="4"/></g></pattern></defs>
+          <g transform="translate(150 150)" fill="#F0B323" opacity=".85"><use href="#i-toro" x="-95" y="-70" width="190" height="139"/></g>
+        </svg>
+        <img class="foto-real" src="assets/fotos/ig-5.jpg" alt="El salón de Olé Restaurante" loading="lazy" onerror="this.remove()">
+        <span class="post__badge"><svg width="15" height="15"><use href="#i-ig"/></svg></span>
+        <span class="post__velo"><span class="post__ver">Ver en Instagram</span><span class="post__txt">De Madrid a Cocoyoc</span></span>
+      </a>
+      <a class="post rev" href="https://www.instagram.com/ole.restaurante" target="_blank" rel="noopener noreferrer">
+        <svg class="arte" viewBox="0 0 300 300" aria-hidden="true">
+          <rect width="300" height="300" fill="#2B2623"/>
+          <g transform="translate(150 144)">
+            <rect x="-16" y="-92" width="32" height="42" rx="6" fill="#6E7A50"/>
+            <path d="M-40-52h80l10 118a22 22 0 0 1-22 24h-56a22 22 0 0 1-22-24z" fill="#3E4A2E"/>
+            <rect x="-40" y="-8" width="80" height="44" fill="#E9D8B4" opacity=".92"/>
+            <text x="0" y="24" text-anchor="middle" font-family="Georgia,serif" font-size="26" fill="#7C0F15">Olé</text>
+          </g>
+        </svg>
+        <img class="foto-real" src="assets/fotos/ig-6.jpg" alt="Sidra asturiana natural, escanciada" loading="lazy" onerror="this.remove()">
+        <span class="post__badge"><svg width="15" height="15"><use href="#i-ig"/></svg></span>
+        <span class="post__velo"><span class="post__ver">Ver en Instagram</span><span class="post__txt">Sidra asturiana natural, escanciada</span></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= Club Olé ============================= -->
+<section class="seccion gris" id="club">
+  <div class="env club">
+    <div class="rev">
+      <p class="eyebrow">Club Olé</p>
+      <h2 class="titulo">Date de alta <em>y entérate primero</em></h2>
+      <p class="bajada">Un mensaje al mes, sin ruido: el fuera de carta, las cenas especiales y las mesas que abrimos antes de publicarlas.</p>
+      <ul class="ventajas">
+        <li class="ventaja">
+          <span class="ventaja__ico"><svg width="19" height="19"><use href="#i-fuego"/></svg></span>
+          <div><h4>El fuera de carta, antes que nadie</h4><p>Lo que entra de temporada y dura lo que dura.</p></div>
+        </li>
+        <li class="ventaja">
+          <span class="ventaja__ico"><svg width="19" height="19"><use href="#i-cal"/></svg></span>
+          <div><h4>Reserva anticipada</h4><p>Primer acceso a las noches temáticas y a las mesas largas.</p></div>
+        </li>
+        <li class="ventaja">
+          <span class="ventaja__ico"><svg width="19" height="19"><use href="#i-regalo"/></svg></span>
+          <div><h4>Detalle de cumpleaños</h4><p>Registra tu fecha y te esperamos con algo de la casa.</p></div>
+        </li>
+        <li class="ventaja">
+          <span class="ventaja__ico"><svg width="19" height="19"><use href="#i-copa"/></svg></span>
+          <div><h4>Catas y sidra</h4><p>Avisos de escanciado, vermut de tarde y catas de tintos españoles.</p></div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="tarjeta rev">
+      <h3>Alta en el Club Olé</h3>
+      <p class="tarjeta__sub">Toma menos de un minuto. Puedes darte de baja cuando quieras.</p>
+
+      <form id="form-club" novalidate>
+        <div class="campos">
+          <div class="fila">
+            <div class="campo">
+              <label for="c-nombre">Nombre</label>
+              <input id="c-nombre" name="nombre" type="text" autocomplete="name" required placeholder="Tu nombre">
+            </div>
+            <div class="campo">
+              <label for="c-email">Correo</label>
+              <input id="c-email" name="email" type="email" autocomplete="email" required placeholder="tu@correo.com">
+            </div>
+          </div>
+          <div class="fila">
+            <div class="campo">
+              <label for="c-tel">WhatsApp <small style="text-transform:none;letter-spacing:0">(opcional)</small></label>
+              <input id="c-tel" name="telefono" type="tel" autocomplete="tel" placeholder="735 000 0000">
+            </div>
+            <div class="campo">
+              <label for="c-cumple">Cumpleaños <small style="text-transform:none;letter-spacing:0">(opcional)</small></label>
+              <input id="c-cumple" name="cumple" type="date">
+            </div>
+          </div>
+          <div class="campo">
+            <label>Me interesa</label>
+            <div class="chips">
+              <label class="chip"><input type="checkbox" name="interes" value="Fuera de carta"><span>Fuera de carta</span></label>
+              <label class="chip"><input type="checkbox" name="interes" value="Catas y vinos"><span>Catas y vinos</span></label>
+              <label class="chip"><input type="checkbox" name="interes" value="Noches de sidra"><span>Noches de sidra</span></label>
+              <label class="chip"><input type="checkbox" name="interes" value="Eventos privados"><span>Eventos privados</span></label>
+            </div>
+          </div>
+          <label class="acepto">
+            <input type="checkbox" id="c-acepto" required>
+            <span>Acepto recibir novedades de Olé Restaurante en el correo o WhatsApp que registré. Mis datos no se comparten con terceros.</span>
+          </label>
+        </div>
+
+        <div class="form-acciones">
+          <button class="btn btn--rojo" type="submit"><span>Darme de alta</span><svg width="17" height="17"><use href="#i-flecha"/></svg></button>
+          <span style="font-size:.78rem;color:var(--texto-suave)">Se abrirá tu correo con los datos listos para enviar.</span>
+        </div>
+        <p class="aviso" id="club-aviso" role="status"></p>
+      </form>
+
+      <div class="alta-redes">
+        <p class="alta-redes__t">O date de alta desde tus redes</p>
+        <div class="alta-redes__b">
+          <a class="mini" id="alta-ig" href="https://www.instagram.com/ole.restaurante" target="_blank" rel="noopener noreferrer"><svg width="16" height="16" style="color:#E1306C"><use href="#i-ig"/></svg>Seguir y escribirnos por Instagram</a>
+          <a class="mini" id="alta-wa" href="#" target="_blank" rel="noopener noreferrer" hidden><svg width="16" height="16" style="color:#25D366"><use href="#i-wa"/></svg>Alta por WhatsApp</a>
+          <a class="mini" id="alta-fb" href="#" target="_blank" rel="noopener noreferrer" hidden><svg width="16" height="16" style="color:#1877F2"><use href="#i-fb"/></svg>Seguir en Facebook</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= Contacto ============================= -->
+<section class="seccion" id="contacto">
+  <div class="env contacto">
+    <div class="rev">
+      <p class="eyebrow">Contacto</p>
+      <h2 class="titulo">Te esperamos <em>en Cocoyoc</em></h2>
+      <p class="bajada">Miércoles a domingo, de dos de la tarde a nueve de la noche. Para grupos grandes, escríbenos con un día de anticipación.</p>
+      <p id="estado-abierto"></p>
+
+      <ul class="datos">
+        <li class="dato" data-edit="mapa">
+          <span class="dato__ico"><svg width="19" height="19"><use href="#i-pin"/></svg></span>
+          <div>
+            <span class="dato__k">Ubicación</span>
+            <span class="dato__v">Centro Comercial, Lomas de Cocoyoc</span>
+            <span class="dato__x">Morelos, México · <a id="lnk-mapa" href="#" target="_blank" rel="noopener noreferrer">Abrir en Google Maps</a></span>
+          </div>
+        </li>
+        <li class="dato">
+          <span class="dato__ico"><svg width="19" height="19"><use href="#i-reloj"/></svg></span>
+          <div style="flex:1">
+            <span class="dato__k">Horario</span>
+            <ul class="horario" id="horario">
+              <li data-dia="1"><b>Lunes</b><span>Cerrado</span></li>
+              <li data-dia="2"><b>Martes</b><span>Cerrado</span></li>
+              <li data-dia="3"><b>Miércoles</b><span>2:00 p.m. – 9:00 p.m.</span></li>
+              <li data-dia="4"><b>Jueves</b><span>2:00 p.m. – 9:00 p.m.</span></li>
+              <li data-dia="5"><b>Viernes</b><span>2:00 p.m. – 9:00 p.m.</span></li>
+              <li data-dia="6"><b>Sábado</b><span>2:00 p.m. – 9:00 p.m.</span></li>
+              <li data-dia="0"><b>Domingo</b><span>2:00 p.m. – 9:00 p.m.</span></li>
+            </ul>
+          </div>
+        </li>
+        <li class="dato">
+          <span class="dato__ico"><svg width="19" height="19"><use href="#i-mail"/></svg></span>
+          <div>
+            <span class="dato__k">Correo</span>
+            <span class="dato__v"><a href="mailto:hola@olerestaurante.com">hola@olerestaurante.com</a></span>
+            <span class="dato__x">Reservas, eventos y prensa</span>
+          </div>
+        </li>
+        <li class="dato" id="dato-tel" data-edit="telefono" hidden>
+          <span class="dato__ico"><svg width="19" height="19"><use href="#i-tel"/></svg></span>
+          <div>
+            <span class="dato__k">Teléfono</span>
+            <span class="dato__v"><a id="lnk-tel" href="#"></a></span>
+            <span class="dato__x">También por WhatsApp</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="tarjeta tarjeta--gris rev" id="reservar">
+      <h3>Reservar mesa</h3>
+      <p class="tarjeta__sub">Cuéntanos día, hora y cuántos son. Te confirmamos por el mismo medio.</p>
+
+      <form id="form-reserva" novalidate>
+        <div class="campos">
+          <div class="fila">
+            <div class="campo">
+              <label for="r-nombre">Nombre</label>
+              <input id="r-nombre" name="nombre" type="text" autocomplete="name" required placeholder="A nombre de">
+            </div>
+            <div class="campo">
+              <label for="r-contacto">Correo o teléfono</label>
+              <input id="r-contacto" name="contacto" type="text" required placeholder="Para confirmarte">
+            </div>
+          </div>
+          <div class="fila">
+            <div class="campo">
+              <label for="r-fecha">Fecha</label>
+              <input id="r-fecha" name="fecha" type="date" required>
+            </div>
+            <div class="campo">
+              <label for="r-hora">Hora</label>
+              <select id="r-hora" name="hora" required>
+                <option value="14:00">2:00 p.m.</option>
+                <option value="14:30">2:30 p.m.</option>
+                <option value="15:00" selected>3:00 p.m.</option>
+                <option value="15:30">3:30 p.m.</option>
+                <option value="16:00">4:00 p.m.</option>
+                <option value="17:00">5:00 p.m.</option>
+                <option value="18:00">6:00 p.m.</option>
+                <option value="19:00">7:00 p.m.</option>
+                <option value="20:00">8:00 p.m.</option>
+              </select>
+            </div>
+          </div>
+          <div class="fila">
+            <div class="campo">
+              <label for="r-personas">Personas</label>
+              <select id="r-personas" name="personas" required>
+                <option>1</option><option>2</option><option selected>3</option><option>4</option>
+                <option>5</option><option>6</option><option>7</option><option>8</option>
+                <option>9</option><option>10</option><option>Más de 10</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label for="r-ocasion">Ocasión</label>
+              <select id="r-ocasion" name="ocasion">
+                <option value="">Sin ocasión especial</option>
+                <option>Cumpleaños</option>
+                <option>Aniversario</option>
+                <option>Comida de trabajo</option>
+                <option>Celebración familiar</option>
+              </select>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="r-notas">Notas</label>
+            <textarea id="r-notas" name="notas" placeholder="Alergias, silla para niño, mesa en terraza..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-acciones">
+          <button class="btn btn--rojo" type="submit"><span>Enviar solicitud</span><svg width="17" height="17"><use href="#i-flecha"/></svg></button>
+          <a class="btn btn--linea" id="reserva-wa" href="#" target="_blank" rel="noopener noreferrer" style="color:var(--texto)" hidden><svg width="17" height="17"><use href="#i-wa"/></svg><span>Enviar por WhatsApp</span></a>
+        </div>
+        <p class="aviso" id="reserva-aviso" role="status"></p>
+        <p style="font-size:.78rem;color:var(--texto-suave);margin-top:12px">La reserva no queda confirmada hasta que te respondamos.</p>
+      </form>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- =============================== Pie =============================== -->
+<footer class="pie">
+  <div class="env">
+    <div class="pie__grid">
+      <div>
+        <a class="marca" href="#inicio" style="margin:0 0 14px" data-edit="logo">
+          <span class="marca__logo logo-ole"><span class="sr">Olé Restaurante</span></span>
+        </a>
+        <p style="max-width:34ch">La cocina española, de Madrid a Cocoyoc. Tapas, pinchos y arroces desde agosto de 2025.</p>
+      </div>
+      <div>
+        <h4>Navegación</h4>
+        <nav class="pie__enlaces" aria-label="Pie de página">
+          <a href="#sobre">Sobre Olé</a>
+          <a href="#comida">Nuestra comida</a>
+          <a href="#carta">La carta</a>
+          <a href="#club">Club Olé</a>
+          <a href="#reservar">Reservar mesa</a>
+        </nav>
+      </div>
+      <div>
+        <h4>Contacto</h4>
+        <div class="pie__enlaces">
+          <a href="mailto:hola@olerestaurante.com">hola@olerestaurante.com</a>
+          <span>Centro Comercial,<br>Lomas de Cocoyoc, Morelos</span>
+          <span>Mié a dom · 2:00 – 9:00 p.m.</span>
+          <a id="pie-ig" href="https://www.instagram.com/ole.restaurante" target="_blank" rel="noopener noreferrer">Instagram @ole.restaurante</a>
+        </div>
+      </div>
+    </div>
+    <div class="pie__base">
+      <span>© <span id="anio"></span> Olé Restaurante. Todos los derechos reservados.</span>
+      <span>Hecho con cariño en Morelos.</span>
+    </div>
+  </div>
+</footer>
+
+<a class="btn btn--rojo flotante" href="#reservar"><span>Reservar mesa</span></a>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Restaurant",
+  "name":"Olé Restaurante",
+  "slogan":"De Madrid a Cocoyoc",
+  "servesCuisine":["Española","Mediterránea","Tapas"],
+  "priceRange":"$$",
+  "email":"hola@olerestaurante.com",
+  "address":{
+    "@type":"PostalAddress",
+    "streetAddress":"Centro Comercial, Lomas de Cocoyoc",
+    "addressLocality":"Lomas de Cocoyoc",
+    "addressRegion":"Morelos",
+    "addressCountry":"MX"
+  },
+  "openingHoursSpecification":[{
+    "@type":"OpeningHoursSpecification",
+    "dayOfWeek":["Wednesday","Thursday","Friday","Saturday","Sunday"],
+    "opens":"14:00","closes":"21:00"
+  }],
+  "sameAs":["https://www.instagram.com/ole.restaurante"]
+}
+</script>
+
+<script>
+/* ===========================================================================
+   CONFIGURACIÓN — lo único que necesitas tocar para poner el sitio en marcha.
+   Deja una cadena vacía en lo que aún no tengas: el bloque correspondiente
+   se oculta solo, sin dejar enlaces rotos.
+   =========================================================================== */
+const OLE = {
+  email:      "hola@olerestaurante.com",
+  telefono:   "",   /* data-edit="telefono"  visible, p. ej. "735 000 0000"   */
+  whatsapp:   "",   /* solo dígitos con lada de país, p. ej. "527350000000"   */
+  instagram:  "https://www.instagram.com/ole.restaurante",
+  facebook:   "",   /* data-edit="redes"  URL completa de la página           */
+  tiktok:     "",   /* data-edit="redes"  URL completa del perfil             */
+  maps:       "https://www.google.com/maps/search/?api=1&query=Ol%C3%A9+Restaurante+Lomas+de+Cocoyoc+Morelos",
+  zonaHoraria:"America/Mexico_City",
+  abre: 14,         /* hora de apertura, 24 h */
+  cierra: 21,       /* hora de cierre, 24 h   */
+  diasAbiertos: [3,4,5,6,0]   /* 0 = domingo ... 6 = sábado */
+};
+
+(function () {
+  "use strict";
+  const $  = (s, c) => (c || document).querySelector(s);
+  const $$ = (s, c) => Array.from((c || document).querySelectorAll(s));
+
+  /* ------------------------------------------------- 1. Enlaces dinámicos */
+  const waBase = OLE.whatsapp ? "https://wa.me/" + OLE.whatsapp : "";
+
+  function mostrar(el, href, texto) {
+    if (!el) return;
+    if (!href) { el.hidden = true; return; }
+    el.hidden = false;
+    el.href = href;
+    if (texto) el.textContent = texto;
+  }
+
+  mostrar($("#r-fb"), OLE.facebook);
+  mostrar($("#r-tt"), OLE.tiktok);
+  mostrar($("#alta-fb"), OLE.facebook);
+  mostrar($("#r-wa"), waBase);
+  const mapa = $("#lnk-mapa"); if (mapa) mapa.href = OLE.maps;
+
+  if (OLE.telefono) {
+    const datoTel = $("#dato-tel"), lnkTel = $("#lnk-tel");
+    if (datoTel && lnkTel) {
+      datoTel.hidden = false;
+      lnkTel.href = "tel:" + OLE.telefono.replace(/[^0-9+]/g, "");
+      lnkTel.textContent = OLE.telefono;
+    }
+  }
+
+  if (waBase) {
+    const altaWa = $("#alta-wa");
+    if (altaWa) {
+      altaWa.hidden = false;
+      altaWa.href = waBase + "?text=" + encodeURIComponent("Hola Olé, quiero darme de alta en el Club Olé.");
+    }
+    const tira = $("#tira-reservas");
+    if (tira) {
+      tira.innerHTML = '<a href="' + waBase + '" >WhatsApp</a>' +
+        "<small>" + (OLE.telefono || "Te respondemos el mismo día") + "</small>";
+    }
+  }
+
+  /* --------------------------------------------------- 2. Navegación fija */
+  const nav = $("#nav"), hamb = $("#hamb"), menu = $("#menu"), flotante = $(".flotante");
+  const alScroll = () => {
+    nav.classList.toggle("fija", window.scrollY > 40);
+    /* el boton flotante aparece cuando el hero ya quedo atras */
+    if (flotante) flotante.classList.toggle("ver", window.scrollY > window.innerHeight * 0.75);
+  };
+  alScroll();
+  window.addEventListener("scroll", alScroll, { passive: true });
+
+  hamb.addEventListener("click", () => {
+    const abierto = hamb.getAttribute("aria-expanded") === "true";
+    hamb.setAttribute("aria-expanded", String(!abierto));
+    hamb.setAttribute("aria-label", abierto ? "Abrir menú" : "Cerrar menú");
+    menu.classList.toggle("abierto", !abierto);
+  });
+  $$("#menu a").forEach(a => a.addEventListener("click", () => {
+    menu.classList.remove("abierto");
+    hamb.setAttribute("aria-expanded", "false");
+  }));
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && menu.classList.contains("abierto")) {
+      menu.classList.remove("abierto");
+      hamb.setAttribute("aria-expanded", "false");
+      hamb.focus();
+    }
+  });
+
+  /* ------------------------------------------------ 3. Sección activa */
+  const enlaces = $$('#menu a[href^="#"]');
+  const secciones = enlaces.map(a => $(a.getAttribute("href"))).filter(Boolean);
+  if ("IntersectionObserver" in window && secciones.length) {
+    const spy = new IntersectionObserver(entradas => {
+      entradas.forEach(en => {
+        if (!en.isIntersecting) return;
+        enlaces.forEach(a => a.classList.toggle("activo", a.getAttribute("href") === "#" + en.target.id));
+      });
+    }, { rootMargin: "-45% 0px -50% 0px" });
+    secciones.forEach(s => spy.observe(s));
+  }
+
+  /* ------------------------------------------------------ 4. Pestañas */
+  const tabs = $$(".tab");
+  function abrirTab(tab) {
+    tabs.forEach(t => {
+      const activa = t === tab;
+      t.setAttribute("aria-selected", String(activa));
+      const panel = $("#" + t.getAttribute("aria-controls"));
+      if (panel) panel.hidden = !activa;
+    });
+  }
+  tabs.forEach((tab, i) => {
+    tab.addEventListener("click", () => abrirTab(tab));
+    tab.addEventListener("keydown", e => {
+      let j = null;
+      if (e.key === "ArrowRight") j = (i + 1) % tabs.length;
+      if (e.key === "ArrowLeft")  j = (i - 1 + tabs.length) % tabs.length;
+      if (e.key === "Home") j = 0;
+      if (e.key === "End")  j = tabs.length - 1;
+      if (j === null) return;
+      e.preventDefault();
+      tabs[j].focus();
+      abrirTab(tabs[j]);
+    });
+  });
+
+  /* -------------------------------------------- 5. Aparición al hacer scroll */
+  const reveals = $$(".rev");
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver((entradas, obs) => {
+      entradas.forEach((en, i) => {
+        if (!en.isIntersecting) return;
+        setTimeout(() => en.target.classList.add("visto"), Math.min(i * 70, 280));
+        obs.unobserve(en.target);
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+    reveals.forEach(el => io.observe(el));
+  } else {
+    reveals.forEach(el => el.classList.add("visto"));
+  }
+
+  /* ------------------------------------------ 6. ¿Estamos abiertos ahora? */
+  function ahoraEnCocoyoc() {
+    try {
+      const f = new Intl.DateTimeFormat("en-US", {
+        timeZone: OLE.zonaHoraria, weekday: "short", hour: "numeric", minute: "numeric", hour12: false
+      }).formatToParts(new Date());
+      const get = t => (f.find(p => p.type === t) || {}).value;
+      const dias = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+      return { dia: dias[get("weekday")], hora: parseInt(get("hour"), 10), min: parseInt(get("minute"), 10) };
+    } catch (e) {
+      const d = new Date();
+      return { dia: d.getDay(), hora: d.getHours(), min: d.getMinutes() };
+    }
+  }
+  const t = ahoraEnCocoyoc();
+  const abierto = OLE.diasAbiertos.indexOf(t.dia) !== -1 && t.hora >= OLE.abre && t.hora < OLE.cierra;
+  const estado = $("#estado-abierto");
+  if (estado) {
+    estado.innerHTML = '<span class="abierto ' + (abierto ? "si" : "no") + '"><i class="punto"></i>' +
+      (abierto ? "Abierto ahora" : "Cerrado ahora") + "</span>";
+  }
+  const hoy = $('#horario li[data-dia="' + t.dia + '"]');
+  if (hoy) hoy.classList.add("hoy");
+
+  /* ------------------------------------------------------ 7. Formularios */
+  function aviso(el, texto, tipo) {
+    el.textContent = texto;
+    el.className = "aviso " + tipo;
+  }
+  const correoOk = v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+
+  const formClub = $("#form-club"), avisoClub = $("#club-aviso");
+  formClub.addEventListener("submit", e => {
+    e.preventDefault();
+    const nombre = $("#c-nombre").value.trim();
+    const email  = $("#c-email").value.trim();
+    if (!nombre)            return aviso(avisoClub, "Escribe tu nombre para darte de alta.", "err");
+    if (!correoOk(email))   return aviso(avisoClub, "Revisa tu correo: no parece una dirección válida.", "err");
+    if (!$("#c-acepto").checked) return aviso(avisoClub, "Necesitamos tu autorización para escribirte.", "err");
+
+    const intereses = $$('input[name="interes"]:checked').map(i => i.value);
+    const cuerpo = [
+      "Alta en el Club Olé",
+      "",
+      "Nombre: " + nombre,
+      "Correo: " + email,
+      "WhatsApp: " + ($("#c-tel").value.trim() || "no proporcionado"),
+      "Cumpleaños: " + ($("#c-cumple").value || "no proporcionado"),
+      "Intereses: " + (intereses.length ? intereses.join(", ") : "sin especificar")
+    ].join("\n");
+
+    window.location.href = "mailto:" + OLE.email +
+      "?subject=" + encodeURIComponent("Alta Club Olé — " + nombre) +
+      "&body=" + encodeURIComponent(cuerpo);
+    aviso(avisoClub, "¡Listo! Abrimos tu correo con el alta preparada. Solo falta que la envíes.", "ok");
+    try { localStorage.setItem("ole.club", JSON.stringify({ nombre, email, fecha: Date.now() })); } catch (err) {}
+  });
+
+  const formRes = $("#form-reserva"), avisoRes = $("#reserva-aviso"), btnWa = $("#reserva-wa");
+  const hoyISO = new Date().toISOString().slice(0, 10);
+  $("#r-fecha").min = hoyISO;
+  $("#r-fecha").value = hoyISO;
+
+  function textoReserva() {
+    const personas = $("#r-personas").value;
+    const ocasion  = $("#r-ocasion").value;
+    const notas    = $("#r-notas").value.trim();
+    return [
+      "Solicitud de reserva en Olé",
+      "",
+      "Nombre: " + $("#r-nombre").value.trim(),
+      "Contacto: " + $("#r-contacto").value.trim(),
+      "Fecha: " + $("#r-fecha").value,
+      "Hora: " + $("#r-hora").value,
+      "Personas: " + personas,
+      ocasion ? "Ocasión: " + ocasion : "",
+      notas ? "Notas: " + notas : ""
+    ].filter(Boolean).join("\n");
+  }
+  function reservaValida() {
+    if (!$("#r-nombre").value.trim())   { aviso(avisoRes, "Falta el nombre de la reserva.", "err"); return false; }
+    if (!$("#r-contacto").value.trim()) { aviso(avisoRes, "Déjanos un correo o teléfono para confirmarte.", "err"); return false; }
+    if (!$("#r-fecha").value)           { aviso(avisoRes, "Elige la fecha de tu visita.", "err"); return false; }
+    const dia = new Date($("#r-fecha").value + "T12:00:00").getDay();
+    if (OLE.diasAbiertos.indexOf(dia) === -1) {
+      aviso(avisoRes, "Ese día descansamos. Abrimos de miércoles a domingo.", "err");
+      return false;
+    }
+    return true;
+  }
+
+  formRes.addEventListener("submit", e => {
+    e.preventDefault();
+    if (!reservaValida()) return;
+    window.location.href = "mailto:" + OLE.email +
+      "?subject=" + encodeURIComponent("Reserva — " + $("#r-nombre").value.trim() + " — " + $("#r-fecha").value) +
+      "&body=" + encodeURIComponent(textoReserva());
+    aviso(avisoRes, "Abrimos tu correo con la solicitud lista. Te confirmamos en cuanto la recibamos.", "ok");
+  });
+
+  if (waBase) {
+    btnWa.hidden = false;
+    const refrescaWa = () => { btnWa.href = waBase + "?text=" + encodeURIComponent(textoReserva()); };
+    refrescaWa();
+    formRes.addEventListener("input", refrescaWa);
+    formRes.addEventListener("change", refrescaWa);
+    btnWa.addEventListener("click", e => { if (!reservaValida()) e.preventDefault(); });
+  }
+
+  /* ------------------------------------------------------------ 8. Varios */
+  $("#anio").textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
