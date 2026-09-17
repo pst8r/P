@@ -17,6 +17,10 @@ para que nadie de la lista se quede sin contestar por más de una hora).
    el bot estaba apagado también se detectan.
 5. Los mensajes de grupos y los de números fuera de la lista se ignoran por completo.
 
+> **¿Primera vez?** Sigue el [INSTRUCTIVO.md](INSTRUCTIVO.md): guía paso a paso desde la
+> instalación hasta dejarlo corriendo de forma permanente, con verificación en cada paso y una
+> tabla de solución de problemas.
+
 ## Requisitos
 
 - Node.js 18 o superior.
@@ -65,6 +69,14 @@ Edita `config/contacts.json`:
 
 ## Uso
 
+Antes del primer arranque, verifica el entorno (no se conecta a WhatsApp ni envía nada):
+
+```bash
+npm run doctor
+```
+
+Luego arranca:
+
 ```bash
 npm start
 ```
@@ -97,8 +109,10 @@ whatsapp-auto-reply/
 │   ├── config.js       # Carga y validación de config/contacts.json y .env
 │   ├── state-store.js  # Persistencia atómica de data/state.json
 │   └── logger.js
+├── scripts/doctor.js   # Chequeo previo del entorno (`npm run doctor`)
 ├── config/contacts.example.json
 ├── test/core.test.js
+├── INSTRUCTIVO.md      # Guía detallada de puesta en marcha
 └── .env.example
 ```
 

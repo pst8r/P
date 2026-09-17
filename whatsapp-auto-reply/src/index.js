@@ -22,7 +22,16 @@ const IGNORED_TYPES = new Set([
 ]);
 
 const rootDir = path.resolve(__dirname, '..');
-const config = loadConfig(rootDir);
+
+let config;
+try {
+  config = loadConfig(rootDir);
+} catch (err) {
+  // Error de configuración: mensaje claro, sin stack trace.
+  console.error(`\nError de configuración: ${err.message}\n`);
+  process.exit(1);
+}
+
 const log = createLogger(config.logLevel);
 const store = new StateStore(config.statePath);
 store.load();
@@ -183,7 +192,25 @@ async function shutdown(signal) {
 process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 
+/** Traduce las fallas de arranque más comunes a una pista accionable. */
+function startupHint(message) {
+  if (/ERR_TUNNEL_CONNECTION_FAILED|ERR_PROXY|ERR_INTERNET_DISCONNECTED|ENOTFOUND|ETIMEDOUT|ERR_NAME_NOT_RESOLVED/.test(message)) {
+    return 'El navegador no pudo abrir web.whatsapp.com. Revisa tu conexión a internet, y si estás detrás de un proxy o VPN corporativa, permite el acceso a web.whatsapp.com.';
+  }
+  if (/Failed to launch|ENOENT|No such file or directory|Browser was not found|Could not find (Chrome|Chromium)/i.test(message)) {
+    return 'No se encontró el navegador. Ejecuta "npx puppeteer browsers install chrome", o define PUPPETEER_EXECUTABLE_PATH con la ruta de un Chrome/Chromium ya instalado.';
+  }
+  if (/error while loading shared libraries|libnss3|libatk|libgbm|libasound/i.test(message)) {
+    return 'A Chromium le faltan librerías del sistema. En Debian/Ubuntu instala: libnss3 libatk-bridge2.0-0 libgbm1 libasound2 libgtk-3-0.';
+  }
+  if (/Target closed|Protocol error|Session closed/i.test(message)) {
+    return 'El navegador se cerró inesperadamente. Borra la carpeta data/session y vuelve a vincular escaneando el QR.';
+  }
+  return 'Ejecuta "npm run doctor" para un diagnóstico del entorno.';
+}
+
 client.initialize().catch((err) => {
   log.error(`No se pudo iniciar el cliente: ${err.message}`);
+  log.error(startupHint(String(err.message)));
   process.exit(1);
 });

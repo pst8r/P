@@ -10,7 +10,8 @@
   },
   "scripts": {
     "start": "node src/index.js",
-    "test": "node --test \"test/**/*.test.js\""
+    "test": "node --test \"test/**/*.test.js\"",
+    "doctor": "node scripts/doctor.js"
   },
   "dependencies": {
     "qrcode-terminal": "^0.12.0",
